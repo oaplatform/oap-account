@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) Open Application Platform Authors
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>oap</groupId>
+        <artifactId>oap.maven</artifactId>
+        <version>21.0.0</version>
+    </parent>
+
+    <packaging>pom</packaging>
+    <artifactId>oap-account-parent</artifactId>
+    <version>${oap-account.project.version}</version>
+
+    <name>oap-account-parent</name>
+
+    <modules>
+        <module>oap-account-api</module>
+        <module>oap-account</module>
+        <module>oap-account-social</module>
+        <module>oap-account-test</module>
+    </modules>
+
+    <repositories>
+        <repository>
+            <id>oap</id>
+            <url>https://artifacts.oaplatform.org/repository/maven/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>oap</id>
+            <url>https://artifacts.oaplatform.org/repository/maven/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>oap</id>
+            <url>https://artifacts.oaplatform.org/repository/maven/</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <oap-account.project.version>21.1.0</oap-account.project.version>
+
+        <oap.deps.oap.version>21.12.0</oap.deps.oap.version>
+
+        <oap.deps.com.restfb>2023.7.1</oap.deps.com.restfb>
+        <oap.deps.google.api-client>1.35.2</oap.deps.google.api-client>
+        <oap.deps.google.http-client>1.15.0-rc</oap.deps.google.http-client>
+        <oap.deps.google.oauth-client>1.32.1</oap.deps.google.oauth-client>
+        <oap.deps.auth0.version>1.42.0</oap.deps.auth0.version>
+
+        <oap.deps.software.amazon.awssdk.version>2.20.25</oap.deps.software.amazon.awssdk.version>
+        <oap.deps.com.google.gson.version>2.8.5</oap.deps.com.google.gson.version>
+
+
+        <oap.deps.lombok.version>1.18.30</oap.deps.lombok.version>
+    </properties>
+
+</project>

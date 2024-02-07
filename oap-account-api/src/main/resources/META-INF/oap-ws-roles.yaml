@@ -1,0 +1,49 @@
+roles:
+  ADMIN: [ organization:user_passwd,
+           organization:store_user,
+           organization:read,
+           organization:update,
+           organization:store,
+           organization:list_users,
+           organization:assign_role,
+           organization:user_account,
+           account:list,
+           account:read,
+           account:store,
+           account:delete,
+           user:read,
+           unban:user,
+           ban:user,
+           organization:user_apikey,
+           publisher:manage,
+           campaign:manage,
+           user:edit_self
+  ]
+  ORGANIZATION_ADMIN: [ organization:user_passwd,
+                        organization:store_user,
+                        organization:read,
+                        organization:update,
+                        organization:list_users,
+                        organization:assign_role,
+                        organization:user_account,
+                        account:list,
+                        account:read,
+                        account:store,
+                        account:delete,
+                        user:read,
+                        unban:user,
+                        ban:user,
+                        campaign:manage,
+                        publisher:manage,
+                        organization:user_apikey,
+                        user:edit_self
+  ]
+  USER: [ user:edit_self,
+          user:passwd,
+          account:read,
+          account:list,
+          campaign:manage,
+          user:apikey
+  ]
+
+

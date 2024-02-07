@@ -1,0 +1,18 @@
+{
+  "email": "xenoss@xenoss.io",
+  "firstName": "System",
+  "lastName": "Admin",
+  "lastLogin": "${LAST_LOGIN}",
+  "banned": false,
+  "confirmed": true,
+  "accessKey": "${ACCESS_KEY}",
+  "apiKey": "${API_KEY}",
+  "defaultOrganization" : "SYSTEM",
+  "roles": {
+    "DFLT": "ADMIN",
+    "SYSTEM": "ADMIN"
+  },
+  "secretKey": "${SECRET_KEY}",
+  "tfaEnabled": false
+}
+
