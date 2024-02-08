@@ -97,19 +97,19 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     }
 
     public OrganizationStorage organizationStorage() {
-        return service( "oap-ws-account", OrganizationStorage.class );
+        return service( "oap-account", OrganizationStorage.class );
     }
 
     public Accounts accounts() {
-        return service( "oap-ws-account", AccountsService.class );
+        return service( "oap-account", AccountsService.class );
     }
 
     public UserStorage userStorage() {
-        return service( "oap-ws-account", UserStorage.class );
+        return service( "oap-account", UserStorage.class );
     }
 
     public AccountMailman accountMailman() {
-        return service( "oap-ws-account", AccountMailman.class );
+        return service( "oap-account", AccountMailman.class );
     }
 
     public MailQueue mailQueue() {

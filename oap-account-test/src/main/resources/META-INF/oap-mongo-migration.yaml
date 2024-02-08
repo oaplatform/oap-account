@@ -1,5 +1,0 @@
-migrations:
-  account:
-    - version:
-        main: 1000
-      script: /oap/ws/account/migrations/default-org-admin.migration.js
