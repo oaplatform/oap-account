@@ -66,9 +66,9 @@
     </distributionManagement>
 
     <properties>
-        <oap-account.project.version>21.12.1</oap-account.project.version>
+        <oap-account.project.version>21.12.2</oap-account.project.version>
 
-        <oap.deps.oap.version>21.12.1.OAP-232-Split-oap-ws-into-two-projects---oap-ws-and-oap-account.171</oap.deps.oap.version>
+        <oap.deps.oap.version>21.12.1.OAP-232.172</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2023.7.1</oap.deps.com.restfb>
         <oap.deps.google.api-client>1.35.2</oap.deps.google.api-client>
