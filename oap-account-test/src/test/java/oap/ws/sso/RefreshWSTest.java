@@ -43,8 +43,6 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class RefreshWSTest extends IntegratedTest {
-
-
     @BeforeMethod
     public void beforeMethod() {
         kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;

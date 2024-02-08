@@ -29,6 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import oap.application.testng.KernelFixture;
+import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
 import oap.util.Pair;
@@ -54,12 +55,13 @@ public class IntegratedTest extends Fixtures {
     protected final KernelFixture kernelFixture;
 
     public IntegratedTest() {
+        fixture( new MongoFixture() );
         kernelFixture = fixture( new KernelFixture( urlOrThrow( getClass(), "/application.test.conf" ) ) );
         fixture( SystemTimerFixture.FIXTURE );
     }
 
     protected TestUserProvider userProvider() {
-        return kernelFixture.service( "oap-ws-sso-test", TestUserProvider.class );
+        return kernelFixture.service( "oap-account-test", TestUserProvider.class );
     }
 
     protected JWTExtractor tokenExtractor() {
