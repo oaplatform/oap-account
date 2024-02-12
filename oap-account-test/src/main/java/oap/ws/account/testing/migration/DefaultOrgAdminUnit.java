@@ -30,7 +30,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import io.mongock.api.annotations.ChangeUnit;
 import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
-import oap.util.Hash;
+import oap.ws.account.User;
 import org.bson.Document;
 
 import java.util.Map;
@@ -48,7 +48,7 @@ public class DefaultOrgAdminUnit {
                             "firstName", "Johnny",
                             "lastName", "Walker",
                             "email", "orgadmin@admin.com",
-                            "password", Hash.md5( "Xenoss123" ).toUpperCase(),
+                            "password", User.encrypt( "Xenoss123" ),
                             "confirmed", true,
                             "defaultOrganization", "DFLT",
                             "apiKey", "pz7r93Hh8ssbcV1Qhxsopej18ng2Q"
@@ -67,7 +67,7 @@ public class DefaultOrgAdminUnit {
                             "firstName", "System",
                             "lastName", "Admin",
                             "email", "systemadmin@admin.com",
-                            "password", Hash.md5( "Xenoss123" ).toUpperCase(),
+                            "password", User.encrypt( "Xenoss123" ),
                             "confirmed", true,
                             "defaultOrganization", "SYSTEM",
                             "apiKey", "qwfqwrqfdsgrwqewgreh4t2wrge43K"

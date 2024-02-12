@@ -78,6 +78,8 @@ public class UserStorage extends MemoryStorage<String, UserData> implements oap.
             return u;
         }, () -> {
             var user = new oap.ws.account.User( defaultSystemAdminEmail, defaultSystemAdminFirstName, defaultSystemAdminLastName, defaultSystemAdminPassword, true );
+            user.encryptPassword( defaultSystemAdminPassword );
+
             user.defaultOrganization = defaultSystemAdminRoles.keySet().stream().findAny().get();
             return new UserData( user, defaultSystemAdminRoles );
         } );

@@ -33,6 +33,7 @@ import oap.ws.account.Accounts;
 import oap.ws.account.AccountsService;
 import oap.ws.account.OrganizationStorage;
 import oap.ws.account.User;
+import oap.ws.account.UserData;
 import oap.ws.account.UserStorage;
 import oap.ws.sso.UserProvider;
 
@@ -185,5 +186,12 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
             user.secretKey = UserProvider.toAccessKey( mail );
         }
         return accounts().createUser( user, roles ).user;
+    }
+
+    public UserData addUser( UserData userData ) {
+        UserData cloned = Binder.json.clone( userData );
+        cloned.user.encryptPassword( cloned.user.password );
+
+        return userStorage().store( cloned );
     }
 }
