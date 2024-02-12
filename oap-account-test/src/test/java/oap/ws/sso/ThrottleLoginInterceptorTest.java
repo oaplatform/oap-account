@@ -26,22 +26,25 @@ package oap.ws.sso;
 
 import oap.http.testng.HttpAsserts;
 import oap.util.Dates;
+import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
 import org.joda.time.DateTimeUtils;
 import org.testng.annotations.Test;
+
+import java.util.Map;
 
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.testng.HttpAsserts.assertPost;
-import static oap.http.testng.HttpAsserts.httpUrl;
 import static oap.http.testng.HttpAsserts.reset;
-import static oap.util.Pair.__;
 
 public class ThrottleLoginInterceptorTest extends IntegratedTest {
     @Test
     public void deniedAccept() {
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = Dates.s( 5 );
+
         Dates.setTimeFixed( DateTimeUtils.currentTimeMillis() );
         reset();
-        userProvider().addUser( "test1@user.com", "pass1", __( "realm", "ADMIN" ) );
+        accountFixture.addUser( "test1@user.com", "pass1", Map.of( "realm", "ADMIN" ) );
 
         login( "test1@user.com", "pass" ).hasCode( UNAUTHORIZED );
         login( "test1@user.com", "pass1" ).hasCode( FORBIDDEN ).hasReason( "Please wait 5s before next attempt" );

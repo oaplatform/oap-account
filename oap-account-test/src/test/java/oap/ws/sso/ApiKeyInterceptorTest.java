@@ -27,6 +27,8 @@ package oap.ws.sso;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 import static oap.http.Http.ContentType.TEXT_PLAIN;
 import static oap.http.Http.StatusCode.CONFLICT;
 import static oap.http.Http.StatusCode.OK;
@@ -39,11 +41,11 @@ import static oap.ws.account.testing.SecureWSFixture.assertSwitchOrganization;
 
 public class ApiKeyInterceptorTest extends IntegratedTest {
 
-    private TestUser user;
+    private oap.ws.account.User user;
 
     @BeforeMethod
     public void beforeMethod() {
-        user = userProvider().addUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) );
+        user = accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
     }
 
     @Test

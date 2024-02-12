@@ -36,8 +36,6 @@ import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.testng.HttpAsserts.assertGet;
 import static oap.http.testng.HttpAsserts.assertPost;
-import static oap.http.testng.HttpAsserts.httpUrl;
-import static oap.util.Pair.__;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
@@ -45,12 +43,12 @@ import static org.testng.AssertJUnit.assertTrue;
 public class RefreshWSTest extends IntegratedTest {
     @BeforeMethod
     public void beforeMethod() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
     }
 
     @Test
     public void refreshResponseTest() throws InterruptedException {
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) ) );
+        accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
         final String[] accessToken = new String[1];
         final String[] refreshToken = new String[1];
         assertPost( httpUrl( "/auth/login" ), "{ \"email\":\"admin@admin.com\",\"password\": \"pass\"}" )
@@ -75,7 +73,7 @@ public class RefreshWSTest extends IntegratedTest {
 
     @Test
     public void refreshResponseWithEWrongOrgIdTest() {
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) ) );
+        accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
         assertPost( httpUrl( "/auth/login" ), "{ \"email\":\"admin@admin.com\",\"password\": \"pass\"}" )
             .hasCode( OK ).satisfies( resp -> {
                 Map<String, String> response = Binder.json.unmarshal( Map.class, resp.contentString() );
@@ -87,7 +85,7 @@ public class RefreshWSTest extends IntegratedTest {
 
     @Test
     public void refreshResponseWithoutOrgIdTest() {
-        final TestUser testUser = userProvider().addUser( new TestUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) ) );
+        final oap.ws.account.User testUser = accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) );
         testUser.defaultOrganization = "r2";
         final String[] refreshToken = new String[1];
         assertPost( httpUrl( "/auth/login" ), "{ \"email\":\"admin@admin.com\",\"password\": \"pass\"}" )

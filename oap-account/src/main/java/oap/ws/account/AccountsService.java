@@ -95,7 +95,6 @@ public class AccountsService implements Accounts {
 
         if( userStorage.get( user.email ).isPresent() )
             throw new IllegalArgumentException( "user: " + user.email + " is already registered" );
-        user.encryptPassword( user.password );
         return userStorage.store( new UserData( user, roles ) );
     }
 

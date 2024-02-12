@@ -28,13 +28,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import oap.application.testng.KernelFixture;
+import oap.storage.mongo.MongoFixture;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
 import oap.util.Pair;
 import oap.util.Result;
 import oap.ws.account.UserData;
+import oap.ws.account.testing.AccountFixture;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.AfterMethod;
 
@@ -44,30 +45,71 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static oap.io.Resources.urlOrThrow;
-import static oap.ws.account.testing.SecureWSFixture.assertLogout;
 import static oap.ws.sso.AuthenticationFailure.TFA_REQUIRED;
 import static oap.ws.sso.AuthenticationFailure.UNAUTHENTICATED;
 import static oap.ws.sso.AuthenticationFailure.WRONG_TFA_CODE;
 import static oap.ws.sso.UserProvider.toAccessKey;
 
 public class IntegratedTest extends Fixtures {
-    protected final KernelFixture kernelFixture;
+    protected final AccountFixture accountFixture;
 
     public IntegratedTest() {
         fixture( new MongoFixture() );
-        kernelFixture = fixture( new KernelFixture( urlOrThrow( getClass(), "/application.test.conf" ) ) );
+        accountFixture = fixture( new AccountFixture() );
         fixture( SystemTimerFixture.FIXTURE );
     }
 
-    protected TestUserProvider userProvider() {
-        return kernelFixture.service( "oap-account-test", TestUserProvider.class );
+    protected String httpUrl( String url ) {
+        return accountFixture.httpUrl( url );
+    }
+
+    protected oap.ws.account.User addUser( String mail, String pass, Map<String, String> roles ) {
+        return accountFixture.addUser( mail, pass, roles );
+    }
+
+    protected oap.ws.account.User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
+        return accountFixture.addUser( mail, pass, roles, tfaEnabled );
+    }
+
+    protected void assertLogin( String login, String password ) {
+        accountFixture.assertLogin( login, password );
+    }
+
+    protected void assertLogin( String login, String password, String tfaCode ) {
+        accountFixture.assertLogin( login, password, tfaCode );
     }
 
     protected JWTExtractor tokenExtractor() {
-        return kernelFixture.service( "oap-ws-sso-api", JWTExtractor.class );
+        return accountFixture.service( "oap-ws-sso-api", JWTExtractor.class );
     }
 
+    protected void assertTfaRequiredLogin( String login, String password ) {
+        accountFixture.assertTfaRequiredLogin( login, password );
+    }
+
+    protected void assertWrongTfaLogin( String login, String password, String tfaCode ) {
+        accountFixture.assertWrongTfaLogin( login, password, tfaCode );
+    }
+
+    protected void assertLoginWithFBToken() {
+        accountFixture.assertLoginWithFBToken();
+    }
+
+    protected void assertLoginWithFBTokenWithTfaRequired() {
+        accountFixture.assertLoginWithFBTokenWithTfaRequired();
+    }
+
+    protected void assertLoginWithFBTokenWithWrongTfa() {
+        accountFixture.assertLoginWithFBTokenWithWrongTfa();
+    }
+
+    protected void assertSwitchOrganization( String orgId ) {
+        accountFixture.assertSwitchOrganization( orgId );
+    }
+
+    protected void assertLogout() {
+        accountFixture.assertLogout();
+    }
 
     @AfterMethod
     public void afterMethod() {
@@ -150,13 +192,13 @@ public class IntegratedTest extends Fixtures {
     public static class TestUser implements User {
         public final String email;
         public final String password;
-        public Map<String, String> roles = new HashMap<>();
         public final boolean tfaEnabled;
         public final String apiKey = RandomStringUtils.random( 10, true, true );
-        public String defaultOrganization = "";
-        public Map<String, String> defaultAccounts = new HashMap<>();
         @JsonIgnore
         public final View view = new View();
+        public Map<String, String> roles = new HashMap<>();
+        public String defaultOrganization = "";
+        public Map<String, String> defaultAccounts = new HashMap<>();
 
         public TestUser( String email, String password, Pair<String, String> role ) {
             this( email, password, role, false );
