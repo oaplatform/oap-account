@@ -93,8 +93,8 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     }
 
     public void assertLoginIntoOrg( String login, String password, String orgId ) {
-        SecureWSFixture.assertLogin( login, password, defaultHttpPort() );
-        SecureWSFixture.assertSwitchOrganization( orgId, defaultHttpPort() );
+        assertLogin( login, password );
+        assertSwitchOrganization( orgId );
     }
 
     public void assertSwitchOrganization( String orgId ) {
