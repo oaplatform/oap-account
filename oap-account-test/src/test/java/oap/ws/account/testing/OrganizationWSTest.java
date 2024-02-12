@@ -527,7 +527,7 @@ public class OrganizationWSTest extends Fixtures {
         final String mail = "user@usr.com";
         UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), Map.of( orgId, USER ) );
         user.addAccount( orgId, "acc1" );
-        accountFixture.addUser( user );
+        user = accountFixture.addUser( user );
         assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
         user.addAccount( orgId, "acc2" );
         assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
@@ -546,7 +546,7 @@ public class OrganizationWSTest extends Fixtures {
         final String mail = "user@usr.com";
         UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), Map.of( orgId, USER ) );
         user.addAccount( orgId, "acc1" );
-        accountFixture.addUser( user );
+        user = accountFixture.addUser( user );
         assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
         user.addAccount( orgId, "acc2" );
         assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
