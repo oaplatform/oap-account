@@ -25,7 +25,6 @@
 package oap.ws.sso;
 
 import oap.storage.mongo.MongoFixture;
-import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
 import oap.ws.account.testing.AccountFixture;
