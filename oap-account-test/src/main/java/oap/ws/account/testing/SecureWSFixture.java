@@ -25,6 +25,7 @@
 package oap.ws.account.testing;
 
 import oap.http.Http;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import static oap.http.testng.HttpAsserts.CookieHttpAssertion.assertCookie;
@@ -77,17 +78,6 @@ public class SecureWSFixture {
                 .isHttpOnly() );
     }
 
-    public static void assertSwitchOrganization( String orgId ) {
-        assertGet( httpUrl( "auth/switch/" + orgId ) ).
-            hasCode( Http.StatusCode.OK )
-            .containsCookie( AUTHENTICATION_KEY, cookie -> assertCookie( cookie )
-                .hasPath( "/" )
-                .isHttpOnly() )
-            .containsCookie( REFRESH_TOKEN_KEY, cookie -> assertCookie( cookie )
-                .hasPath( "/" )
-                .isHttpOnly() );
-    }
-
     public static void assertTfaRequiredLogin( String login, String password, int port ) {
         assertPost( httpUrl( port, "/auth/login" ), "{  \"email\": \"" + login + "\",  \"password\": \"" + password + "\"}" )
             .hasCode( Http.StatusCode.BAD_REQUEST )
@@ -113,8 +103,8 @@ public class SecureWSFixture {
                 .expiresAt( new DateTime( 1970, 1, 1, 1, 1, UTC ) ) );
     }
 
-    public static void assertLoginWithFBToken() {
-        assertPost( httpUrl( getTestHttpPort().orElse( 80 ), "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+    public static void assertLoginWithFBToken( int port ) {
+        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
             .containsCookie( AUTHENTICATION_KEY, cookie -> assertCookie( cookie )
                 .hasPath( "/" )
                 .isHttpOnly() )
@@ -123,8 +113,10 @@ public class SecureWSFixture {
                 .isHttpOnly() );
     }
 
-    public static void assertLoginWithFBTokenWithTfa() {
-        assertPost( httpUrl( getTestHttpPort().orElse( 80 ), "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-tfa-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+    public static void assertLoginWithFBTokenWithTfa( int port, String tfaCode ) {
+        String content = contentOfTestResource( SecureWSFixture.class, "token-tfa-credentials.json", ofString() );
+        content = StringUtils.replace( content, "proper_code", tfaCode );
+        assertPost( httpUrl( port, "/auth/oauth/login" ), content, Http.ContentType.APPLICATION_JSON )
             .containsCookie( AUTHENTICATION_KEY, cookie -> assertCookie( cookie )
                 .hasPath( "/" )
                 .isHttpOnly() )
@@ -133,14 +125,14 @@ public class SecureWSFixture {
                 .isHttpOnly() );
     }
 
-    public static void assertLoginWithFBTokenWithTfaRequired() {
-        assertPost( httpUrl( getTestHttpPort().orElse( 80 ), "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+    public static void assertLoginWithFBTokenWithTfaRequired( int port ) {
+        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
             .hasCode( Http.StatusCode.BAD_REQUEST )
             .hasReason( "TFA code is required" );
     }
 
-    public static void assertLoginWithFBTokenWithWrongTfa() {
-        assertPost( httpUrl( getTestHttpPort().orElse( 80 ), "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-wrong-tfa-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+    public static void assertLoginWithFBTokenWithWrongTfa( int port ) {
+        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-wrong-tfa-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
             .hasCode( Http.StatusCode.BAD_REQUEST )
             .hasReason( "TFA code is incorrect" );
     }

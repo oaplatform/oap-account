@@ -27,6 +27,8 @@ package oap.ws.sso;
 
 import oap.http.Http;
 import oap.json.Binder;
+import oap.ws.account.testing.SecureWSFixture;
+import oap.ws.account.utils.TfaUtils;
 import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
 import org.testng.annotations.Test;
 
@@ -37,32 +39,21 @@ import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.testng.HttpAsserts.assertGet;
 import static oap.http.testng.HttpAsserts.assertPost;
-import static oap.http.testng.HttpAsserts.getTestHttpPort;
-import static oap.http.testng.HttpAsserts.httpUrl;
-import static oap.util.Pair.__;
-import static oap.ws.account.testing.SecureWSFixture.assertLogin;
-import static oap.ws.account.testing.SecureWSFixture.assertLoginWithFBToken;
-import static oap.ws.account.testing.SecureWSFixture.assertLoginWithFBTokenWithTfa;
-import static oap.ws.account.testing.SecureWSFixture.assertLoginWithFBTokenWithTfaRequired;
-import static oap.ws.account.testing.SecureWSFixture.assertLoginWithFBTokenWithWrongTfa;
-import static oap.ws.account.testing.SecureWSFixture.assertLogout;
-import static oap.ws.account.testing.SecureWSFixture.assertSwitchOrganization;
-import static oap.ws.account.testing.SecureWSFixture.assertTfaRequiredLogin;
-import static oap.ws.account.testing.SecureWSFixture.assertWrongTfaLogin;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class AuthWSTest extends IntegratedTest {
     @Test
     public void loginWhoami() {
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) ) );
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
         assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "/auth/whoami" ) )
-            .respondedJson( "{\"email\":\"admin@admin.com\"}" );
+            .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"admin@admin.com\"" ) );
     }
 
     @Test
     public void loginResponseTest() {
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) ) );
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
         assertPost( httpUrl( "/auth/login" ), "{ \"email\":\"admin@admin.com\",\"password\": \"pass\"}" )
             .hasCode( Http.StatusCode.OK ).satisfies( resp -> {
                 Map<String, String> response = Binder.json.unmarshal( Map.class, resp.contentString() );
@@ -73,53 +64,53 @@ public class AuthWSTest extends IntegratedTest {
 
     @Test
     public void loginMfaRequired() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ), true ) );
-        assertTfaRequiredLogin( "admin@admin.com", "pass", getTestHttpPort().orElse( 80 ) );
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ), true );
+        assertTfaRequiredLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "/auth/whoami" ) )
             .hasCode( UNAUTHORIZED );
     }
 
     @Test
     public void loginMfa() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ), true ) );
-        assertTfaRequiredLogin( "admin@admin.com", "pass", getTestHttpPort().orElse( 80 ) );
-        assertLogin( "admin@admin.com", "pass", "proper_code", getTestHttpPort().orElse( 80 ) );
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        var user = addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ), true );
+        assertTfaRequiredLogin( "admin@admin.com", "pass" );
+        assertLogin( "admin@admin.com", "pass", TfaUtils.getTOTPCode( user.getSecretKey() ) );
         assertGet( httpUrl( "/auth/whoami" ) )
-            .respondedJson( "{\"email\":\"admin@admin.com\"}" );
+            .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"admin@admin.com\"" ) );
     }
 
     @Test
     public void loginMfaWrongCode() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ), true ) );
-        assertTfaRequiredLogin( "admin@admin.com", "pass", getTestHttpPort().orElse( 80 ) );
-        assertWrongTfaLogin( "admin@admin.com", "pass", "wrong_code", getTestHttpPort().orElse( 80 ) );
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ), true );
+        assertTfaRequiredLogin( "admin@admin.com", "pass" );
+        assertWrongTfaLogin( "admin@admin.com", "pass", "wrong_code" );
         assertGet( httpUrl( "/auth/whoami" ) )
             .hasCode( UNAUTHORIZED );
     }
 
     @Test
     public void logout() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
 
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) ) );
-        userProvider().addUser( new TestUser( "user@admin.com", "pass", __( "r1", "USER" ) ) );
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
+        addUser( "user@admin.com", "pass", Map.of( "r1", "USER" ) );
         assertLogin( "admin@admin.com", "pass" );
         assertLogout();
         assertGet( httpUrl( "/auth/whoami" ) )
             .hasCode( UNAUTHORIZED );
         assertLogin( "user@admin.com", "pass" );
         assertGet( httpUrl( "/auth/whoami" ) )
-            .respondedJson( "{\"email\":\"user@admin.com\"}" );
+            .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"user@admin.com\"" ) );
     }
 
     @Test
     public void loginAndTryToReachOrganization() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) ) );
-        userProvider().addUser( new TestUser( "user@user.com", "pass", __( "r1", "USER" ) ) );
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
+        addUser( "user@user.com", "pass", Map.of( "r1", "USER" ) );
         assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "/secure/r1" ) ).hasCode( OK );
         assertLogin( "admin@admin.com", "pass" );
@@ -130,15 +121,15 @@ public class AuthWSTest extends IntegratedTest {
 
     @Test
     public void loginThenUseSpecificOrganization() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) ) );
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) );
         assertLogin( "admin@admin.com", "pass" );
         assertSwitchOrganization( "r2" );
     }
 
     @Test
     public void loginThenUseWrongOrganization() throws InterruptedException {
-        userProvider().addUser( new TestUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) ) );
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) );
         assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "auth/switch/r3" ) ).hasCode( FORBIDDEN ).hasReason( "User doesn't belong to organization" );
         Thread.sleep( 5000L );
@@ -146,37 +137,37 @@ public class AuthWSTest extends IntegratedTest {
 
     @Test
     public void loginWithExternalToken() {
-        userProvider().addUser( new TestUser( "newuser@user.com", null, __( "r1", "USER" ) ) );
+        addUser( "newuser@user.com", null, Map.of( "r1", "USER" ) );
         assertLoginWithFBToken();
         assertGet( httpUrl( "/secure/r1" ) )
             .hasCode( FORBIDDEN );
         assertGet( httpUrl( "/auth/whoami" ) )
-            .respondedJson( "{\"email\":\"newuser@user.com\"}" );
+            .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"newuser@user.com\"" ) );
     }
 
     @Test
     public void loginWithExternalTokenWithTfa() {
-        userProvider().addUser( new TestUser( "newuser@user.com", null, __( "r1", "USER" ), true ) );
-        assertLoginWithFBTokenWithTfa();
+        var user = addUser( "newuser@user.com", null, Map.of( "r1", "USER" ), true );
+        SecureWSFixture.assertLoginWithFBTokenWithTfa( accountFixture.defaultHttpPort(), TfaUtils.getTOTPCode( user.getSecretKey() ) );
         assertGet( httpUrl( "/secure/r1" ) )
             .hasCode( FORBIDDEN );
         assertGet( httpUrl( "/auth/whoami" ) )
-            .respondedJson( "{\"email\":\"newuser@user.com\"}" );
+            .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"newuser@user.com\"" ) );
     }
 
     @Test
     public void loginWithExternalTokenWithTfaRequired() {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
 
-        userProvider().addUser( new TestUser( "newuser@user.com", null, __( "r1", "USER" ), true ) );
+        addUser( "newuser@user.com", null, Map.of( "r1", "USER" ), true );
         assertLoginWithFBTokenWithTfaRequired();
     }
 
     @Test
     public void loginWithExternalTokenWithWrongTfa() throws InterruptedException {
-        kernelFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
+        accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
 
-        userProvider().addUser( new TestUser( "newuser@user.com", null, __( "r1", "USER" ), true ) );
+        addUser( "newuser@user.com", null, Map.of( "r1", "USER" ), true );
         assertLoginWithFBTokenWithWrongTfa();
     }
 }

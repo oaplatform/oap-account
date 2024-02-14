@@ -26,21 +26,19 @@ package oap.ws.sso;
 
 import org.testng.annotations.Test;
 
+import java.util.Map;
+
 import static oap.http.Http.ContentType.TEXT_PLAIN;
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.testng.HttpAsserts.assertGet;
-import static oap.http.testng.HttpAsserts.httpUrl;
-import static oap.util.Pair.__;
-import static oap.ws.account.testing.SecureWSFixture.assertLogin;
-import static oap.ws.account.testing.SecureWSFixture.assertSwitchOrganization;
 
 public class JWTInterceptorTest extends IntegratedTest {
     @Test
     public void allowed() {
-        userProvider().addUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) );
-        assertLogin( "admin@admin.com", "pass" );
+        accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
+        accountFixture.assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "/secure/r1" ) )
             .responded( OK, "OK", TEXT_PLAIN, "admin@admin.com" );
         assertGet( httpUrl( "/secure/r1" ) )
@@ -51,34 +49,34 @@ public class JWTInterceptorTest extends IntegratedTest {
 
     @Test
     public void wrongRealm() {
-        userProvider().addUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) );
-        assertLogin( "admin@admin.com", "pass" );
-        assertGet( httpUrl( "/secure/r2" ) )
+        accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
+        accountFixture.assertLogin( "admin@admin.com", "pass" );
+        assertGet( accountFixture.httpUrl( "/secure/r2" ) )
             .hasCode( FORBIDDEN );
 
     }
 
     @Test
     public void wrongRealmWithOrganizationLoggedIn() throws InterruptedException {
-        userProvider().addUser( "admin@admin.com", "pass", __( "r1", "ADMIN" ) );
-        assertLogin( "admin@admin.com", "pass" );
+        accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
+        accountFixture.assertLogin( "admin@admin.com", "pass" );
         assertSwitchOrganization( "r1" );
-        assertGet( httpUrl( "/secure/r2" ) )
+        assertGet( accountFixture.httpUrl( "/secure/r2" ) )
             .hasCode( FORBIDDEN );
 
     }
 
     @Test
     public void notLoggedIn() {
-        assertGet( httpUrl( "/secure/r1" ) )
+        assertGet( accountFixture.httpUrl( "/secure/r1" ) )
             .hasCode( UNAUTHORIZED );
     }
 
     @Test
     public void denied() {
-        userProvider().addUser( "user@user.com", "pass", __( "r1", "USER" ) );
-        assertLogin( "user@user.com", "pass" );
-        assertGet( httpUrl( "/secure/r1" ) )
+        accountFixture.addUser( "user@user.com", "pass", Map.of( "r1", "USER" ) );
+        accountFixture.assertLogin( "user@user.com", "pass" );
+        assertGet( accountFixture.httpUrl( "/secure/r1" ) )
             .hasCode( FORBIDDEN );
     }
 

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package oap.ws.sso;
+package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
@@ -31,8 +31,12 @@ import oap.ws.Session;
 import oap.ws.SessionManager;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
-import oap.ws.account.OauthService;
-import oap.ws.account.TokenInfo;
+import oap.ws.sso.AbstractSecureWS;
+import oap.ws.sso.Authenticator;
+import oap.ws.sso.Credentials;
+import oap.ws.sso.SecurityRoles;
+import oap.ws.sso.TokenCredentials;
+import oap.ws.sso.User;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
 
@@ -88,7 +92,7 @@ public class AuthWS extends AbstractSecureWS {
     public Response login( String email,
                            String password,
                            @WsParam( from = BODY ) Optional<String> tfaCode,
-                           @WsParam( from = SESSION ) Optional<User> loggedUser,
+                           @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         var result = authenticator.authenticate( email, password, tfaCode );
@@ -104,7 +108,7 @@ public class AuthWS extends AbstractSecureWS {
 
     @WsMethod( method = POST, path = "/oauth/login" )
     public Response login( @WsParam( from = BODY ) TokenCredentials credentials,
-                           @WsParam( from = SESSION ) Optional<User> loggedUser,
+                           @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         final Optional<TokenInfo> tokenInfo = oauthService.getOauthProvider( credentials.source ).getTokenInfo( credentials.accessToken );
@@ -125,7 +129,7 @@ public class AuthWS extends AbstractSecureWS {
     @SuppressWarnings( "ParameterName" )
     @WsMethod( method = GET, path = "/switch/{organizationId}" )
     public Response switchOrganization( @WsParam( from = PATH ) String organizationId,
-                                        @WsParam( from = SESSION ) Optional<User> loggedUser,
+                                        @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                                         @WsParam( from = COOKIE ) String Authorization,
                                         Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
@@ -141,7 +145,7 @@ public class AuthWS extends AbstractSecureWS {
     }
 
     @WsMethod( method = GET, path = "/logout" )
-    public Response logout( @WsParam( from = SESSION ) Optional<User> loggedUser,
+    public Response logout( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                             Session session ) {
         loggedUser.ifPresent( user -> {
             log.debug( "Invalidating token for user [{}]", user.getEmail() );
@@ -151,7 +155,7 @@ public class AuthWS extends AbstractSecureWS {
         return logoutResponse( sessionManager.cookieDomain );
     }
 
-    protected ValidationErrors validateUserAccess( Optional<String> email, User loggedUser ) {
+    protected ValidationErrors validateUserAccess( Optional<String> email, oap.ws.sso.User loggedUser ) {
         return email
             .filter( e -> !loggedUser.getEmail().equalsIgnoreCase( e ) )
             .map( e -> error( Http.StatusCode.FORBIDDEN, "User [%s] doesn't have enough permissions", loggedUser.getEmail() ) )
@@ -160,7 +164,7 @@ public class AuthWS extends AbstractSecureWS {
 
     @WsMethod( method = GET, path = "/whoami" )
     @WsValidate( "validateUserLoggedIn" )
-    public Optional<User.View> whoami( @WsParam( from = SESSION ) Optional<User> loggedUser ) {
-        return loggedUser.map( User::getView );
+    public Optional<oap.ws.sso.User.View> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
+        return loggedUser.map( oap.ws.sso.User::getView );
     }
 }

@@ -30,12 +30,11 @@ import java.util.random.RandomGenerator;
 @ToString( exclude = { "password", "create" } )
 @EqualsAndHashCode
 public class User implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -3371939128187130008L;
-
     public static final String SCHEMA = "/oap/ws/account/user.schema.conf";
     public static final String SCHEMA_REGISTRATION = "/oap/ws/account/user-registration.schema.conf";
-
+    @Serial
+    private static final long serialVersionUID = -3371939128187130008L;
+    public static RandomGenerator random = new SecureRandom();
     @Id
     public String email;
     public String firstName;
@@ -49,7 +48,6 @@ public class User implements Serializable {
     public boolean tfaEnabled;
     public String defaultOrganization;
     public Map<String, String> defaultAccounts = new HashMap<>();
-    public static RandomGenerator random = new SecureRandom();
     public String secretKey = generateSecretKey();
 
     @JsonCreator
@@ -62,7 +60,7 @@ public class User implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.confirmed = confirmed;
-        this.encryptPassword( password );
+        this.password = password;
     }
 
     public User( String email, String firstName, String lastName, String password, boolean confirmed, boolean tfaEnabled ) {
@@ -70,7 +68,7 @@ public class User implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.confirmed = confirmed;
-        this.encryptPassword( password );
+        this.password = password;
         this.tfaEnabled = tfaEnabled;
     }
 
@@ -80,7 +78,22 @@ public class User implements Serializable {
     }
 
     public static String encrypt( String password ) {
+        if( password == null ) {
+            return null;
+        }
+
         return Hash.md5( password );
+    }
+
+    public static String organizationFromEmail( String email ) {
+        return Strings.substringAfter( email, "@" );
+    }
+
+    private static String generateSecretKey() {
+        byte[] bytes = new byte[20];
+        random.nextBytes( bytes );
+        Base32 base32 = new Base32();
+        return base32.encodeToString( bytes );
     }
 
     public String getEmail() {
@@ -128,19 +141,7 @@ public class User implements Serializable {
         return ( E ) ext;
     }
 
-
-    public static String organizationFromEmail( String email ) {
-        return Strings.substringAfter( email, "@" );
-    }
-
     public String organizationName() {
         return organizationFromEmail( email );
-    }
-
-    private static String generateSecretKey() {
-        byte[] bytes = new byte[20];
-        random.nextBytes( bytes );
-        Base32 base32 = new Base32();
-        return base32.encodeToString( bytes );
     }
 }

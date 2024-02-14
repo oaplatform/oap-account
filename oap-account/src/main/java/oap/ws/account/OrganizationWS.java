@@ -268,6 +268,8 @@ public class OrganizationWS extends AbstractWS {
     @SneakyThrows
     public Response confirm( @WsParam( from = PATH ) String email,
                              @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+        log.debug( "confirm email {} loggedUser {} hasPassword {}", email, loggedUser, loggedUser.get().user.hasPassword() );
+
         User user = loggedUser.get().user;
         URI redirect = new URIBuilder( confirmUrlFinish )
             .addParameter( "apiKey", user.apiKey )

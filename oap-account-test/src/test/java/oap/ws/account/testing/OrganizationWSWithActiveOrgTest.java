@@ -83,7 +83,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void storeOrgAdmin() {
         OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
-        UserData user = accountFixture.userStorage().store( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
+        UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id ), "{\"id\":\"" + data.organization.id + "\", \"name\":\"newname\"}", Http.ContentType.APPLICATION_JSON )
             .hasCode( OK );
@@ -94,7 +94,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void getOrgAdmin() {
         OrganizationData data = accountFixture.organizationStorage().store( new OrganizationData( new Organization( "test", "test" ) ) );
-        UserData user = accountFixture.userStorage().store( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
+        UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertGet( accountFixture.httpUrl( "/organizations/" + data.organization.id ) )
             .respondedJson( OK, "OK", "{\"description\":\"test\", \"id\":\"TST\", \"name\":\"test\"}" );
@@ -103,7 +103,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void listOrgAdmin() {
         OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
-        UserData user = accountFixture.userStorage().store( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
+        UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLogin( user.user.email, DEFAULT_PASSWORD );
         assertGet( accountFixture.httpUrl( "/organizations" ) )
             .respondedJson( OK, "OK", "[{\"description\":\"test\", \"id\":\"TST\", \"name\":\"test\"}]" );
@@ -125,7 +125,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void storeAccountOrgAdmin() {
         OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
-        UserData user = accountFixture.userStorage().store( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
+        UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ), "{\"name\":\"acc1\"}", Http.ContentType.APPLICATION_JSON )
             .hasCode( OK );
@@ -137,7 +137,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
         accountFixture.accounts().storeAccount( data.organization.id, new Account( "acc2", "acc2" ) );
         accountFixture.accounts().storeAccount( data.organization.id, new Account( "acc1", "acc1" ) );
-        UserData user = accountFixture.userStorage().store( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
+        UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertGet( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ) )
             .respondedJson( OK, "OK", "[{\"id\":\"acc2\", \"name\":\"acc2\"}, {\"id\":\"acc1\", \"name\":\"acc1\"}]" );
@@ -151,7 +151,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         accountFixture.organizationStorage().store( data );
         UserData user = new UserData( REGULAR_USER, Map.of( data.organization.id, USER ) );
         user.addAccount( data.organization.id, "acc1" );
-        accountFixture.userStorage().store( user );
+        accountFixture.addUser( user );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertGet( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ) )
             .respondedJson( OK, "OK", "[{\"id\":\"acc1\", \"name\":\"acc1\"}]" );
@@ -167,7 +167,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         accountFixture.organizationStorage().store( data );
         UserData user = new UserData( REGULAR_USER, Map.of( data.organization.id, USER ) );
         user.addAccount( data.organization.id, "acc1" );
-        accountFixture.userStorage().store( user );
+        accountFixture.addUser( user );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertGet( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts/" + account1.id ) )
             .respondedJson( OK, "OK", "{\"id\":\"acc1\", \"name\":\"acc1\"}" );
@@ -180,7 +180,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void account404() {
         OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
-        UserData user = accountFixture.userStorage().store( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
+        UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ), "{\"id\":\"acc1\", \"name\":\"acc1\"}", Http.ContentType.APPLICATION_JSON )
             .hasCode( OK );
@@ -307,7 +307,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void passwd() {
         var email = "newuser@gmail.com";
-        accountFixture.userStorage().store( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLoginIntoOrg( email, "pass123", DEFAULT_ORGANIZATION_ID );
         assertPost( accountFixture.httpUrl( "/organizations/hackit/users/passwd" ), "{\"email\": \"" + email + "\", \"password\": \"newpass\"}" )
             .hasCode( Http.StatusCode.FORBIDDEN );
@@ -342,7 +342,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void ban() {
         final String email = "user@admin.com";
-        var user = accountFixture.userStorage().store( new UserData( new User( email, "Joe", "Epstein", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        var user = accountFixture.addUser( new UserData( new User( email, "Joe", "Epstein", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( email, "pass123" );
         accountFixture.assertLogout();
         accountFixture.assertOrgAdminLogin();
@@ -382,7 +382,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addAccountToUserByAdmin() {
-        accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertSystemAdminLogin();
         final String account1 = "account1";
@@ -399,7 +399,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addAccountToUserByAdminWithLimitedRole() {
-        accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER, "SYSTEM", USER ) ) );
+        accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER, "SYSTEM", USER ) ) );
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertLogin( userEmail, DEFAULT_PASSWORD );
         final String account1 = "account1";
@@ -409,7 +409,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addAccountToUserByOrgAdmin() {
-        accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertOrgAdminLogin();
         final String account1 = "account1";
@@ -426,7 +426,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void accessToAllAccountsToUser() {
-        accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertOrgAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/" + userEmail + "/accounts/add?accountId=" + "account1" ), Http.ContentType.APPLICATION_JSON )
@@ -446,7 +446,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addSeveralAccountsToUser() {
-        accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertOrgAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/" + userEmail + "/accounts/add?accountId=" + "account1" ), Http.ContentType.APPLICATION_JSON )
@@ -464,7 +464,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addSeveralDuplicatedAccountsToUser() {
-        accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertOrgAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/" + userEmail + "/accounts/add?accountId=" + "account1" ), Http.ContentType.APPLICATION_JSON )
@@ -484,7 +484,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void refreshApiKey() {
-        final UserData userData = accountFixture.userStorage().store( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        final UserData userData = accountFixture.addUser( new UserData( REGULAR_USER, Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         final String apikeyCurrent = userData.user.apiKey;
         final String userEmail = REGULAR_USER.email;
         accountFixture.assertOrgAdminLogin();
@@ -497,8 +497,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void refreshApiKeyByOneUserToAnother() {
-        final UserData userData = accountFixture.userStorage().store( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
-        accountFixture.userStorage().store( new UserData( new User( "jga@test.com" ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        final UserData userData = accountFixture.addUser( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( "jga@test.com" ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( userData.user.email, "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/apikey/" + "jga@test.com" ) )
             .hasCode( FORBIDDEN );
@@ -507,7 +507,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void generateTfaAuthorizationLink() {
         final String email = "john@test.com";
-        accountFixture.userStorage().store( new UserData( new User( email, "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( email, "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( email, "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/users/tfa/" + email ) )
             .isOk().satisfies( response -> {
@@ -530,7 +530,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
         final String mail = "user@usr.com";
         UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), roles );
-        accountFixture.userStorage().store( user );
+        accountFixture.addUser( user );
 
         accountFixture.assertSystemAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?newOrganizationId=" + org2.organization.id + "&email=" + mail + "&role=ADMIN" ) ).hasCode( OK );
@@ -554,8 +554,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         roles.put( org1.organization.id, USER );
         UserData user = new UserData( new User( userMail, "John", "Smith", "pass", true ), roles );
 
-        accountFixture.userStorage().store( admin );
-        accountFixture.userStorage().store( user );
+        accountFixture.addUser( admin );
+        accountFixture.addUser( user );
 
         accountFixture.assertLoginIntoOrg( adminMail, "pass123", org1.organization.id );
 
@@ -580,8 +580,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         roles.put( org1.organization.id, USER );
         UserData user = new UserData( new User( userMail, "John", "Smith", "pass", true ), roles );
 
-        accountFixture.userStorage().store( admin );
-        accountFixture.userStorage().store( user );
+        accountFixture.addUser( admin );
+        accountFixture.addUser( user );
 
         accountFixture.assertLoginIntoOrg( adminMail, "pass123", org1.organization.id );
 

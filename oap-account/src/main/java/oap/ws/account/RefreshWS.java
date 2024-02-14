@@ -22,13 +22,17 @@
  * SOFTWARE.
  */
 
-package oap.ws.sso;
+package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
+import oap.util.Result;
 import oap.ws.Response;
 import oap.ws.SessionManager;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
+import oap.ws.sso.Authentication;
+import oap.ws.sso.AuthenticationFailure;
+import oap.ws.sso.Authenticator;
 
 import java.util.Optional;
 
@@ -54,7 +58,7 @@ public class RefreshWS {
     @WsMethod( method = GET, path = "/" )
     public Response refreshToken( @WsParam( from = COOKIE ) String refreshToken,
                                   @WsParam( from = QUERY ) Optional<String> organizationId ) {
-        var result = authenticator.refreshToken( refreshToken, organizationId );
+        Result<Authentication, AuthenticationFailure> result = authenticator.refreshToken( refreshToken, organizationId );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieExpiration, sessionManager.cookieSecure );
         else

@@ -78,6 +78,12 @@
             <version>${oap.deps.oap.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-ws-sso</artifactId>
+            <version>${oap.deps.oap.version}</version>
+            <scope>test</scope>
+        </dependency>
 
 
         <dependency>

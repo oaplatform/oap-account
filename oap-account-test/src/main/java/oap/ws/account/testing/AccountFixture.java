@@ -33,7 +33,9 @@ import oap.ws.account.Accounts;
 import oap.ws.account.AccountsService;
 import oap.ws.account.OrganizationStorage;
 import oap.ws.account.User;
+import oap.ws.account.UserData;
 import oap.ws.account.UserStorage;
+import oap.ws.sso.UserProvider;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -87,9 +89,37 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
         SecureWSFixture.assertLogin( login, password, defaultHttpPort() );
     }
 
+    public void assertLogin( String login, String password, String tfaCode ) {
+        SecureWSFixture.assertLogin( login, password, tfaCode, defaultHttpPort() );
+    }
+
     public void assertLoginIntoOrg( String login, String password, String orgId ) {
-        SecureWSFixture.assertLogin( login, password, defaultHttpPort() );
+        assertLogin( login, password );
+        assertSwitchOrganization( orgId );
+    }
+
+    public void assertSwitchOrganization( String orgId ) {
         SecureWSFixture.assertSwitchOrganization( orgId, defaultHttpPort() );
+    }
+
+    public void assertWrongTfaLogin( String login, String password, String tfaCode ) {
+        SecureWSFixture.assertWrongTfaLogin( login, password, tfaCode, defaultHttpPort() );
+    }
+
+    public void assertLoginWithFBToken() {
+        SecureWSFixture.assertLoginWithFBToken( defaultHttpPort() );
+    }
+
+    public void assertTfaRequiredLogin( String login, String password ) {
+        SecureWSFixture.assertTfaRequiredLogin( login, password, defaultHttpPort() );
+    }
+
+    public void assertLoginWithFBTokenWithTfaRequired() {
+        SecureWSFixture.assertLoginWithFBTokenWithTfaRequired( defaultHttpPort() );
+    }
+
+    public void assertLoginWithFBTokenWithWrongTfa() {
+        SecureWSFixture.assertLoginWithFBTokenWithWrongTfa( defaultHttpPort() );
     }
 
     public void assertLogout() {
@@ -144,5 +174,24 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public void after() {
         assertLogout();
         super.after();
+    }
+
+    public User addUser( String mail, String pass, Map<String, String> roles ) {
+        return accounts().createUser( new User( mail, mail, mail, pass, true ), roles ).user;
+    }
+
+    public User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
+        User user = new User( mail, mail, mail, pass, true, tfaEnabled );
+        if( tfaEnabled ) {
+            user.secretKey = UserProvider.toAccessKey( mail );
+        }
+        return accounts().createUser( user, roles ).user;
+    }
+
+    public UserData addUser( UserData userData ) {
+        UserData cloned = Binder.json.clone( userData );
+        cloned.user.encryptPassword( cloned.user.password );
+
+        return userStorage().store( cloned );
     }
 }
