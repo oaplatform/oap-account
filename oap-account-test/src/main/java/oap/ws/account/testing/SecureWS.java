@@ -22,10 +22,13 @@
  * SOFTWARE.
  */
 
-package oap.ws.sso;
+package oap.ws.account.testing;
 
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
+import oap.ws.sso.User;
+import oap.ws.sso.WsSecurity;
+
 import java.util.Optional;
 
 import static oap.ws.WsParam.From.PATH;
