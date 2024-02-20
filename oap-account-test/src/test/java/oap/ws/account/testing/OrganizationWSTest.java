@@ -45,8 +45,7 @@ import static oap.ws.account.testing.AccountFixture.REGULAR_USER;
 import static oap.ws.validate.testng.ValidationAssertion.assertValidation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.joda.time.DateTimeZone.UTC;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.*;
 
 public class OrganizationWSTest extends Fixtures {
     public static final String TODAY = DateTimeFormat.forPattern( "yyyy-MM-dd" ).print( DateTime.now( UTC ) );
@@ -605,7 +604,7 @@ public class OrganizationWSTest extends Fixtures {
         accountFixture.addUser( user );
 
         accountFixture.assertSystemAdminLogin();
-        assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/add?newOrganizationId=" + org2.organization.id + "&email=" + mail + "&role=ADMIN" ) ).hasCode( OK );
+        assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/add?userOrganizationId=" + org2.organization.id + "&email=" + mail + "&role=ADMIN" ) ).hasCode( OK );
         assertTrue( accountFixture.userStorage().getUser( mail ).get().getRoles().containsKey( org2.organization.id ) );
     }
 
@@ -631,7 +630,7 @@ public class OrganizationWSTest extends Fixtures {
 
         accountFixture.assertLogin( adminMail, "pass123" );
 
-        assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?newOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( OK );
+        assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?userOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( OK );
         assertTrue( accountFixture.userStorage().getUser( userMail ).get().getRoles().containsKey( org2.organization.id ) );
     }
 
@@ -657,6 +656,27 @@ public class OrganizationWSTest extends Fixtures {
 
         accountFixture.assertLogin( adminMail, "pass123" );
 
-        assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?newOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( FORBIDDEN );
+        assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?userOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( FORBIDDEN );
+    }
+
+    @Test
+    public void removeOrganizationFromUserBySystemAdmin() {
+        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        final String orgId = org1.organization.id;
+
+        Map<String, String> roles = new HashMap<>();
+        roles.put( orgId, USER );
+
+        final String mail = "user@usr.com";
+        UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), roles );
+        user.addAccount( orgId, "acc2" );
+        accountFixture.userStorage().store( user );
+
+        accountFixture.assertSystemAdminLogin();
+        assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/remove?userOrganizationId=" + org2.organization.id + "&email=" + mail ) ).hasCode( OK );
+        var userData = ( UserData ) accountFixture.userStorage().getUser( mail ).get();
+        assertFalse( userData.getRoles().containsKey( org2.organization.id ) );
+        assertFalse( userData.accounts.containsKey( org2.organization.id ) );
     }
 }

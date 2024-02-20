@@ -335,11 +335,21 @@ public class OrganizationWS extends AbstractWS {
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_STORE_USER } )
     @WsValidate( "validateAdminOrganizationAccess" )
     public Optional<UserData.View> addUserToOrganization( @WsParam( from = PATH ) String organizationId,
-                                                          @WsParam( from = QUERY ) String newOrganizationId,
+                                                          @WsParam( from = QUERY ) String userOrganizationId,
                                                           @WsParam( from = QUERY ) String email,
                                                           @WsParam( from = QUERY ) String role,
                                                           @WsParam( from = SESSION ) UserData loggedUser ) {
-        return accounts.addOrganizationToUser( email, newOrganizationId, role ).map( u -> u.view );
+        return accounts.addOrganizationToUser( email, userOrganizationId, role ).map( u -> u.view );
+    }
+
+    @WsMethod( method = GET, path = "/{organizationId}/remove", description = "Remove user from existing organization" )
+    @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_STORE_USER } )
+    @WsValidate( "validateAdminOrganizationAccess" )
+    public Optional<UserData.View> removeUserFromOrganization( @WsParam( from = PATH ) String organizationId,
+                                                               @WsParam( from = QUERY ) String userOrganizationId,
+                                                               @WsParam( from = QUERY ) String email,
+                                                               @WsParam( from = SESSION ) UserData loggedUser ) {
+        return accounts.removeUserFromOrganization( email, userOrganizationId ).map( u -> u.view );
     }
 
     @WsMethod( method = POST, path = "/{organizationId}/assign" )
@@ -420,18 +430,15 @@ public class OrganizationWS extends AbstractWS {
         }
     }
 
-    protected ValidationErrors validateAdminOrganizationAccess( String email, UserData loggedUser, String newOrganizationId ) {
-        final String loggedUserRoleInNewOrganization = loggedUser.roles.getOrDefault( newOrganizationId, "" );
+    protected ValidationErrors validateAdminOrganizationAccess( String email, UserData loggedUser, String userOrganizationId ) {
+        final String loggedUserRoleInNewOrganization = loggedUser.roles.getOrDefault( userOrganizationId, "" );
         if( loggedUserRoleInNewOrganization.isEmpty() && !isSystemAdmin( loggedUser ) ) {
-            return error( FORBIDDEN, "User is not allowed to add users to organization (%s)", newOrganizationId );
+            return error( FORBIDDEN, "User is not allowed to add users to organization (%s)", userOrganizationId );
         }
         if( !loggedUserRoleInNewOrganization.equals( ADMIN ) && !isSystemAdmin( loggedUser ) ) {
             return error( FORBIDDEN, "Only ADMIN can add user to organization" );
         }
         if( accounts.getUser( email ).isPresent() && isSystemAdmin( loggedUser ) ) {
-            return empty();
-        }
-        if( accounts.getUser( email ).isPresent() ) {
             return empty();
         }
         return empty();

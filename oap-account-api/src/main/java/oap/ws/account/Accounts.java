@@ -49,4 +49,6 @@ public interface Accounts {
     void permanentlyDeleteAll();
 
     Optional<UserData> addOrganizationToUser( String email, String organizationId, String role );
+
+    Optional<UserData> removeUserFromOrganization( String email, String organizationId );
 }
