@@ -533,7 +533,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         accountFixture.addUser( user );
 
         accountFixture.assertSystemAdminLogin();
-        assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?newOrganizationId=" + org2.organization.id + "&email=" + mail + "&role=ADMIN" ) ).hasCode( OK );
+        assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?userOrganizationId=" + org2.organization.id + "&email=" + mail + "&role=ADMIN" ) ).hasCode( OK );
         assertTrue( accountFixture.userStorage().getUser( mail ).get().getRoles().containsKey( org2.organization.id ) );
     }
 
@@ -559,7 +559,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
         accountFixture.assertLoginIntoOrg( adminMail, "pass123", org1.organization.id );
 
-        assertGet( accountFixture.httpUrl( "/organizations/" + org1.organization.id + "/add?newOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( OK );
+        assertGet( accountFixture.httpUrl( "/organizations/" + org1.organization.id + "/add?userOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( OK );
         assertTrue( accountFixture.userStorage().getUser( userMail ).get().getRoles().containsKey( org2.organization.id ) );
     }
 
@@ -585,6 +585,6 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
         accountFixture.assertLoginIntoOrg( adminMail, "pass123", org1.organization.id );
 
-        assertGet( accountFixture.httpUrl( "/organizations/" + org1.organization.id + "/add?newOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( FORBIDDEN );
+        assertGet( accountFixture.httpUrl( "/organizations/" + org1.organization.id + "/add?userOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( FORBIDDEN );
     }
 }
