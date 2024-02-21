@@ -45,7 +45,9 @@ import static oap.ws.account.testing.AccountFixture.REGULAR_USER;
 import static oap.ws.validate.testng.ValidationAssertion.assertValidation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.joda.time.DateTimeZone.UTC;
-import static org.testng.AssertJUnit.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class OrganizationWSTest extends Fixtures {
     public static final String TODAY = DateTimeFormat.forPattern( "yyyy-MM-dd" ).print( DateTime.now( UTC ) );
