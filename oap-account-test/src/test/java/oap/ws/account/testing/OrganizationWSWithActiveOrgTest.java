@@ -44,8 +44,8 @@ import java.util.Map;
 
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.OK;
-import static oap.http.testng.HttpAsserts.assertGet;
-import static oap.http.testng.HttpAsserts.assertPost;
+import static oap.http.test.HttpAsserts.assertGet;
+import static oap.http.test.HttpAsserts.assertPost;
 import static oap.mail.test.MessageAssertion.assertMessage;
 import static oap.mail.test.MessagesAssertion.assertMessages;
 import static oap.testng.Asserts.assertString;

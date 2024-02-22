@@ -37,8 +37,8 @@ import java.util.Map;
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
-import static oap.http.testng.HttpAsserts.assertGet;
-import static oap.http.testng.HttpAsserts.assertPost;
+import static oap.http.test.HttpAsserts.assertGet;
+import static oap.http.test.HttpAsserts.assertPost;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.AssertJUnit.assertTrue;
 

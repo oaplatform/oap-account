@@ -24,7 +24,7 @@
 
 package oap.ws.sso;
 
-import oap.http.testng.HttpAsserts;
+import oap.http.test.HttpAsserts;
 import oap.util.Dates;
 import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
 import org.joda.time.DateTimeUtils;
@@ -34,8 +34,8 @@ import java.util.Map;
 
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
-import static oap.http.testng.HttpAsserts.assertPost;
-import static oap.http.testng.HttpAsserts.reset;
+import static oap.http.test.HttpAsserts.assertPost;
+import static oap.http.test.HttpAsserts.reset;
 
 public class ThrottleLoginInterceptorTest extends IntegratedTest {
     @Test
