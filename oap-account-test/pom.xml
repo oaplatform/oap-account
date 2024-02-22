@@ -48,11 +48,6 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-application</artifactId>
-            <version>${oap.deps.oap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>oap</groupId>
             <artifactId>oap-ws-test</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
