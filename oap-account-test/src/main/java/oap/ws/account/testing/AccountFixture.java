@@ -25,7 +25,7 @@
 package oap.ws.account.testing;
 
 import oap.application.testng.AbstractKernelFixture;
-import oap.http.testng.HttpAsserts;
+import oap.http.test.HttpAsserts;
 import oap.json.Binder;
 import oap.mail.MailQueue;
 import oap.ws.account.AccountMailman;

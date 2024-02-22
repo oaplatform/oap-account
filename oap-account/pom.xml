@@ -35,6 +35,21 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
+            <artifactId>oap-http</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-application</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-http-prometheus</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>oap</groupId>
             <artifactId>oap-ws-sso</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>

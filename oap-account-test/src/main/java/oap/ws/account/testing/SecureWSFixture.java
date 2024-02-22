@@ -28,11 +28,11 @@ import oap.http.Http;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
-import static oap.http.testng.HttpAsserts.CookieHttpAssertion.assertCookie;
-import static oap.http.testng.HttpAsserts.assertGet;
-import static oap.http.testng.HttpAsserts.assertPost;
-import static oap.http.testng.HttpAsserts.getTestHttpPort;
-import static oap.http.testng.HttpAsserts.httpUrl;
+import static oap.http.test.HttpAsserts.CookieHttpAssertion.assertCookie;
+import static oap.http.test.HttpAsserts.assertGet;
+import static oap.http.test.HttpAsserts.assertPost;
+import static oap.http.test.HttpAsserts.getTestHttpPort;
+import static oap.http.test.HttpAsserts.httpUrl;
 import static oap.io.content.ContentReader.ofString;
 import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.sso.SSO.AUTHENTICATION_KEY;

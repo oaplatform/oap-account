@@ -32,7 +32,7 @@ import static oap.http.Http.ContentType.TEXT_PLAIN;
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
-import static oap.http.testng.HttpAsserts.assertGet;
+import static oap.http.test.HttpAsserts.assertGet;
 
 public class JWTInterceptorTest extends IntegratedTest {
     @Test

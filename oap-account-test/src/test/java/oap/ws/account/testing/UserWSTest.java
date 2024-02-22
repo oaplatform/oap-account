@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
-import static oap.http.testng.HttpAsserts.assertGet;
+import static oap.http.test.HttpAsserts.assertGet;
 import static oap.io.content.ContentReader.ofString;
 import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.account.Roles.USER;
@@ -32,7 +32,7 @@ import static oap.ws.account.testing.OrganizationWSTest.TODAY;
 
 public class UserWSTest extends Fixtures {
     protected final AccountFixture accountFixture;
-    private byte[] randomBytes = new byte[] {
+    private final byte[] randomBytes = new byte[] {
         0x12, 0x21, 0x12, 0x32, 0x42,
         0x59, 0x13, 0x22, 0x12, 0x38,
         0x70, 0x62, 0x14, 0x23, 0x12,
