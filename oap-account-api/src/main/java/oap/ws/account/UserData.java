@@ -181,6 +181,12 @@ public class UserData implements oap.ws.sso.User, Serializable {
         return this;
     }
 
+    public UserData removeOrganization( String organizationId ) {
+        this.roles.remove( organizationId );
+        this.accounts.remove( organizationId );
+        return this;
+    }
+
     public class View implements oap.ws.sso.User.View {
         public String getEmail() {
             return user.email;

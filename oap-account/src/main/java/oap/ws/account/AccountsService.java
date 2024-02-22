@@ -183,4 +183,9 @@ public class AccountsService implements Accounts {
     public Optional<UserData> addOrganizationToUser( String email, String organizationId, String role ) {
         return userStorage.update( email, u -> u.addOrganization( organizationId, role ) );
     }
+
+    @Override
+    public Optional<UserData> removeUserFromOrganization( String email, String organizationId ) {
+        return userStorage.update( email, u -> u.removeOrganization( organizationId ) );
+    }
 }
