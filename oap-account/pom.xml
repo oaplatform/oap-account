@@ -76,7 +76,7 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-ws-sso-api-default</artifactId>
+            <artifactId>oap-ws-sso-api</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
         <dependency>
