@@ -36,8 +36,8 @@ public class IntegratedTest extends Fixtures {
     protected final AccountFixture accountFixture;
 
     public IntegratedTest() {
-        fixture( new MongoFixture() );
-        accountFixture = fixture( new AccountFixture() );
+        var mongoFixture = fixture( new MongoFixture() );
+        accountFixture = fixture( new AccountFixture( mongoFixture ) );
         fixture( SystemTimerFixture.FIXTURE );
     }
 
