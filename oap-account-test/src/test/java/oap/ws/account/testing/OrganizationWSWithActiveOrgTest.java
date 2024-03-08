@@ -70,8 +70,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     public OrganizationWSWithActiveOrgTest() {
         fixture( new TestDirectoryFixture() );
-        fixture( new MongoFixture() );
-        accountFixture = fixture( new AccountFixture()
+        var mongoFixture = fixture( new MongoFixture() );
+        accountFixture = fixture( new AccountFixture( mongoFixture )
             .withConfResource( AccountFixture.class, "/application-account.fixture-org.conf" ) );
     }
 

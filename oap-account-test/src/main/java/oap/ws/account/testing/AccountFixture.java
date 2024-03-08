@@ -28,6 +28,7 @@ import oap.application.testng.AbstractKernelFixture;
 import oap.http.test.HttpAsserts;
 import oap.json.Binder;
 import oap.mail.MailQueue;
+import oap.storage.mongo.MongoFixture;
 import oap.ws.account.AccountMailman;
 import oap.ws.account.Accounts;
 import oap.ws.account.AccountsService;
@@ -54,8 +55,8 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
 
     private static final String PREFIX = "ACCOUNT_FIXTURE_";
 
-    public AccountFixture() {
-        super( PREFIX, urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ) );
+    public AccountFixture( MongoFixture mongoFixture ) {
+        super( PREFIX, urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ), mongoFixture );
 
         define( "SESSION_MANAGER_EXPIRATION_TIME", "24h" );
 
