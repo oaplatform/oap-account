@@ -55,8 +55,8 @@ public class OrganizationWSTest extends Fixtures {
     protected final AccountFixture accountFixture;
 
     public OrganizationWSTest() {
-        fixture( new TestDirectoryFixture() );
-        var mongoFixture = fixture( new MongoFixture() );
+        fixture( new TestDirectoryFixture( getClass() ) );
+        var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
         accountFixture = fixture( new AccountFixture( mongoFixture ) );
     }
 
