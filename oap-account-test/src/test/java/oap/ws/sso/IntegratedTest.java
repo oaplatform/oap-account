@@ -38,7 +38,7 @@ public class IntegratedTest extends Fixtures {
     public IntegratedTest() {
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
         accountFixture = fixture( new AccountFixture( mongoFixture ) );
-        fixture( new SystemTimerFixture( getClass() ) );
+        fixture( new SystemTimerFixture() );
     }
 
     protected String httpUrl( String url ) {
