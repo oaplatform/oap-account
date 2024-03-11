@@ -53,10 +53,10 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public static final User ORG_ADMIN_USER = new User( "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
     public static final User REGULAR_USER = new User( "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
 
-    private static final String PREFIX = "ACCOUNT";
-
     public AccountFixture( MongoFixture mongoFixture ) {
-        super( PREFIX, urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ) );
+        super( urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ) );
+
+        addDependency( "mongo", mongoFixture );
 
         define( "SESSION_MANAGER_EXPIRATION_TIME", "24h" );
 
