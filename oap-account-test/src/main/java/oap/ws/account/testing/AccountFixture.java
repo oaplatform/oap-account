@@ -43,6 +43,25 @@ import java.util.concurrent.TimeUnit;
 
 import static oap.io.Resources.urlOrThrow;
 
+/**
+ * variables:
+ * <ul>
+ *     <li>mongo.* - {@link oap.storage.mongo.MongoFixture}</li>
+ *     <li>SESSION_MANAGER_EXPIRATION_TIME</li>
+ *     <li>MONGO_MIGRATIONS_PACKAGE</li>
+ *     <li>DEFAULT_SYSTEM_ADMIN_EMAIL</li>
+ *     <li>DEFAULT_SYSTEM_ADMIN_PASSWORD</li>
+ *     <li>DEFAULT_SYSTEM_ADMIN_FIRST_NAME</li>
+ *     <li>DEFAULT_SYSTEM_ADMIN_LAST_NAME</li>
+ *     <li>DEFAULT_SYSTEM_ADMIN_ROLES</li>
+ *     <li>DEFAULT_SYSTEM_READ_ONLY</li>
+ *     <li>DEFAULT_ORGANIZATION_ID</li>
+ *     <li>DEFAULT_ORGANIZATION_NAME</li>
+ *     <li>DEFAULT_ORGANIZATION_DESCRIPTION</li>
+ *     <li>DEFAULT_ORGANIZATION_READ_ONLY</li>
+ * </ul>
+ * @see oap.application.testng.AbstractKernelFixture
+ */
 public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public static final String DEFAULT_PASSWORD = "Xenoss123";
     public static final String DEFAULT_ACCOUNT_ID = "DFLTACCT";
