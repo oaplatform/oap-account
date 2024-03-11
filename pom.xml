@@ -68,7 +68,7 @@
     <properties>
         <oap-account.project.version>21.14.2</oap-account.project.version>
 
-        <oap.deps.oap.version>21.16.2</oap.deps.oap.version>
+        <oap.deps.oap.version>21.16.3</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.2.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.3.0</oap.deps.google.api-client>
