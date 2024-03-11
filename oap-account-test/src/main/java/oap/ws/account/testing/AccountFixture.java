@@ -53,10 +53,10 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public static final User ORG_ADMIN_USER = new User( "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
     public static final User REGULAR_USER = new User( "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
 
-    private static final String PREFIX = "ACCOUNT_FIXTURE_";
+    private static final String PREFIX = "ACCOUNT";
 
     public AccountFixture( MongoFixture mongoFixture ) {
-        super( PREFIX, urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ), mongoFixture );
+        super( PREFIX, urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ) );
 
         define( "SESSION_MANAGER_EXPIRATION_TIME", "24h" );
 
@@ -83,15 +83,15 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
 
     public void assertOrgAdminLogin() {
         assertLogin( DEFAULT_ORGANIZATION_ADMIN_EMAIL, DEFAULT_PASSWORD );
-        SecureWSFixture.assertSwitchOrganization( DEFAULT_ORGANIZATION_ID, defaultHttpPort() );
+        SecureWSHelper.assertSwitchOrganization( DEFAULT_ORGANIZATION_ID, defaultHttpPort() );
     }
 
     public void assertLogin( String login, String password ) {
-        SecureWSFixture.assertLogin( login, password, defaultHttpPort() );
+        SecureWSHelper.assertLogin( login, password, defaultHttpPort() );
     }
 
     public void assertLogin( String login, String password, String tfaCode ) {
-        SecureWSFixture.assertLogin( login, password, tfaCode, defaultHttpPort() );
+        SecureWSHelper.assertLogin( login, password, tfaCode, defaultHttpPort() );
     }
 
     public void assertLoginIntoOrg( String login, String password, String orgId ) {
@@ -100,31 +100,31 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     }
 
     public void assertSwitchOrganization( String orgId ) {
-        SecureWSFixture.assertSwitchOrganization( orgId, defaultHttpPort() );
+        SecureWSHelper.assertSwitchOrganization( orgId, defaultHttpPort() );
     }
 
     public void assertWrongTfaLogin( String login, String password, String tfaCode ) {
-        SecureWSFixture.assertWrongTfaLogin( login, password, tfaCode, defaultHttpPort() );
+        SecureWSHelper.assertWrongTfaLogin( login, password, tfaCode, defaultHttpPort() );
     }
 
     public void assertLoginWithFBToken() {
-        SecureWSFixture.assertLoginWithFBToken( defaultHttpPort() );
+        SecureWSHelper.assertLoginWithFBToken( defaultHttpPort() );
     }
 
     public void assertTfaRequiredLogin( String login, String password ) {
-        SecureWSFixture.assertTfaRequiredLogin( login, password, defaultHttpPort() );
+        SecureWSHelper.assertTfaRequiredLogin( login, password, defaultHttpPort() );
     }
 
     public void assertLoginWithFBTokenWithTfaRequired() {
-        SecureWSFixture.assertLoginWithFBTokenWithTfaRequired( defaultHttpPort() );
+        SecureWSHelper.assertLoginWithFBTokenWithTfaRequired( defaultHttpPort() );
     }
 
     public void assertLoginWithFBTokenWithWrongTfa() {
-        SecureWSFixture.assertLoginWithFBTokenWithWrongTfa( defaultHttpPort() );
+        SecureWSHelper.assertLoginWithFBTokenWithWrongTfa( defaultHttpPort() );
     }
 
     public void assertLogout() {
-        SecureWSFixture.assertLogout( defaultHttpPort() );
+        SecureWSHelper.assertLogout( defaultHttpPort() );
     }
 
     public OrganizationStorage organizationStorage() {

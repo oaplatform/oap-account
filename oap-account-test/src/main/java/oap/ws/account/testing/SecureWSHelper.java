@@ -31,7 +31,6 @@ import org.joda.time.DateTime;
 import static oap.http.test.HttpAsserts.CookieHttpAssertion.assertCookie;
 import static oap.http.test.HttpAsserts.assertGet;
 import static oap.http.test.HttpAsserts.assertPost;
-import static oap.http.test.HttpAsserts.getTestHttpPort;
 import static oap.http.test.HttpAsserts.httpUrl;
 import static oap.io.content.ContentReader.ofString;
 import static oap.testng.Asserts.contentOfTestResource;
@@ -42,9 +41,8 @@ import static org.joda.time.DateTimeZone.UTC;
 /**
  * Created by igor.petrenko on 2021-02-24.
  */
-public class SecureWSFixture {
-    public static void assertLogin( String login, String password ) {
-        assertLogin( login, password, getTestHttpPort().orElse( 80 ) );
+public class SecureWSHelper {
+    private SecureWSHelper() {
     }
 
     public static void assertLogin( String login, String password, int port ) {
@@ -91,10 +89,6 @@ public class SecureWSFixture {
             .hasReason( "TFA code is incorrect" );
     }
 
-    public static void assertLogout() {
-        assertLogout( getTestHttpPort().orElse( 80 ) );
-    }
-
     public static void assertLogout( int port ) {
         assertGet( httpUrl( port, "/auth/logout" ) )
             .hasCode( Http.StatusCode.NO_CONTENT )
@@ -104,7 +98,7 @@ public class SecureWSFixture {
     }
 
     public static void assertLoginWithFBToken( int port ) {
-        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSHelper.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
             .containsCookie( AUTHENTICATION_KEY, cookie -> assertCookie( cookie )
                 .hasPath( "/" )
                 .isHttpOnly() )
@@ -114,7 +108,7 @@ public class SecureWSFixture {
     }
 
     public static void assertLoginWithFBTokenWithTfa( int port, String tfaCode ) {
-        String content = contentOfTestResource( SecureWSFixture.class, "token-tfa-credentials.json", ofString() );
+        String content = contentOfTestResource( SecureWSHelper.class, "token-tfa-credentials.json", ofString() );
         content = StringUtils.replace( content, "proper_code", tfaCode );
         assertPost( httpUrl( port, "/auth/oauth/login" ), content, Http.ContentType.APPLICATION_JSON )
             .containsCookie( AUTHENTICATION_KEY, cookie -> assertCookie( cookie )
@@ -126,13 +120,13 @@ public class SecureWSFixture {
     }
 
     public static void assertLoginWithFBTokenWithTfaRequired( int port ) {
-        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSHelper.class, "token-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
             .hasCode( Http.StatusCode.BAD_REQUEST )
             .hasReason( "TFA code is required" );
     }
 
     public static void assertLoginWithFBTokenWithWrongTfa( int port ) {
-        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSFixture.class, "token-wrong-tfa-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
+        assertPost( httpUrl( port, "/auth/oauth/login" ), contentOfTestResource( SecureWSHelper.class, "token-wrong-tfa-credentials.json", ofString() ), Http.ContentType.APPLICATION_JSON )
             .hasCode( Http.StatusCode.BAD_REQUEST )
             .hasReason( "TFA code is incorrect" );
     }

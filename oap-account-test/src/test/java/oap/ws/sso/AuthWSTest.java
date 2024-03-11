@@ -27,7 +27,7 @@ package oap.ws.sso;
 
 import oap.http.Http;
 import oap.json.Binder;
-import oap.ws.account.testing.SecureWSFixture;
+import oap.ws.account.testing.SecureWSHelper;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
 import org.testng.annotations.Test;
@@ -148,7 +148,7 @@ public class AuthWSTest extends IntegratedTest {
     @Test
     public void loginWithExternalTokenWithTfa() {
         var user = addUser( "newuser@user.com", null, Map.of( "r1", "USER" ), true );
-        SecureWSFixture.assertLoginWithFBTokenWithTfa( accountFixture.defaultHttpPort(), TfaUtils.getTOTPCode( user.getSecretKey() ) );
+        SecureWSHelper.assertLoginWithFBTokenWithTfa( accountFixture.defaultHttpPort(), TfaUtils.getTOTPCode( user.getSecretKey() ) );
         assertGet( httpUrl( "/secure/r1" ) )
             .hasCode( FORBIDDEN );
         assertGet( httpUrl( "/auth/whoami" ) )

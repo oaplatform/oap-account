@@ -34,10 +34,8 @@ import static oap.http.Http.StatusCode.CONFLICT;
 import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.test.HttpAsserts.assertGet;
-import static oap.http.test.HttpAsserts.httpUrl;
 import static oap.util.Pair.__;
-import static oap.ws.account.testing.SecureWSFixture.assertLogin;
-import static oap.ws.account.testing.SecureWSFixture.assertSwitchOrganization;
+import static oap.ws.account.testing.SecureWSHelper.assertLogin;
 
 public class ApiKeyInterceptorTest extends IntegratedTest {
 
