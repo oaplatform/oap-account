@@ -29,6 +29,7 @@ import oap.http.test.HttpAsserts;
 import oap.json.Binder;
 import oap.mail.MailQueue;
 import oap.storage.mongo.MongoFixture;
+import oap.testng.TestDirectoryFixture;
 import oap.ws.account.AccountMailman;
 import oap.ws.account.Accounts;
 import oap.ws.account.AccountsService;
@@ -60,6 +61,7 @@ import static oap.io.Resources.urlOrThrow;
  *     <li>DEFAULT_ORGANIZATION_DESCRIPTION</li>
  *     <li>DEFAULT_ORGANIZATION_READ_ONLY</li>
  * </ul>
+ *
  * @see oap.application.testng.AbstractKernelFixture
  */
 public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
@@ -72,8 +74,8 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public static final User ORG_ADMIN_USER = new User( "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
     public static final User REGULAR_USER = new User( "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
 
-    public AccountFixture( MongoFixture mongoFixture ) {
-        super( urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ) );
+    public AccountFixture( TestDirectoryFixture testDirectoryFixture, MongoFixture mongoFixture ) {
+        super( testDirectoryFixture, urlOrThrow( AccountFixture.class, "/application-account.fixture.conf" ) );
 
         addDependency( "mongo", mongoFixture );
 

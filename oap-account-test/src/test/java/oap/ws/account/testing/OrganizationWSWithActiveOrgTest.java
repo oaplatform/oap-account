@@ -27,6 +27,7 @@ package oap.ws.account.testing;
 import oap.http.Http;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
+import oap.testng.TestDirectoryFixture;
 import oap.ws.account.Account;
 import oap.ws.account.Organization;
 import oap.ws.account.OrganizationData;
@@ -68,8 +69,9 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     protected final AccountFixture accountFixture;
 
     public OrganizationWSWithActiveOrgTest() {
+        TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
-        accountFixture = fixture( new AccountFixture( mongoFixture )
+        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture )
             .withConfResource( AccountFixture.class, "/application-account.fixture-org.conf" ) );
     }
 

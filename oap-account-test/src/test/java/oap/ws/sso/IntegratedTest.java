@@ -27,6 +27,7 @@ package oap.ws.sso;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
+import oap.testng.TestDirectoryFixture;
 import oap.ws.account.testing.AccountFixture;
 import org.testng.annotations.AfterMethod;
 
@@ -36,9 +37,10 @@ public class IntegratedTest extends Fixtures {
     protected final AccountFixture accountFixture;
 
     public IntegratedTest() {
-        var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
-        accountFixture = fixture( new AccountFixture( mongoFixture ) );
         fixture( new SystemTimerFixture() );
+        TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
+        var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
+        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
     }
 
     protected String httpUrl( String url ) {
