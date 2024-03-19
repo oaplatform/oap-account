@@ -42,7 +42,7 @@
             <dependency>
                 <groupId>oap</groupId>
                 <artifactId>oap-dependencies</artifactId>
-                <version>21.1.9</version>
+                <version>21.1.10</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -80,7 +80,7 @@
     <properties>
         <oap-account.project.version>21.14.3</oap-account.project.version>
 
-        <oap.deps.oap.version>21.17.0.OAP-251-hocon-fs-apache-jclouds.316</oap.deps.oap.version>
+        <oap.deps.oap.version>21.17.0.OAP-251-hocon-fs-apache-jclouds.328</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.2.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.3.0</oap.deps.google.api-client>
