@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.random.RandomGenerator;
 
-@ToString( exclude = { "password", "create" } )
+@ToString( exclude = { "password", "create", "apiKey", "secretKey" } )
 @EqualsAndHashCode
 public class User implements Serializable {
     public static final String SCHEMA = "/oap/ws/account/user.schema.conf";
