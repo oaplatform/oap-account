@@ -9,6 +9,7 @@ package oap.ws.account.testing;
 import oap.http.Http;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
+import oap.testng.TestDirectoryFixture;
 import oap.ws.account.Organization;
 import oap.ws.account.OrganizationData;
 import oap.ws.account.User;
@@ -39,8 +40,9 @@ public class UserWSTest extends Fixtures {
     };
 
     public UserWSTest() {
+        TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
-        accountFixture = fixture( new AccountFixture( mongoFixture ) );
+        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
         User.random = new Random() {
             @Override
             public void nextBytes( byte[] bytes ) {
