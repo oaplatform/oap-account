@@ -78,7 +78,7 @@
     </distributionManagement>
 
     <properties>
-        <oap-account.project.version>21.14.4</oap-account.project.version>
+        <oap-account.project.version>21.14.5</oap-account.project.version>
 
         <oap.deps.oap.version>21.17.3</oap.deps.oap.version>
 
