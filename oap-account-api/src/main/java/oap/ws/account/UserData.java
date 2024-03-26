@@ -175,7 +175,7 @@ public class UserData implements oap.ws.sso.User, Serializable {
 
     public UserData addOrganization( String organizationId, String role ) {
         this.roles.put( organizationId, role );
-        if( getDefaultOrganization().isPresent() ) {
+        if( getDefaultOrganization().isEmpty() ) {
             this.user.defaultOrganization = organizationId;
         }
         return this;
