@@ -7,11 +7,15 @@
 
 package oap.ws.account;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import oap.json.ext.Ext;
+import oap.json.properties.PropertiesDeserializer;
 import oap.util.Hash;
 import oap.ws.sso.UserProvider;
 import org.joda.time.DateTime;
@@ -20,6 +24,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,21 +36,18 @@ import static oap.ws.sso.WsSecurity.SYSTEM;
 public class UserData implements oap.ws.sso.User, Serializable {
     @Serial
     private static final long serialVersionUID = -3371939128187130008L;
-
+    private static final String ALL_ACCOUNTS = "*";
     @JsonIgnore
     public final View view = new View();
     @JsonIgnore
     public final SecureView secureView = new SecureView();
-
+    private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Map<String, String> roles = new HashMap<>();
     public Map<String, List<String>> accounts = new HashMap<>();
     public User user;
-
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd" )
     public DateTime lastLogin;
     public boolean banned = false;
-
-    private static final String ALL_ACCOUNTS = "*";
 
     public UserData( User user, Map<String, String> roles ) {
         this.user = user;
@@ -185,6 +187,23 @@ public class UserData implements oap.ws.sso.User, Serializable {
         this.roles.remove( organizationId );
         this.accounts.remove( organizationId );
         return this;
+    }
+
+
+    @JsonAnySetter
+    @JsonDeserialize( contentUsing = PropertiesDeserializer.class )
+    public void putProperty( String name, Object value ) {
+        properties.put( name, value );
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public <T> T getProperty( String property ) {
+        return ( T ) properties.get( property );
     }
 
     public class View implements oap.ws.sso.User.View {

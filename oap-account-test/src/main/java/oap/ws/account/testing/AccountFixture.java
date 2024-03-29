@@ -216,4 +216,10 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
 
         return userStorage().store( cloned );
     }
+
+    public AccountFixture withMailMock() {
+        withConfResource( getClass(), "/application-account.fixture-mail-mock.conf" );
+
+        return this;
+    }
 }
