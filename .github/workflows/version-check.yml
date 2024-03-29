@@ -22,4 +22,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           file-to-check: pom.xml
-          pom-property-as-version: oap-account.project.version
+          pom-property-as-version: oap.project.version
