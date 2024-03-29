@@ -41,6 +41,7 @@ public class UserData implements oap.ws.sso.User, Serializable {
     public final View view = new View();
     @JsonIgnore
     public final SecureView secureView = new SecureView();
+    @JsonIgnore
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Map<String, String> roles = new HashMap<>();
     public Map<String, List<String>> accounts = new HashMap<>();

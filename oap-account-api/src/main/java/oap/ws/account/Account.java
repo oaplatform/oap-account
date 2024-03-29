@@ -9,6 +9,7 @@ package oap.ws.account;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -26,6 +27,7 @@ public class Account implements Serializable {
     public static final String SCHEMA = "/oap/ws/account/account.schema.conf";
     @Serial
     private static final long serialVersionUID = -1598345391160039855L;
+    @JsonIgnore
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public String id;
     public String name;
