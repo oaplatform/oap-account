@@ -33,6 +33,7 @@ import static oap.id.Identifier.Option.COMPACT;
 public class OrganizationData implements Serializable {
     @Serial
     private static final long serialVersionUID = 649896869101430210L;
+    @JsonIgnore
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Organization organization;
     public Accounts accounts = new Accounts();
