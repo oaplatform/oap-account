@@ -24,6 +24,7 @@
 
 package oap.ws.account.testing;
 
+import lombok.extern.slf4j.Slf4j;
 import oap.application.testng.AbstractKernelFixture;
 import oap.http.test.HttpAsserts;
 import oap.json.Binder;
@@ -64,6 +65,7 @@ import static oap.io.Resources.urlOrThrow;
  *
  * @see oap.application.testng.AbstractKernelFixture
  */
+@Slf4j
 public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public static final String DEFAULT_PASSWORD = "Xenoss123";
     public static final String DEFAULT_ACCOUNT_ID = "DFLTACCT";
@@ -194,7 +196,11 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
 
     @Override
     public void after() {
-        assertLogout();
+        try {
+            assertLogout();
+        } catch( Exception e ) {
+            log.error( e.getMessage(), e );
+        }
         super.after();
     }
 
