@@ -80,7 +80,7 @@
     <properties>
         <oap.project.version>21.15.0</oap.project.version>
 
-        <oap.deps.oap.version>21.19.0.OAP-117-Support-for-properties-for-classes.73</oap.deps.oap.version>
+        <oap.deps.oap.version>21.19.0.OAP-117-Support-for-properties-for-classes.74</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.2.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.3.0</oap.deps.google.api-client>
