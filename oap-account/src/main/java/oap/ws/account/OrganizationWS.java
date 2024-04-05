@@ -152,11 +152,20 @@ public class OrganizationWS extends AbstractWS {
 
     @WsMethod( method = POST, path = "/{organizationId}/users/{email}/accounts/add" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_ADD } )
-    public Optional<UserData.View> addAccountsToUser( @WsParam( from = PATH ) String organizationId,
+    public Optional<UserData.View> addAccountToUser( @WsParam( from = PATH ) String organizationId,
                                                       @WsParam( from = PATH ) String email,
                                                       @WsParam( from = QUERY ) String accountId,
                                                       @WsParam( from = SESSION ) UserData loggedUser ) {
         return accounts.addAccountToUser( email, organizationId, accountId ).map( u -> u.view );
+    }
+
+    @WsMethod( method = POST, path = "/{organizationId}/users/{email}/accounts/remove" )
+    @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_ADD } )
+    public Optional<UserData.View> removeAccountFromUser( @WsParam( from = PATH ) String organizationId,
+                                                      @WsParam( from = PATH ) String email,
+                                                      @WsParam( from = QUERY ) String accountId,
+                                                      @WsParam( from = SESSION ) UserData loggedUser ) {
+        return accounts.removeAccountFromUser( email, organizationId, accountId ).map( u -> u.view );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users" )

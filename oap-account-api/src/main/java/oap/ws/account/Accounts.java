@@ -40,6 +40,8 @@ public interface Accounts {
 
     Optional<UserData> addAccountToUser( String email, String organizationId, String accountId );
 
+    Optional<UserData> removeAccountFromUser( String email, String organizationId, String accountId );
+
     Optional<UserData> refreshApikey( String email );
 
     void permanentlyDeleteOrganization( String organizationId );

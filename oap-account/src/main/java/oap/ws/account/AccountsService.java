@@ -119,6 +119,13 @@ public class AccountsService implements Accounts {
     }
 
     @Override
+    public Optional<UserData> removeAccountFromUser( String email, String organizationId, String accountId ) {
+        log.debug( "remove account: {} from user: {} in organization: {}", accountId, email, organizationId );
+
+        return userStorage.update( email, u -> u.removeAccount( organizationId, accountId ) );
+    }
+
+    @Override
     public Optional<UserData> refreshApikey( String email ) {
         log.debug( "refresh apikey to user: {}", email );
 
