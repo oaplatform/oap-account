@@ -22,6 +22,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static oap.id.Identifier.Option.COMPACT;
@@ -100,6 +101,10 @@ public class OrganizationData implements Serializable {
 
         public String getDescription() {
             return OrganizationData.this.organization.description;
+        }
+
+        public List<Account> getAccounts() {
+            return OrganizationData.this.accounts.stream().toList();
         }
 
         public Ext getExt() {
