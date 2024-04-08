@@ -30,7 +30,7 @@
     <parent>
         <groupId>oap</groupId>
         <artifactId>oap-account-parent</artifactId>
-        <version>${oap-account.project.version}</version>
+        <version>${oap.project.version}</version>
     </parent>
 
     <artifactId>oap-account-social</artifactId>

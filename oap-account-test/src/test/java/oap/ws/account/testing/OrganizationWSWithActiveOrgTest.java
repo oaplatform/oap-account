@@ -72,7 +72,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
         accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture )
-            .withConfResource( AccountFixture.class, "/application-account.fixture-org.conf" ) );
+            .withConfResource( AccountFixture.class, "/application-account.fixture-org.conf" ) )
+            .withMailMock();
     }
 
     @AfterMethod

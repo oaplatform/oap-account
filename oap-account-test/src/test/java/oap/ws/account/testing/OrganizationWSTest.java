@@ -58,7 +58,8 @@ public class OrganizationWSTest extends Fixtures {
     public OrganizationWSTest() {
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture() );
-        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
+        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) )
+            .withMailMock();
     }
 
     @AfterMethod
