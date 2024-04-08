@@ -685,24 +685,24 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void removeAccountFromUserBySystemAdmin() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization("First", "test" ) );
+        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
         roles.put( orgId, USER );
 
         final String mail = "user@usr.com";
-        UserData user = new UserData(new User( mail, "John", "Smith", "pass123", true ), roles );
+        UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), roles );
         user.addAccount( orgId, "acc1" );
         user.addAccount( orgId, "acc2" );
         user.addAccount( orgId, "acc3" );
-        accountFixture.userStorage().store(user);
+        accountFixture.userStorage().store( user );
 
         accountFixture.assertSystemAdminLogin();
-        assertPost(accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/accounts/remove?accountId=" + "acc1" ), Http.ContentType.APPLICATION_JSON )
+        assertPost( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/accounts/remove?accountId=" + "acc1" ), Http.ContentType.APPLICATION_JSON )
                 .hasCode(OK);
         var userData = ( UserData ) accountFixture.userStorage().getUser( mail ).get();
-        assertFalse( userData.accounts.get(orgId).contains("acc1" ) );
+        assertFalse( userData.accounts.get (orgId ).contains("acc1" ) );
         assertNull( userData.user.defaultAccounts.get( orgId ) );
     }
 }
