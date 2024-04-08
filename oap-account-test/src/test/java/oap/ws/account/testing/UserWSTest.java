@@ -42,7 +42,8 @@ public class UserWSTest extends Fixtures {
     public UserWSTest() {
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
-        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
+        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) )
+            .withMailMock();
         User.random = new Random() {
             @Override
             public void nextBytes( byte[] bytes ) {
