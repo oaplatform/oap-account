@@ -702,7 +702,7 @@ public class OrganizationWSTest extends Fixtures {
         assertPost( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/accounts/remove?accountId=" + "acc1" ), Http.ContentType.APPLICATION_JSON )
                 .hasCode( OK );
         var userData = ( UserData ) accountFixture.userStorage().getUser( mail ).get();
-        assertFalse( userData.accounts.get ( orgId ).contains("acc1" ) );
+        assertFalse( userData.accounts.get ( orgId ).contains( "acc1" ) );
         assertNull( userData.user.defaultAccounts.get( orgId ) );
     }
 }
