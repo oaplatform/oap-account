@@ -45,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-remote</artifactId>
+            <artifactId>oap-remote-application</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
         <dependency>
