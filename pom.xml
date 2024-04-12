@@ -1,26 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!--
-  ~ The MIT License (MIT)
-  ~
-  ~ Copyright (c) Open Application Platform Authors
-  ~
-  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
-  ~ of this software and associated documentation files (the "Software"), to deal
-  ~ in the Software without restriction, including without limitation the rights
-  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  ~ copies of the Software, and to permit persons to whom the Software is
-  ~ furnished to do so, subject to the following conditions:
-  ~
-  ~ The above copyright notice and this permission notice shall be included in all
-  ~ copies or substantial portions of the Software.
-  ~
-  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  ~ SOFTWARE.
-  -->
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -42,7 +20,7 @@
             <dependency>
                 <groupId>oap</groupId>
                 <artifactId>oap-dependencies</artifactId>
-                <version>21.1.11</version>
+                <version>22.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -78,9 +56,9 @@
     </distributionManagement>
 
     <properties>
-        <oap.project.version>21.16.2</oap.project.version>
+        <oap.project.version>22.0.0</oap.project.version>
 
-        <oap.deps.oap.version>21.20.0</oap.deps.oap.version>
+        <oap.deps.oap.version>22.0.0</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.2.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.3.0</oap.deps.google.api-client>
