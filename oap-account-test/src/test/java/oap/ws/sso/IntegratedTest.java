@@ -40,8 +40,7 @@ public class IntegratedTest extends Fixtures {
         fixture( new SystemTimerFixture() );
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
-        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) )
-            .withMailMock();
+        accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
     }
 
     protected String httpUrl( String url ) {
