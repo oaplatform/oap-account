@@ -56,7 +56,6 @@
     </distributionManagement>
 
     <properties>
-
         <oap.project.version>22.1.0</oap.project.version>
 
         <oap.deps.oap.version>22.0.0.OAP-104-Remove-OAP-profiles.115</oap.deps.oap.version>
