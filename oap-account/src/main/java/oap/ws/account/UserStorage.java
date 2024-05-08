@@ -91,6 +91,21 @@ public class UserStorage extends MemoryStorage<String, UserData> implements oap.
     }
 
     @Override
+    public Result<? extends User, String> getValidUser( String email ) {
+        UserData userData = get( email ).orElse( null );
+
+        if( userData == null ) {
+            return Result.failure( "User not found with email: " + email );
+        } else if( userData.banned ) {
+            return Result.failure( "User with email " + email + " is banned" );
+        } else if( !userData.user.isConfirmed() ) {
+            return Result.failure( "User with email " + email + " is not confirmed" );
+        } else {
+            return Result.success( userData );
+        }
+    }
+
+    @Override
     public Result<? extends User, AuthenticationFailure> getAuthenticated( String email, String password, Optional<String> tfaCode ) {
         Optional<UserData> authenticated = get( email )
             .filter( u -> u.authenticate( password ) );
