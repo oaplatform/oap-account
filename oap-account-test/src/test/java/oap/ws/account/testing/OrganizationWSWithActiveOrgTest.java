@@ -24,6 +24,7 @@
 
 package oap.ws.account.testing;
 
+import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
@@ -44,6 +45,7 @@ import java.util.Map;
 
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.OK;
+import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.test.HttpAsserts.assertGet;
 import static oap.http.test.HttpAsserts.assertPost;
 import static oap.mail.test.MessageAssertion.assertMessage;
@@ -63,6 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.joda.time.DateTimeZone.UTC;
 import static org.testng.AssertJUnit.assertTrue;
 
+@Slf4j
 public class OrganizationWSWithActiveOrgTest extends Fixtures {
     public static final String TODAY = DateTimeFormat.forPattern( "yyyy-MM-dd" ).print( DateTime.now( UTC ) );
 
@@ -228,7 +231,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                 .hasSubject( "You've been invited" ) );
         accountFixture.assertLogout();
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + userEmail + "\", \"password\": \"pass\"}" )
-            .hasCode( Http.StatusCode.UNAUTHORIZED );
+            .hasCode( UNAUTHORIZED );
         UserData user = accountFixture.userStorage().get( userEmail ).orElseThrow();
         String confirmUrl = accountFixture.accountMailman().confirmUrl( user );
         assertGet( confirmUrl )
@@ -238,7 +241,6 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/passwd?accessKey=" + user.getAccessKey() + "&apiKey=" + user.user.apiKey ), "{\"email\": \"vk@xenoss.io\", \"password\": \"pass\"}" )
             .hasCode( OK );
         accountFixture.assertLoginIntoOrg( userEmail, "pass", DEFAULT_ORGANIZATION_ID );
-        accountFixture.assertLogout();
     }
 
     @Test
@@ -254,14 +256,13 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                 .hasSubject( "Registration successful" ) );
         assertThat( accountFixture.accounts().getOrganization( "XNSS" ) ).isNotEmpty();
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + user.user.email + "\", \"password\": \"pass\"}" )
-            .hasCode( Http.StatusCode.UNAUTHORIZED );
+            .hasCode( UNAUTHORIZED );
         String confirmUrl = accountFixture.accountMailman().confirmUrl( user );
         assertGet( confirmUrl )
             .hasCode( Http.StatusCode.FOUND )
             .containsHeader( "Location", "http://xenoss.io?apiKey=" + user.user.apiKey + "&accessKey=" + user.getAccessKey()
                 + "&email=vk%40xenoss.io" + "&passwd=false" );
         accountFixture.assertLoginIntoOrg( user.user.email, "pass", "XNSS" );
-        accountFixture.assertLogout();
     }
 
     @Test
@@ -300,7 +301,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         accountFixture.assertOrgAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/fake-org/users" ),
             contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), Http.ContentType.APPLICATION_JSON )
-            .hasCode( Http.StatusCode.FORBIDDEN );
+            .hasCode( UNAUTHORIZED );
     }
 
 
@@ -310,7 +311,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         accountFixture.addUser( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLoginIntoOrg( email, "pass123", DEFAULT_ORGANIZATION_ID );
         assertPost( accountFixture.httpUrl( "/organizations/hackit/users/passwd" ), "{\"email\": \"" + email + "\", \"password\": \"newpass\"}" )
-            .hasCode( Http.StatusCode.FORBIDDEN );
+            .hasCode( UNAUTHORIZED );
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/passwd" ), "{\"email\": \"" + DEFAULT_ORGANIZATION_ADMIN_EMAIL + "\", \"password\": \"newpass\"}" )
             .hasCode( Http.StatusCode.FORBIDDEN )
             .satisfies( response -> assertValidation( response ).hasErrors( "cannot manage " + DEFAULT_ORGANIZATION_ADMIN_EMAIL ) );
@@ -354,7 +355,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                 ) ) );
         accountFixture.assertLogout();
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + user.user.email + "\", \"password\": \"pass\"}" )
-            .hasCode( Http.StatusCode.UNAUTHORIZED );
+            .hasCode( UNAUTHORIZED );
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/unban/" + user.user.email ) )
             .respondedJson( OK, "OK",
@@ -365,7 +366,6 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                 ) ) );
         accountFixture.assertLogout();
         accountFixture.assertLogin( email, "pass123" );
-        accountFixture.assertLogout();
     }
 
     @Test
@@ -404,7 +404,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         accountFixture.assertLogin( userEmail, DEFAULT_PASSWORD );
         final String account1 = "account1";
         assertPost( accountFixture.httpUrl( "/organizations/" + "testId" + "/users/" + userEmail + "/accounts/add?accountId=" + account1 ), Http.ContentType.APPLICATION_JSON )
-            .hasCode( Http.StatusCode.FORBIDDEN );
+            .hasCode( UNAUTHORIZED );
     }
 
     @Test

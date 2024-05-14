@@ -66,7 +66,7 @@ public class IntegratedTest extends Fixtures {
     }
 
     protected JWTExtractor tokenExtractor() {
-        return accountFixture.service( "oap-ws-sso-api", JWTExtractor.class );
+        return accountFixture.service( "oap-account", JWTExtractor.class );
     }
 
     protected void assertTfaRequiredLogin( String login, String password ) {

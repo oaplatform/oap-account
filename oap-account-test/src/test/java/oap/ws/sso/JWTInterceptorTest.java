@@ -29,7 +29,6 @@ import org.testng.annotations.Test;
 import java.util.Map;
 
 import static oap.http.Http.ContentType.TEXT_PLAIN;
-import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.test.HttpAsserts.assertGet;
@@ -52,7 +51,7 @@ public class JWTInterceptorTest extends IntegratedTest {
         accountFixture.addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
         accountFixture.assertLogin( "admin@admin.com", "pass" );
         assertGet( accountFixture.httpUrl( "/secure/r2" ) )
-            .hasCode( FORBIDDEN );
+            .hasCode( UNAUTHORIZED );
 
     }
 
@@ -62,7 +61,7 @@ public class JWTInterceptorTest extends IntegratedTest {
         accountFixture.assertLogin( "admin@admin.com", "pass" );
         assertSwitchOrganization( "r1" );
         assertGet( accountFixture.httpUrl( "/secure/r2" ) )
-            .hasCode( FORBIDDEN );
+            .hasCode( UNAUTHORIZED );
 
     }
 
@@ -77,7 +76,7 @@ public class JWTInterceptorTest extends IntegratedTest {
         accountFixture.addUser( "user@user.com", "pass", Map.of( "r1", "USER" ) );
         accountFixture.assertLogin( "user@user.com", "pass" );
         assertGet( accountFixture.httpUrl( "/secure/r1" ) )
-            .hasCode( FORBIDDEN );
+            .hasCode( UNAUTHORIZED );
     }
 
 }

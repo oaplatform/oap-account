@@ -104,7 +104,6 @@ public class RefreshWSTest extends IntegratedTest {
         } );
     }
 
-
     @Test
     public void refreshWithExpiredRefreshToken() {
         final String expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdEB0ZXN0LmlvIiwiaXNzIjoiPGNoYW5nZSBtZT4iLCJleHAiOjE2OTY5MjYzODJ9.VZdySTBEThoTOwB73JMNpBgCjaXGvlmes8_13Bs3dXg";
