@@ -151,8 +151,8 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
     private boolean hasRealmMismatchError( String organization, boolean useOrganizationLogin, String realmString ) {
         boolean organizationNotEmpty = !StringUtils.isEmpty( organization );
         boolean realmNotEqualOrganization = !realmString.equals( organization );
-        boolean realmNotEqualSystem = !WsSecurity.SYSTEM.equals( realmString );
-        boolean organizationNotEqualSystem = !WsSecurity.SYSTEM.equals( organization );
+        boolean realmNotEqualSystem = !WsSecurity.SYSTEM_REALMS.contains( realmString );
+        boolean organizationNotEqualSystem = organization != null && !WsSecurity.SYSTEM_REALMS.contains( organization );
 
         return organizationNotEmpty && useOrganizationLogin
             && realmNotEqualOrganization

@@ -11,6 +11,7 @@
     "accessKey" : "SXENLMSXMVUJ",
     "apiKey" : "${API_KEY}",
     "confirmed" : false,
+    "counter" : 0,
     "defaultOrganization" : "r1",
     "defaultAccounts" : {
       "org1" : "acc1"

@@ -119,11 +119,7 @@ public class JwtUserAuthenticator implements Authenticator {
     }
 
     private void incUserCounter( User user ) {
-        userStorage.update( user.getEmail(), u -> {
-            u.user.counter.incrementAndGet();
-
-            return u;
-        } );
+        userStorage.update( user.getEmail(), UserData::incCounter );
     }
 
     private Authentication generateTokenWithOrgId( User user, String activeOrgId ) {

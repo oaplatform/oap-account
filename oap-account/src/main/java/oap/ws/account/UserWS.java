@@ -24,6 +24,7 @@ import static oap.ws.WsParam.From.SESSION;
 import static oap.ws.account.OrganizationWS.ORGANIZATION_ID;
 import static oap.ws.account.Permissions.MANAGE_SELF;
 import static oap.ws.account.Permissions.USER_READ;
+import static oap.ws.sso.WsSecurity.USER;
 
 @Slf4j
 public class UserWS extends AbstractWS {
@@ -56,6 +57,7 @@ public class UserWS extends AbstractWS {
 
     @WsMethod( method = GET, path = "/current", description = "Returns a current logged user" )
     @WsValidate( { "validateUserLoggedIn" } )
+    @WsSecurity( realm = USER, permissions = {} )
     public Optional<UserData.SecureView> current( @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
         return loggedUser.map( u -> u.secureView );
     }

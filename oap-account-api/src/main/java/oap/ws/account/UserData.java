@@ -97,9 +97,10 @@ public class UserData implements oap.ws.sso.User, Serializable {
         return Optional.ofNullable( user.defaultAccounts.get( organizationId ) );
     }
 
+    @JsonIgnore
     @Override
     public long getCounter() {
-        return user.counter.get();
+        return user.counter;
     }
 
     @JsonIgnore
@@ -207,7 +208,7 @@ public class UserData implements oap.ws.sso.User, Serializable {
     }
 
     public UserData incCounter() {
-        user.counter.incrementAndGet();
+        user.counter += 1;
 
         return this;
     }
