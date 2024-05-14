@@ -56,9 +56,9 @@
     </distributionManagement>
 
     <properties>
-        <oap.project.version>22.2.0</oap.project.version>
+        <oap.project.version>22.3.0</oap.project.version>
 
-        <oap.deps.oap.version>22.2.0</oap.deps.oap.version>
+        <oap.deps.oap.version>22.3.0.OAP-129-SSO-ref-token-validation.195</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.2.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.3.0</oap.deps.google.api-client>

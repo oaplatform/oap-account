@@ -530,12 +530,12 @@ public class OrganizationWSTest extends Fixtures {
         UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), Map.of( orgId, USER ) );
         user.addAccount( orgId, "acc1" );
         user = accountFixture.addUser( user );
-        assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc1", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
         user.addAccount( orgId, "acc2" );
-        assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc1", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
         accountFixture.assertLogin( "user@usr.com", "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/default-account/acc2" ) ).hasCode( OK );
-        assertEquals( "acc2", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc2", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
     }
 
     @Test
@@ -549,13 +549,13 @@ public class OrganizationWSTest extends Fixtures {
         UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), Map.of( orgId, USER ) );
         user.addAccount( orgId, "acc1" );
         user = accountFixture.addUser( user );
-        assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc1", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
         user.addAccount( orgId, "acc2" );
-        assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc1", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
         accountFixture.assertLogin( "user@usr.com", "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/default-account/acc2" ) ).hasCode( OK );
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/default-account/acc2" ) ).hasCode( BAD_REQUEST );
-        assertEquals( "acc2", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc2", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
     }
 
     @Test
@@ -584,13 +584,13 @@ public class OrganizationWSTest extends Fixtures {
         UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), Map.of( orgId, ORGANIZATION_ADMIN ) );
         user.addAccount( orgId, "acc1" );
         accountFixture.addUser( user );
-        assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc1", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
         user.addAccount( orgId, "acc2" );
-        assertEquals( "acc1", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc1", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
         accountFixture.assertLogin( "user@usr.com", "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/default-account/acc2" ) ).hasCode( OK );
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/default-account/acc3" ) ).hasCode( NOT_FOUND );
-        assertEquals( "acc2", accountFixture.userStorage().getUser( mail ).get().getDefaultAccount( orgId ).get() );
+        assertEquals( "acc2", accountFixture.userStorage().get( mail ).get().getDefaultAccount( orgId ).get() );
     }
 
     @Test
@@ -608,7 +608,7 @@ public class OrganizationWSTest extends Fixtures {
 
         accountFixture.assertSystemAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/add?userOrganizationId=" + org2.organization.id + "&email=" + mail + "&role=ADMIN" ) ).hasCode( OK );
-        assertTrue( accountFixture.userStorage().getUser( mail ).get().getRoles().containsKey( org2.organization.id ) );
+        assertTrue( accountFixture.userStorage().get( mail ).get().getRoles().containsKey( org2.organization.id ) );
     }
 
     @Test
@@ -634,7 +634,7 @@ public class OrganizationWSTest extends Fixtures {
         accountFixture.assertLogin( adminMail, "pass123" );
 
         assertGet( accountFixture.httpUrl( "/organizations/" + org2.organization.id + "/add?userOrganizationId=" + org2.organization.id + "&email=" + userMail + "&role=ADMIN" ) ).hasCode( OK );
-        assertTrue( accountFixture.userStorage().getUser( userMail ).get().getRoles().containsKey( org2.organization.id ) );
+        assertTrue( accountFixture.userStorage().get( userMail ).get().getRoles().containsKey( org2.organization.id ) );
     }
 
     @Test
@@ -678,7 +678,7 @@ public class OrganizationWSTest extends Fixtures {
 
         accountFixture.assertSystemAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/remove?userOrganizationId=" + org2.organization.id + "&email=" + mail ) ).hasCode( OK );
-        var userData = ( UserData ) accountFixture.userStorage().getUser( mail ).get();
+        var userData = ( UserData ) accountFixture.userStorage().get( mail ).get();
         assertFalse( userData.getRoles().containsKey( org2.organization.id ) );
         assertFalse( userData.accounts.containsKey( org2.organization.id ) );
     }
@@ -701,7 +701,7 @@ public class OrganizationWSTest extends Fixtures {
         accountFixture.assertSystemAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + orgId + "/users/" + mail + "/accounts/remove?accountId=" + "acc1" ), Http.ContentType.APPLICATION_JSON )
             .hasCode( OK );
-        var userData = ( UserData ) accountFixture.userStorage().getUser( mail ).get();
+        var userData = ( UserData ) accountFixture.userStorage().get( mail ).get();
         assertFalse( userData.accounts.get( orgId ).contains( "acc1" ) );
         assertNull( userData.user.defaultAccounts.get( orgId ) );
     }

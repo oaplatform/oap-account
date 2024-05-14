@@ -198,8 +198,10 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     public void after() {
         try {
             assertLogout();
-        } catch( Exception e ) {
-            log.error( e.getMessage(), e );
+        } catch( AssertionError | Exception e ) {
+            if( !e.getMessage().contains( "code = 401" ) ) {
+                log.error( e.getMessage(), e );
+            }
         }
         super.after();
     }

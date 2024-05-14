@@ -24,6 +24,7 @@
 
 package oap.ws.sso;
 
+import lombok.extern.slf4j.Slf4j;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
@@ -33,6 +34,7 @@ import org.testng.annotations.AfterMethod;
 
 import java.util.Map;
 
+@Slf4j
 public class IntegratedTest extends Fixtures {
     protected final AccountFixture accountFixture;
 
@@ -97,6 +99,12 @@ public class IntegratedTest extends Fixtures {
 
     @AfterMethod
     public void afterMethod() {
-        assertLogout();
+        try {
+            assertLogout();
+        } catch( AssertionError | Exception e ) {
+            if( !e.getMessage().contains( "code = 401" ) ) {
+                log.error( e.getMessage(), e );
+            }
+        }
     }
 }

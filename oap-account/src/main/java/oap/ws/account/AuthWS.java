@@ -37,6 +37,7 @@ import oap.ws.sso.Credentials;
 import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.TokenCredentials;
 import oap.ws.sso.User;
+import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
 
@@ -97,7 +98,7 @@ public class AuthWS extends AbstractSecureWS {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         var result = authenticator.authenticate( email, password, tfaCode );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
-            sessionManager.cookieDomain, sessionManager.cookieExpiration, sessionManager.cookieSecure );
+            sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( TFA_REQUIRED == result.getFailureValue() )
             return notAuthenticatedResponse( BAD_REQUEST, "TFA code is required", sessionManager.cookieDomain );
         else if( WRONG_TFA_CODE == result.getFailureValue() ) {
@@ -115,7 +116,7 @@ public class AuthWS extends AbstractSecureWS {
         if( tokenInfo.isPresent() ) {
             var result = authenticator.authenticate( tokenInfo.get().email, credentials.tfaCode );
             if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
-                sessionManager.cookieDomain, sessionManager.cookieExpiration, sessionManager.cookieSecure );
+                sessionManager.cookieDomain, sessionManager.cookieSecure );
             else if( TFA_REQUIRED == result.getFailureValue() )
                 return notAuthenticatedResponse( BAD_REQUEST, "TFA code is required", sessionManager.cookieDomain );
             else if( WRONG_TFA_CODE == result.getFailureValue() ) {
@@ -135,7 +136,7 @@ public class AuthWS extends AbstractSecureWS {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         var result = authenticator.authenticateWithActiveOrgId( Authorization, organizationId );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
-            sessionManager.cookieDomain, sessionManager.cookieExpiration, sessionManager.cookieSecure );
+            sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( WRONG_ORGANIZATION == result.getFailureValue() )
             return notAuthenticatedResponse( FORBIDDEN, "User doesn't belong to organization", sessionManager.cookieDomain );
         else if( TOKEN_NOT_VALID == result.getFailureValue() ) {
@@ -145,6 +146,7 @@ public class AuthWS extends AbstractSecureWS {
     }
 
     @WsMethod( method = GET, path = "/logout" )
+    @WsSecurity( realm = WsSecurity.USER, permissions = {} )
     public Response logout( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                             Session session ) {
         loggedUser.ifPresent( user -> {
@@ -164,6 +166,7 @@ public class AuthWS extends AbstractSecureWS {
 
     @WsMethod( method = GET, path = "/whoami" )
     @WsValidate( "validateUserLoggedIn" )
+    @WsSecurity( realm = WsSecurity.USER, permissions = {} )
     public Optional<oap.ws.sso.User.View> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
         return loggedUser.map( oap.ws.sso.User::getView );
     }

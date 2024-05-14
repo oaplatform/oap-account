@@ -60,7 +60,7 @@ public class RefreshWS {
                                   @WsParam( from = QUERY ) Optional<String> organizationId ) {
         Result<Authentication, AuthenticationFailure> result = authenticator.refreshToken( refreshToken, organizationId );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
-            sessionManager.cookieDomain, sessionManager.cookieExpiration, sessionManager.cookieSecure );
+            sessionManager.cookieDomain, sessionManager.cookieSecure );
         else
             return notAuthenticatedResponse( UNAUTHORIZED, "Token is invalid", sessionManager.cookieDomain );
     }

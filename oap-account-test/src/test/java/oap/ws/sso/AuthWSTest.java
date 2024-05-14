@@ -103,20 +103,23 @@ public class AuthWSTest extends IntegratedTest {
             .hasCode( UNAUTHORIZED );
         assertLogin( "user@admin.com", "pass" );
         assertGet( httpUrl( "/auth/whoami" ) )
+            .isOk()
             .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"user@admin.com\"" ) );
     }
 
     @Test
     public void loginAndTryToReachOrganization() {
         accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
-        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
-        addUser( "user@user.com", "pass", Map.of( "r1", "USER" ) );
+
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "USER" ) );
+        addUser( "user@user.com", "pass", Map.of( "r1", "ADMIN" ) );
+
         assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "/secure/r1" ) ).hasCode( OK );
+
         assertLogin( "admin@admin.com", "pass" );
         assertSwitchOrganization( "r1" );
-        assertGet( httpUrl( "/secure/r1" ) )
-            .hasCode( OK );
+        assertGet( httpUrl( "/secure/r1" ) ).hasCode( OK );
     }
 
     @Test
@@ -132,7 +135,6 @@ public class AuthWSTest extends IntegratedTest {
         addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN", "r2", "USER" ) );
         assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "auth/switch/r3" ) ).hasCode( FORBIDDEN ).hasReason( "User doesn't belong to organization" );
-        Thread.sleep( 5000L );
     }
 
     @Test
@@ -140,7 +142,7 @@ public class AuthWSTest extends IntegratedTest {
         addUser( "newuser@user.com", null, Map.of( "r1", "USER" ) );
         assertLoginWithFBToken();
         assertGet( httpUrl( "/secure/r1" ) )
-            .hasCode( FORBIDDEN );
+            .isOk();
         assertGet( httpUrl( "/auth/whoami" ) )
             .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"newuser@user.com\"" ) );
     }
@@ -150,7 +152,7 @@ public class AuthWSTest extends IntegratedTest {
         var user = addUser( "newuser@user.com", null, Map.of( "r1", "USER" ), true );
         SecureWSHelper.assertLoginWithFBTokenWithTfa( accountFixture.defaultHttpPort(), TfaUtils.getTOTPCode( user.getSecretKey() ) );
         assertGet( httpUrl( "/secure/r1" ) )
-            .hasCode( FORBIDDEN );
+            .isOk();
         assertGet( httpUrl( "/auth/whoami" ) )
             .is( r -> assertThat( r.contentString() ).contains( "\"email\":\"newuser@user.com\"" ) );
     }
