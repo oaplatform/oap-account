@@ -111,8 +111,8 @@ public class AuthWSTest extends IntegratedTest {
     public void loginAndTryToReachOrganization() {
         accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = -1;
 
-        addUser( "admin@admin.com", "pass", Map.of( "r1", "USER" ) );
-        addUser( "user@user.com", "pass", Map.of( "r1", "ADMIN" ) );
+        addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
+        addUser( "user@user.com", "pass", Map.of( "r1", "USER" ) );
 
         assertLogin( "admin@admin.com", "pass" );
         assertGet( httpUrl( "/secure/r1" ) ).hasCode( OK );
@@ -139,7 +139,7 @@ public class AuthWSTest extends IntegratedTest {
 
     @Test
     public void loginWithExternalToken() {
-        addUser( "newuser@user.com", null, Map.of( "r1", "USER" ) );
+        addUser( "newuser@user.com", null, Map.of( "r1", "ADMIN" ) );
         assertLoginWithFBToken();
         assertGet( httpUrl( "/secure/r1" ) )
             .isOk();
@@ -149,7 +149,7 @@ public class AuthWSTest extends IntegratedTest {
 
     @Test
     public void loginWithExternalTokenWithTfa() {
-        var user = addUser( "newuser@user.com", null, Map.of( "r1", "USER" ), true );
+        var user = addUser( "newuser@user.com", null, Map.of( "r1", "ADMIN" ), true );
         SecureWSHelper.assertLoginWithFBTokenWithTfa( accountFixture.defaultHttpPort(), TfaUtils.getTOTPCode( user.getSecretKey() ) );
         assertGet( httpUrl( "/secure/r1" ) )
             .isOk();

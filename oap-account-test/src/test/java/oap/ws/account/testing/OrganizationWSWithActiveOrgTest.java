@@ -304,7 +304,6 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
             .hasCode( UNAUTHORIZED );
     }
 
-
     @Test
     public void passwd() {
         var email = "newuser@gmail.com";
@@ -313,7 +312,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         assertPost( accountFixture.httpUrl( "/organizations/hackit/users/passwd" ), "{\"email\": \"" + email + "\", \"password\": \"newpass\"}" )
             .hasCode( UNAUTHORIZED );
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/passwd" ), "{\"email\": \"" + DEFAULT_ORGANIZATION_ADMIN_EMAIL + "\", \"password\": \"newpass\"}" )
-            .hasCode( Http.StatusCode.FORBIDDEN )
+            .hasCode( UNAUTHORIZED )
             .satisfies( response -> assertValidation( response ).hasErrors( "cannot manage " + DEFAULT_ORGANIZATION_ADMIN_EMAIL ) );
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/passwd" ), "{}" )
             .hasCode( Http.StatusCode.BAD_REQUEST )
