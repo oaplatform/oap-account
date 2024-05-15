@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
 import oap.ws.account.ws.AbstractWS;
-import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
@@ -31,8 +30,7 @@ public class UserWS extends AbstractWS {
 
     protected Accounts accounts;
 
-    public UserWS( SecurityRoles roles, Accounts accounts ) {
-        super( roles );
+    public UserWS( Accounts accounts ) {
         this.accounts = accounts;
     }
 

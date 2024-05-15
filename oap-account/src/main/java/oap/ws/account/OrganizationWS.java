@@ -16,7 +16,6 @@ import oap.ws.WsMethod;
 import oap.ws.WsParam;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.account.ws.AbstractWS;
-import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
@@ -79,8 +78,7 @@ public class OrganizationWS extends AbstractWS {
     protected final String confirmUrlFinish;
     protected final boolean selfRegistrationEnabled;
 
-    public OrganizationWS( Accounts accounts, AccountMailman mailman, SecurityRoles roles, String confirmUrlFinish, boolean selfRegistrationEnabled, OauthService oauthService ) {
-        super( roles );
+    public OrganizationWS( Accounts accounts, AccountMailman mailman, String confirmUrlFinish, boolean selfRegistrationEnabled, OauthService oauthService ) {
         this.accounts = accounts;
         this.mailman = mailman;
         this.confirmUrlFinish = confirmUrlFinish;

@@ -34,7 +34,6 @@ import oap.ws.WsParam;
 import oap.ws.sso.AbstractSecureWS;
 import oap.ws.sso.Authenticator;
 import oap.ws.sso.Credentials;
-import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.TokenCredentials;
 import oap.ws.sso.User;
 import oap.ws.sso.WsSecurity;
@@ -71,15 +70,14 @@ public class AuthWS extends AbstractSecureWS {
 
     private final OauthService oauthService;
 
-    public AuthWS( SecurityRoles roles, Authenticator authenticator, SessionManager sessionManager, OauthService oauthService ) {
-        super( roles );
+    public AuthWS( Authenticator authenticator, SessionManager sessionManager, OauthService oauthService ) {
         this.authenticator = authenticator;
         this.sessionManager = sessionManager;
         this.oauthService = oauthService;
     }
 
-    public AuthWS( SecurityRoles roles, Authenticator authenticator, SessionManager sessionManager ) {
-        this( roles, authenticator, sessionManager, null );
+    public AuthWS( Authenticator authenticator, SessionManager sessionManager ) {
+        this( authenticator, sessionManager, null );
     }
 
     @WsMethod( method = POST, path = "/login" )
