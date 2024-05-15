@@ -1,41 +1,91 @@
 roles:
-  ADMIN: [
-    #           todo remove
-    campaign:manage,
-    campaign:read,
-    campaign:run,
-    campaign:archive,
-    campaign:write,
-    asset:read,
-    asset:archive,
-    asset:write,
-    creative:read,
-    creative:archive,
-    creative:write
-  ]
-  ORGANIZATION_ADMIN: [
-    campaign:manage,
-    campaign:read,
-    campaign:run,
-    campaign:archive,
-    campaign:write,
-    asset:read,
-    asset:archive,
-    asset:write,
-    creative:read,
-    creative:archive,
-    creative:write
-  ]
-  USER: [
-    campaign:manage,
-    campaign:read,
-    campaign:run,
-    campaign:archive,
-    campaign:write,
-    asset:read,
-    asset:archive,
-    asset:write,
-    creative:read,
-    creative:archive,
-    creative:write
-  ]
+  ADMIN:
+    - organization:user_passwd
+    - organization:store_user
+    - organization:read
+    - organization:update
+    - organization:store
+    - organization:list_users
+    - organization:assign_role
+    - organization:user_account
+    - organization:user_apikey
+
+    - account:list
+    - account:read
+    - account:store
+    - account:delete
+
+    - user:read
+    - user:edit_self
+
+    - unban:user
+    - ban:user
+
+    - campaign:manage
+    - campaign:read
+    - campaign:run
+    - campaign:archive
+    - campaign:write
+
+    - asset:read
+    - asset:archive
+    - asset:write
+
+    - creative:read
+    - creative:archive
+    - creative:write
+
+    - publisher:manage
+  ORGANIZATION_ADMIN:
+    - organization:user_passwd
+    - organization:store_user
+    - organization:read
+    - organization:update
+    - organization:list_users
+    - organization:assign_role
+    - organization:user_account
+    - organization:user_apikey
+
+    - account:list
+    - account:read
+    - account:store
+    - account:delete
+
+    - user:read
+    - user:edit_self
+
+    - unban:user
+    - ban:user
+
+    - campaign:manage
+    - campaign:read
+    - campaign:run
+    - campaign:archive
+    - campaign:write
+    - asset:read
+    - asset:archive
+    - asset:write
+    - creative:read
+    - creative:archive
+    - creative:write
+
+    - publisher:manage
+  USER:
+    - user:edit_self
+    - user:passwd
+    - user:apikey
+
+    - account:read
+    - account:list
+
+    - campaign:manage
+    - campaign:read
+    - campaign:run
+    - campaign:archive
+    - campaign:write
+    - asset:read
+    - asset:archive
+    - asset:write
+    - creative:read
+    - creative:archive
+    - creative:write
