@@ -52,7 +52,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
     @Override
     public Result<UserWithCookies, String> getAuthenticatedByAccessToken( Optional<String> accessToken, Optional<String> refreshToken,
                                                                           Optional<String> sessionUserEmail,
-                                                                          String realm, String... wssPermissions ) {
+                                                                          SecurityRoles clientRoles, String realm, String... wssPermissions ) {
         String organization = null;
         String email = null;
 
@@ -133,8 +133,9 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
                 return Result.failure( "user doesn't have access to realm '" + realm + "'" );
             }
 
-            if( !roles.granted( role, wssPermissions ) ) {
-                return Result.failure( "user doesn't have required permissions: '" + List.of( wssPermissions ) + "', user permissions: '" + roles.permissionsOf( role ) + "'" );
+            SecurityRoles allRoles = roles.merge( clientRoles );
+            if( !allRoles.granted( role, wssPermissions ) ) {
+                return Result.failure( "user doesn't have required permissions: '" + List.of( wssPermissions ) + "', user permissions: '" + allRoles.permissionsOf( role ) + "'" );
             }
         }
 
@@ -199,10 +200,5 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
     @Override
     public Optional<? extends User> getAuthenticatedByApiKey( String accessKey, String apiKey ) {
         return userStorage.select().filter( u -> u.authenticate( accessKey, apiKey ) ).findAny();
-    }
-
-    @Override
-    public boolean granted( String role, String... permissions ) {
-        return roles.granted( role, permissions );
     }
 }

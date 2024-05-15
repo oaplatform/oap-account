@@ -21,21 +21,6 @@ roles:
     - unban:user
     - ban:user
 
-    - campaign:manage
-    - campaign:read
-    - campaign:run
-    - campaign:archive
-    - campaign:write
-
-    - asset:read
-    - asset:archive
-    - asset:write
-
-    - creative:read
-    - creative:archive
-    - creative:write
-
-    - publisher:manage
   ORGANIZATION_ADMIN:
     - organization:user_passwd
     - organization:store_user
@@ -57,35 +42,13 @@ roles:
     - unban:user
     - ban:user
 
-    - campaign:manage
-    - campaign:read
-    - campaign:run
-    - campaign:archive
-    - campaign:write
-    - asset:read
-    - asset:archive
-    - asset:write
-    - creative:read
-    - creative:archive
-    - creative:write
-
-    - publisher:manage
   USER:
+    - account:read
+    - account:list
+
     - user:edit_self
     - user:passwd
     - user:apikey
 
-    - account:read
-    - account:list
 
-    - campaign:manage
-    - campaign:read
-    - campaign:run
-    - campaign:archive
-    - campaign:write
-    - asset:read
-    - asset:archive
-    - asset:write
-    - creative:read
-    - creative:archive
-    - creative:write
+
