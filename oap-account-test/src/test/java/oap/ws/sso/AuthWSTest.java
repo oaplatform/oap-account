@@ -35,7 +35,6 @@ import oap.ws.account.utils.TfaUtils;
 import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
 import org.apache.http.cookie.Cookie;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -207,7 +206,7 @@ public class AuthWSTest extends IntegratedTest {
     public void testRefreshToken() {
         addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
 
-        DateTimeUtils.setCurrentMillisFixed( DateTimeUtils.currentTimeMillis() );
+        Dates.setTimeFixed( 2023, 5, 15, 21, 26, 0 );
 
         DateTime startTime = new DateTime( UTC );
 
