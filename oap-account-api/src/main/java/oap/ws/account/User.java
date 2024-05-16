@@ -35,6 +35,7 @@ public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = -3371939128187130008L;
     public static RandomGenerator random = new SecureRandom();
+    public long counter = 0;
     @Id
     public String email;
     public String firstName;

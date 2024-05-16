@@ -6,10 +6,9 @@
 
 package oap.ws.account.ws;
 
-import oap.ws.account.UserData;
 import oap.http.Http;
+import oap.ws.account.UserData;
 import oap.ws.sso.AbstractSecureWS;
-import oap.ws.sso.SecurityRoles;
 import oap.ws.validate.ValidationErrors;
 
 import static oap.ws.account.Roles.ORGANIZATION_ADMIN;
@@ -19,10 +18,6 @@ import static oap.ws.validate.ValidationErrors.error;
 
 public abstract class AbstractWS extends AbstractSecureWS {
     protected boolean securityDisabled = false;
-
-    public AbstractWS( SecurityRoles roles ) {
-        super( roles );
-    }
 
     protected ValidationErrors validateOrganizationAccess( UserData loggedUser, String organizationId ) {
         return canAccessOrganization( loggedUser, organizationId )

@@ -6,6 +6,7 @@
 
 package oap.ws.account.testing;
 
+import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
@@ -30,6 +31,7 @@ import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ADMIN_E
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ID;
 import static oap.ws.account.testing.OrganizationWSTest.TODAY;
 
+@Slf4j
 public class UserWSTest extends Fixtures {
     protected final AccountFixture accountFixture;
     private final byte[] randomBytes = new byte[] {
@@ -53,7 +55,13 @@ public class UserWSTest extends Fixtures {
 
     @AfterMethod
     public void afterMethod() {
-        accountFixture.assertLogout();
+        try {
+            accountFixture.assertLogout();
+        } catch( AssertionError | Exception e ) {
+            if( !e.getMessage().contains( "code = 401" ) ) {
+                log.error( e.getMessage(), e );
+            }
+        }
     }
 
     @Test

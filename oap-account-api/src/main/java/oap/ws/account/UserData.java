@@ -48,6 +48,7 @@ public class UserData implements oap.ws.sso.User, Serializable {
     public User user;
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd" )
     public DateTime lastLogin;
+    public DateTime lastAccess;
     public boolean banned = false;
 
     public UserData( User user, Map<String, String> roles ) {
@@ -94,6 +95,12 @@ public class UserData implements oap.ws.sso.User, Serializable {
     @JsonIgnore
     public Optional<String> getDefaultAccount( String organizationId ) {
         return Optional.ofNullable( user.defaultAccounts.get( organizationId ) );
+    }
+
+    @JsonIgnore
+    @Override
+    public long getCounter() {
+        return user.counter;
     }
 
     @JsonIgnore
@@ -197,6 +204,12 @@ public class UserData implements oap.ws.sso.User, Serializable {
         if( defaultAccount.isPresent() && accountId.equals( defaultAccount.get() ) ) {
             this.user.defaultAccounts.remove( organizationId );
         }
+        return this;
+    }
+
+    public UserData incCounter() {
+        user.counter += 1;
+
         return this;
     }
 

@@ -16,7 +16,6 @@ import oap.ws.WsMethod;
 import oap.ws.WsParam;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.account.ws.AbstractWS;
-import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
@@ -35,6 +34,7 @@ import java.util.Optional;
 import static io.undertow.util.StatusCodes.BAD_REQUEST;
 import static io.undertow.util.StatusCodes.NOT_FOUND;
 import static oap.http.Http.StatusCode.FORBIDDEN;
+import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.server.nio.HttpServerExchange.HttpMethod.GET;
 import static oap.http.server.nio.HttpServerExchange.HttpMethod.POST;
 import static oap.ws.WsParam.From.BODY;
@@ -63,6 +63,7 @@ import static oap.ws.account.Roles.ADMIN;
 import static oap.ws.account.Roles.ORGANIZATION_ADMIN;
 import static oap.ws.account.utils.TfaUtils.getGoogleAuthenticatorCode;
 import static oap.ws.sso.WsSecurity.SYSTEM;
+import static oap.ws.sso.WsSecurity.USER;
 import static oap.ws.validate.ValidationErrors.empty;
 import static oap.ws.validate.ValidationErrors.error;
 
@@ -77,8 +78,7 @@ public class OrganizationWS extends AbstractWS {
     protected final String confirmUrlFinish;
     protected final boolean selfRegistrationEnabled;
 
-    public OrganizationWS( Accounts accounts, AccountMailman mailman, SecurityRoles roles, String confirmUrlFinish, boolean selfRegistrationEnabled, OauthService oauthService ) {
-        super( roles );
+    public OrganizationWS( Accounts accounts, AccountMailman mailman, String confirmUrlFinish, boolean selfRegistrationEnabled, OauthService oauthService ) {
         this.accounts = accounts;
         this.mailman = mailman;
         this.confirmUrlFinish = confirmUrlFinish;
@@ -115,6 +115,7 @@ public class OrganizationWS extends AbstractWS {
 
     @WsMethod( method = GET, path = "/" )
     @WsValidate( { "validateUserLoggedIn" } )
+    @WsSecurity( realm = USER, permissions = {} )
     public List<OrganizationData.View> list( @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
         return Stream.of( accounts.getOrganizations() )
             .filter( o -> canAccessOrganization( loggedUser.get(), o.organization.id ) )
@@ -294,6 +295,7 @@ public class OrganizationWS extends AbstractWS {
 
     @WsMethod( method = GET, path = "/users/tfa/{email}", description = "Generate authorization link for Google Authenticator" )
     @WsValidate( { "validateUserLoggedIn" } )
+    @WsSecurity( realm = USER, permissions = {} )
     public Response generateTfaCode( @WsParam( from = PATH ) String email,
                                      @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
         Optional<UserData> user = accounts.getUser( email );
@@ -375,7 +377,7 @@ public class OrganizationWS extends AbstractWS {
             || isSystem( loggedUser )
             || isOrganizationAdmin( loggedUser, organizationId )
             ? empty()
-            : error( FORBIDDEN, "cannot manage " + passwd.email );
+            : error( UNAUTHORIZED, "cannot manage " + passwd.email );
     }
 
     protected ValidationErrors validateUsersOrganization( String organizationId, UserData loggedUser ) {

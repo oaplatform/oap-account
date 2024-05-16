@@ -99,11 +99,10 @@ public class RefreshWSTest extends IntegratedTest {
             Map<String, String> response = Binder.json.unmarshal( Map.class, resp.contentString() );
             assertTrue( response.containsKey( "accessToken" ) );
             assertTrue( response.containsKey( "refreshToken" ) );
-            final String organizationId = tokenExtractor().getOrganizationId( response.get( "accessToken" ) );
+            final String organizationId = tokenExtractor().decodeJWT( response.get( "accessToken" ) ).getOrganizationId();
             assertEquals( "r2", organizationId );
         } );
     }
-
 
     @Test
     public void refreshWithExpiredRefreshToken() {
