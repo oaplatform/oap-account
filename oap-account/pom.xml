@@ -86,6 +86,11 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
+            <artifactId>oap-ws-admin-ws</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>oap</groupId>
             <artifactId>oap-mail</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
