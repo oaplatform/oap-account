@@ -1,5 +1,6 @@
 package oap.ws.account;
 
+import lombok.extern.slf4j.Slf4j;
 import oap.util.Result;
 import oap.ws.SessionManager;
 import oap.ws.sso.Authentication;
@@ -24,6 +25,7 @@ import static oap.ws.sso.AuthenticationFailure.UNAUTHENTICATED;
 import static oap.ws.sso.AuthenticationFailure.WRONG_TFA_CODE;
 import static org.joda.time.DateTimeZone.UTC;
 
+@Slf4j
 public class DefaultUserProvider implements oap.ws.sso.UserProvider {
     private final UserStorage userStorage;
     private final JWTExtractor jwtExtractor;
@@ -67,13 +69,19 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
                 token = JWTExtractor.extractBearerToken( accessToken.get() );
                 tokenStatus = jwtExtractor.verifyToken( token );
             } else {
+                log.trace( "accessToken = null" );
                 tokenStatus = JWTExtractor.TokenStatus.EXPIRED;
             }
+
+            log.trace( "access token status {}", tokenStatus );
 
             if( tokenStatus == JWTExtractor.TokenStatus.EXPIRED ) {
                 if( refreshToken.isPresent() ) {
                     String rt = JWTExtractor.extractBearerToken( refreshToken.get() );
                     JWTExtractor.TokenStatus refreshTokenStatus = jwtExtractor.verifyToken( rt );
+
+                    log.trace( "refresh token status {}", tokenStatus );
+
                     if( refreshTokenStatus == JWTExtractor.TokenStatus.VALID ) {
                         JwtToken jwtRefreshToken = jwtExtractor.decodeJWT( rt );
                         UserData currentUser = userStorage.get( jwtRefreshToken.getUserEmail() ).orElse( null );
@@ -99,6 +107,8 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
             jwtToken = jwtExtractor.decodeJWT( token );
             email = jwtToken.getUserEmail();
             organization = jwtToken.getOrganizationId();
+        } else {
+            log.trace( "accessToken = null && refreshToken = null" );
         }
 
         if( hasRealmMismatchError( organization, useOrganizationLogin, realm ) ) {
@@ -150,6 +160,8 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
 
 
     private boolean hasRealmMismatchError( String organization, boolean useOrganizationLogin, String realmString ) {
+        log.trace( "hasRealmMismatchError organization {} useOrganizationLogin {} realmString {}", organization, useOrganizationLogin, realmString );
+
         boolean organizationNotEmpty = !StringUtils.isEmpty( organization );
         boolean realmNotEqualOrganization = !realmString.equals( organization );
         boolean realmNotEqualSystem = !WsSecurity.SYSTEM_REALMS.contains( realmString );
