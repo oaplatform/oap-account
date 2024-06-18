@@ -220,7 +220,7 @@ public class OrganizationWSTest extends Fixtures {
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=USER" ),
             contentOfTestResource( getClass(), "user.json", Map.of( "EMAIL", userEmail ) ), Http.ContentType.APPLICATION_JSON )
             .hasCode( OK );
-        assertMessages( accountFixture.mailQueue().messages() )
+        assertMessages( accountFixture.getTransportMock().messages )
             .sentTo( userEmail, message -> assertMessage( message )
                 .hasSubject( "You've been invited" ) );
         accountFixture.assertLogout();
@@ -245,7 +245,7 @@ public class OrganizationWSTest extends Fixtures {
             contentOfTestResource( getClass(), "register-user.json", Map.of() ), Http.ContentType.APPLICATION_JSON )
             .respondedJson( getClass(), "registered-user.json" );
         UserData user = accountFixture.userStorage().get( userEmail ).orElseThrow();
-        assertMessages( accountFixture.mailQueue().messages() )
+        assertMessages( accountFixture.getTransportMock().messages )
             .sentTo( userEmail, message -> assertMessage( message )
                 .hasSubject( "Registration successful" ) );
         assertThat( accountFixture.accounts().getOrganization( "XNSS" ) ).isNotEmpty();

@@ -29,6 +29,7 @@ import oap.application.testng.AbstractKernelFixture;
 import oap.http.test.HttpAsserts;
 import oap.json.Binder;
 import oap.mail.MailQueue;
+import oap.mail.TransportMock;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.TestDirectoryFixture;
 import oap.ws.account.AccountMailman;
@@ -229,5 +230,9 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
         withConfResource( getClass(), "/application-account.fixture-mail-smtp.conf" );
 
         return this;
+    }
+
+    public TransportMock getTransportMock() {
+        return service( "oap-account-test", TransportMock.class );
     }
 }
