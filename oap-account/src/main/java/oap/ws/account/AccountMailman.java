@@ -47,7 +47,7 @@ public class AccountMailman {
         message.from = MailAddress.of( fromPersonal, fromEmail );
         message.to.add( MailAddress.of( user.user.firstName + " " + user.user.lastName, user.user.email ) );
         log.trace( "sending mail {}", message );
-        mailman.send( message, false );
+        mailman.send( message );
     }
 
     public String confirmUrl( UserData user ) {
