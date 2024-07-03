@@ -30,6 +30,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import oap.http.Client;
@@ -64,14 +65,19 @@ public class GoogleProvider implements OauthProviderService {
                 return Optional.empty();
             } catch( Exception e ) {
                 log.error( "Failed to extract user from google token", e );
-                throw new RuntimeException( e );
+                throw Throwables.propagate( e );
             }
         } else {
-            Client.Response response = Client.DEFAULT.get( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
-            Preconditions.checkArgument( response.code == Http.StatusCode.OK );
-            Optional<TokenInfoResponse> info = response.unmarshal( TokenInfoResponse.class );
+            try {
+                Client.Response response = Client.DEFAULT.get( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
+                Preconditions.checkArgument( response.code == Http.StatusCode.OK );
+                Optional<TokenInfoResponse> info = response.unmarshal( TokenInfoResponse.class );
 
-            return info.map( i -> new TokenInfo( i.email, i.given_name, i.family_name ) );
+                return info.map( i -> new TokenInfo( i.email, i.given_name, i.family_name ) );
+            } catch( Exception e ) {
+                log.error( "Failed to extract user from google token", e );
+                throw Throwables.propagate( e );
+            }
         }
     }
 
