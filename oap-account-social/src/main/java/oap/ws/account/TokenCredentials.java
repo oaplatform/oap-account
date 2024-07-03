@@ -24,9 +24,9 @@
 
 package oap.ws.sso;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import oap.ws.account.OauthProvider;
-import org.codehaus.jackson.annotate.JsonCreator;
 
 import java.io.Serializable;
 import java.util.Optional;

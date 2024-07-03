@@ -29,36 +29,59 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.common.base.Preconditions;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import oap.http.Client;
+import oap.http.Http;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.Optional;
 
 @Slf4j
 public class GoogleProvider implements OauthProviderService {
-    private final String clientId;
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     private static final GsonFactory GSON_FACTORY = new GsonFactory();
+    private final String clientId;
 
     public GoogleProvider( String clientId ) {
         this.clientId = clientId;
     }
 
     public Optional<TokenInfo> getTokenInfo( String accessToken ) {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder( HTTP_TRANSPORT, GSON_FACTORY )
-            .setAudience( Collections.singletonList( clientId ) )
-            .build();
+        if( StringUtils.split( "." ).length > 2 ) {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder( HTTP_TRANSPORT, GSON_FACTORY )
+                .setAudience( Collections.singletonList( clientId ) )
+                .build();
 
-        try {
-            GoogleIdToken idToken = verifier.verify( accessToken );
-            if( idToken != null ) {
-                GoogleIdToken.Payload payload = idToken.getPayload();
-                return Optional.of( new TokenInfo( payload.getEmail(), ( String ) payload.get( "given_name" ), ( String ) payload.get( "family_name" ) ) );
+            try {
+                GoogleIdToken idToken = verifier.verify( accessToken );
+                if( idToken != null ) {
+                    GoogleIdToken.Payload payload = idToken.getPayload();
+                    return Optional.of( new TokenInfo( payload.getEmail(), ( String ) payload.get( "given_name" ), ( String ) payload.get( "family_name" ) ) );
+                }
+                return Optional.empty();
+            } catch( Exception e ) {
+                log.error( "Failed to extract user from google token", e );
+                throw new RuntimeException( e );
             }
-            return Optional.empty();
-        } catch( Exception e ) {
-            log.error( "Failed to extract user from google token", e );
-            throw new RuntimeException( e );
+        } else {
+            Client.Response response = Client.DEFAULT.get( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
+            Preconditions.checkArgument( response.code == Http.StatusCode.OK );
+            Optional<TokenInfoResponse> info = response.unmarshal( TokenInfoResponse.class );
+
+            return info.map( i -> new TokenInfo( i.email, i.given_name, i.family_name ) );
         }
+    }
+
+    @ToString
+    public static class TokenInfoResponse {
+        public String email;
+        public String scope;
+        @SuppressWarnings( "checkstyle:MemberName" )
+        public String given_name;
+        @SuppressWarnings( "checkstyle:MemberName" )
+        public String family_name;
     }
 }
