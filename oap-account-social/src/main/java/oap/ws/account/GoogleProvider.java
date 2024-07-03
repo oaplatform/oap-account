@@ -50,6 +50,10 @@ public class GoogleProvider implements OauthProviderService {
         this.clientId = clientId;
     }
 
+    /**
+     * @param accessToken - jwt or access token
+     * @return
+     */
     public Optional<TokenInfo> getTokenInfo( String accessToken ) {
         if( StringUtils.split( "." ).length > 2 ) {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder( HTTP_TRANSPORT, GSON_FACTORY )
