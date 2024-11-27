@@ -27,6 +27,7 @@ import static oap.io.content.ContentReader.ofString;
 import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.account.Roles.USER;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ADMIN_EMAIL;
+import static oap.ws.account.testing.AccountFixture.DEFAULT_PASSWORD;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ID;
 import static oap.ws.account.testing.OrganizationWSTest.TODAY;
@@ -122,4 +123,18 @@ public class UserWSTest extends Fixtures {
             .respondedJson( HTTP_NOT_FOUND, "validation failed", "{\"errors\":[\"not found other@other.com\"]}" );
         accountFixture.assertLogout();
     }
+
+    @Test
+    public void loginEmailCaseInsencitive() {
+        accountFixture.assertLogin( DEFAULT_ADMIN_EMAIL.toUpperCase(), DEFAULT_PASSWORD );
+        UserData organizationAdmin = accountFixture.userStorage().get( DEFAULT_ORGANIZATION_ADMIN_EMAIL ).orElseThrow();
+        assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + organizationAdmin.user.email.toUpperCase() ) )
+            .respondedJson( contentOfTestResource( getClass(), "org-admin-never-logged-in.json", Map.of(
+                "ACCESS_KEY", organizationAdmin.getAccessKey(),
+                "API_KEY", organizationAdmin.user.apiKey,
+                "SECRET_KEY", organizationAdmin.user.secretKey
+            ) ) );
+        accountFixture.assertLogout();
+    }
+
 }
