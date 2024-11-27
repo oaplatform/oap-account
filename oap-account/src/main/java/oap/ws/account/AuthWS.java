@@ -94,7 +94,7 @@ public class AuthWS extends AbstractSecureWS {
                            @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
-        var result = authenticator.authenticate( email, password, tfaCode );
+        var result = authenticator.authenticate( AccountsService.prepareEmail( email ), password, tfaCode );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( TFA_REQUIRED == result.getFailureValue() )
@@ -112,7 +112,7 @@ public class AuthWS extends AbstractSecureWS {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         final Optional<TokenInfo> tokenInfo = oauthService.getOauthProvider( credentials.source ).getTokenInfo( credentials.accessToken );
         if( tokenInfo.isPresent() ) {
-            var result = authenticator.authenticate( tokenInfo.get().email, credentials.tfaCode );
+            var result = authenticator.authenticate( AccountsService.prepareEmail( tokenInfo.get().email ), credentials.tfaCode );
             if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
                 sessionManager.cookieDomain, sessionManager.cookieSecure );
             else if( TFA_REQUIRED == result.getFailureValue() )
