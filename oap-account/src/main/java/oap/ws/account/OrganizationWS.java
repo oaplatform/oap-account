@@ -372,7 +372,7 @@ public class OrganizationWS extends AbstractWS {
 
     @WsMethod( method = POST, path = "/{organizationId}/assign" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
-    @WsValidate("validateRole")
+    @WsValidate( "validateRole" )
     public Optional<UserData.View> assignRole( @WsParam( from = PATH ) String organizationId,
                                                @WsParam( from = QUERY ) String email,
                                                @WsParam( from = QUERY ) String role,
@@ -383,14 +383,14 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = GET, path = "/{organizationId}/roles", description = "List all available roles with permissions" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
     public Map<String, Set<String>> listAllRolesWithPermissions( @WsParam( from = PATH ) String organizationId,
-                                                  @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+                                                                 @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
         return roles.roles().stream().collect( Collectors.toMap( Function.identity(), roles::permissionsOf ) );
     }
 
     @WsMethod( path = "/{organizationId}/user/roles", method = GET, description = "List user roles with permissions" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE, MANAGE_SELF } )
     public Map<String, Set<String>> listUserRolesWithPermissions( @WsParam( from = PATH ) String organizationId,
-                                                   @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+                                                                  @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
         final Collection<String> userRoles = loggedUser.getRoles().values();
         return userRoles.stream()
             .collect( Collectors.toMap(
