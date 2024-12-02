@@ -16,6 +16,7 @@ import oap.ws.WsMethod;
 import oap.ws.WsParam;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.account.ws.AbstractWS;
+import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
@@ -24,12 +25,9 @@ import org.apache.http.client.utils.URIBuilder;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static io.undertow.util.StatusCodes.BAD_REQUEST;
 import static io.undertow.util.StatusCodes.NOT_FOUND;
@@ -77,13 +75,15 @@ public class OrganizationWS extends AbstractWS {
     protected final AccountMailman mailman;
     protected final String confirmUrlFinish;
     protected final boolean selfRegistrationEnabled;
+    protected final SecurityRoles roles;
 
-    public OrganizationWS( Accounts accounts, AccountMailman mailman, String confirmUrlFinish, boolean selfRegistrationEnabled, OauthService oauthService ) {
+    public OrganizationWS( Accounts accounts, AccountMailman mailman, String confirmUrlFinish, boolean selfRegistrationEnabled, OauthService oauthService, SecurityRoles roles ) {
         this.accounts = accounts;
         this.mailman = mailman;
         this.confirmUrlFinish = confirmUrlFinish;
         this.selfRegistrationEnabled = selfRegistrationEnabled;
         this.oauthService = oauthService;
+        this.roles = roles;
     }
 
     @WsMethod( method = POST, path = "/{organizationId}" )
@@ -365,11 +365,32 @@ public class OrganizationWS extends AbstractWS {
 
     @WsMethod( method = POST, path = "/{organizationId}/assign" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
+    @WsValidate("validateRole")
     public Optional<UserData.View> assignRole( @WsParam( from = PATH ) String organizationId,
                                                @WsParam( from = QUERY ) String email,
                                                @WsParam( from = QUERY ) String role,
                                                @WsParam( from = SESSION ) UserData loggedUser ) {
         return accounts.assignRole( email, organizationId, role ).map( u -> u.view );
+    }
+
+    @WsMethod( method = GET, path = "/{organizationId}/roles", description = "List all available roles with permissions" )
+    @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
+    public Map<String, Set<String>> listAllRolesWithPermissions( @WsParam( from = PATH ) String organizationId,
+                                                  @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+        return roles.roles().stream().collect( Collectors.toMap( Function.identity(), roles::permissionsOf ) );
+    }
+
+    @WsMethod( path = "/{organizationId}/user/roles", method = GET, description = "List user roles with permissions" )
+    @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE, MANAGE_SELF } )
+    public Map<String, Set<String>> listUserRolesWithPermissions( @WsParam( from = PATH ) String organizationId,
+                                                   @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+        final Collection<String> userRoles = loggedUser.getRoles().values();
+        return userRoles.stream()
+            .collect( Collectors.toMap(
+                Function.identity(),
+                roles::permissionsOf,
+                ( a, b ) -> a
+            ) );
     }
 
     protected ValidationErrors validateUserAccess( String organizationId, @Nonnull Passwd passwd, @Nonnull UserData loggedUser ) {
@@ -486,6 +507,14 @@ public class OrganizationWS extends AbstractWS {
             return error( BAD_REQUEST, String.format( "Account (%s) is already marked as default in organization (%s)", accountId, organizationId ) );
         }
         return empty();
+    }
+
+    protected ValidationErrors validateRole( String role ) {
+        if( roles.roles().contains( role ) ) {
+            return empty();
+        } else {
+            return error( BAD_REQUEST, String.format( "Role (%s) does not exist", role ) );
+        }
     }
 
 
