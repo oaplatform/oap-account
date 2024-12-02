@@ -52,8 +52,8 @@ public abstract class AbstractWS extends AbstractSecureWS {
             || loggedUser.canAccessAccount( organizationId, accountId );
     }
 
-    protected boolean isOrganizationAdmin(UserData loggedUser, String organizationId) {
-        return ORGANIZATION_ADMIN.equals(loggedUser.roles.get(organizationId));
+    protected boolean isOrganizationAdmin( UserData loggedUser, String organizationId ) {
+        return ORGANIZATION_ADMIN.equals( loggedUser.roles.get( organizationId ) );
     }
 
 }
