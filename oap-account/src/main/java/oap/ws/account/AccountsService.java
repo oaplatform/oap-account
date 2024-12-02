@@ -113,8 +113,7 @@ public class AccountsService implements Accounts {
     @Override
     public Optional<UserData> assignRole( String email, String organizationId, String role ) {
         log.debug( "assign role: {} to user: {} in organization: {}", role, email, organizationId );
-        userStorage.update( prepareEmail( email ), u -> u.assignRole( organizationId, role ) );
-        return Optional.empty();
+        return userStorage.update( prepareEmail( email ), u -> u.assignRole( organizationId, role ) );
     }
 
     @Override

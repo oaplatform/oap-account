@@ -53,7 +53,7 @@ public abstract class AbstractWS extends AbstractSecureWS {
     }
 
     protected boolean isOrganizationAdmin( UserData loggedUser, String organizationId ) {
-        return loggedUser.roles.get( organizationId ).equals( ORGANIZATION_ADMIN );
+        return ORGANIZATION_ADMIN.equals( loggedUser.roles.get( organizationId ) );
     }
 
 }

@@ -1,0 +1,5 @@
+{
+  "ADMIN" : [ "account:read", "user:edit_self", "organization:user_passwd", "organization:user_account", "organization:read", "unban:user", "account:list", "organization:user_apikey", "organization:store_user", "ALLOWED", "account:store", "organization:assign_role", "user:read", "account:delete", "ban:user", "organization:store", "organization:update", "organization:list_users" ],
+  "ORGANIZATION_ADMIN" : [ "account:read", "user:edit_self", "organization:user_passwd", "organization:user_account", "organization:read", "unban:user", "account:list", "organization:user_apikey", "organization:store_user", "account:store", "organization:assign_role", "user:read", "account:delete", "ban:user", "organization:update", "organization:list_users" ],
+  "USER" : [ "account:read", "user:apikey", "user:edit_self", "user:passwd", "account:list" ]
+}
