@@ -56,16 +56,39 @@
     </distributionManagement>
 
     <properties>
-        <oap.project.version>22.4.2</oap.project.version>
+        <oap.project.version>22.4.3</oap.project.version>
 
-        <oap.deps.oap.version>22.4.23</oap.deps.oap.version>
+        <oap.deps.oap.version>22.6.2</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.12.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.7.0</oap.deps.google.api-client>
         <oap.deps.google.oauth-client>1.36.0</oap.deps.google.oauth-client>
         <oap.deps.auth0.version>2.12.0</oap.deps.auth0.version>
 
-        <oap.deps.software.amazon.awssdk.version>2.27.23</oap.deps.software.amazon.awssdk.version>
+        <oap.deps.maven.properties-maven-plugin>1.2.1</oap.deps.maven.properties-maven-plugin>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>${oap.deps.maven.properties-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <keyPrefix>oap.deps.</keyPrefix>
+                            <urls>
+                                <url>classpath:/META-INF/oap.properties</url>
+                            </urls>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
