@@ -249,9 +249,11 @@ public class OrganizationWSTest extends Fixtures {
             contentOfTestResource( getClass(), "register-user.json", Map.of() ), APPLICATION_JSON )
             .respondedJson( getClass(), "registered-user.json" );
         UserData user = accountFixture.userStorage().get( userEmail ).orElseThrow();
-        assertMessages( accountFixture.getTransportMock().messages )
-            .sentTo( userEmail, message -> assertMessage( message )
-                .hasSubject( "Registration successful" ) );
+        assertEventually( 100, 100, () -> {
+            assertMessages( accountFixture.getTransportMock().messages )
+                .sentTo( userEmail, message -> assertMessage( message )
+                    .hasSubject( "Registration successful" ) );
+        } );
         assertThat( accountFixture.accounts().getOrganization( "XNSS" ) ).isNotEmpty();
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + user.user.email + "\", \"password\": \"pass\"}" )
             .hasCode( Http.StatusCode.UNAUTHORIZED );
