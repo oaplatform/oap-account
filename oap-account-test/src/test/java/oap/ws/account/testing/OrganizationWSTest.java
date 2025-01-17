@@ -34,6 +34,7 @@ import static oap.http.test.HttpAsserts.assertGet;
 import static oap.http.test.HttpAsserts.assertPost;
 import static oap.mail.test.MessageAssertion.assertMessage;
 import static oap.mail.test.MessagesAssertion.assertMessages;
+import static oap.testng.Asserts.assertEventually;
 import static oap.testng.Asserts.assertString;
 import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.account.Roles.ADMIN;
@@ -221,9 +222,11 @@ public class OrganizationWSTest extends Fixtures {
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=USER" ),
             contentOfTestResource( getClass(), "user.json", Map.of( "EMAIL", userEmail ) ), APPLICATION_JSON )
             .hasCode( OK );
-        assertMessages( accountFixture.getTransportMock().messages )
-            .sentTo( userEmail, message -> assertMessage( message )
-                .hasSubject( "You've been invited" ) );
+        assertEventually( 100, 100, () -> {
+            assertMessages( accountFixture.getTransportMock().messages )
+                .sentTo( userEmail, message -> assertMessage( message )
+                    .hasSubject( "You've been invited" ) );
+        } );
         accountFixture.assertLogout();
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + userEmail + "\", \"password\": \"pass\"}" )
             .hasCode( Http.StatusCode.UNAUTHORIZED );
