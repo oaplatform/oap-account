@@ -10,6 +10,9 @@ package oap.ws.account;
 import lombok.extern.slf4j.Slf4j;
 import oap.id.Identifier;
 import oap.storage.MemoryStorage;
+import oap.storage.Metadata;
+
+import java.util.Optional;
 
 import static oap.storage.Storage.Lock.SERIALIZED;
 
@@ -51,14 +54,25 @@ public class OrganizationStorage extends MemoryStorage<String, OrganizationData>
             }
             return d;
         }, () -> {
-            var defaultOrganization = new Organization( defaultOrganizationId, defaultOrganizationName, defaultOrganizationDescription );
+            Organization defaultOrganization = new Organization( defaultOrganizationId, defaultOrganizationName, defaultOrganizationDescription );
             return new OrganizationData( defaultOrganization );
         } );
     }
 
     public void deleteAllPermanently() {
-        for( var organizationData : this ) {
+        for( OrganizationData organizationData : this ) {
             memory.removePermanently( organizationData.organization.id );
         }
+    }
+
+    public Optional<Metadata<OrganizationData>> storeAccount( String organizationId, Account account ) {
+        log.debug( "storeAccount organizationId {} account {}", organizationId, account );
+
+        update( organizationId, o -> {
+            o.addOrUpdateAccount( account );
+            return o;
+        } );
+
+        return getMetadata( organizationId );
     }
 }

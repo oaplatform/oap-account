@@ -27,9 +27,9 @@ import static oap.io.content.ContentReader.ofString;
 import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.account.Roles.USER;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ADMIN_EMAIL;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_PASSWORD;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ID;
+import static oap.ws.account.testing.AccountFixture.DEFAULT_PASSWORD;
 import static oap.ws.account.testing.OrganizationWSTest.TODAY;
 
 @Slf4j
@@ -104,8 +104,8 @@ public class UserWSTest extends Fixtures {
 
     @Test
     public void noSecureData() {
-        UserData user = accountFixture.accounts().createUser( new User( "user@user.com", "Johnny", "Walker",
-            "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) );
+        UserData user = accountFixture.userStorage().createUser( new User( "user@user.com", "Johnny", "Walker",
+            "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ).object;
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )
             .respondedJson( contentOfTestResource( getClass(), "user.json", ofString() ) );
@@ -114,9 +114,9 @@ public class UserWSTest extends Fixtures {
 
     @Test
     public void accessOtherOrgUser() {
-        final OrganizationData organizationData = accountFixture.accounts().storeOrganization( new Organization( "THRRG", "otherOrg" ) );
-        UserData user = accountFixture.accounts().createUser( new User( "other@other.com", "Other", "User",
-            "pass", false ), Map.of( organizationData.organization.id, USER ) );
+        OrganizationData organizationData = accountFixture.accounts().storeOrganization( new Organization( "THRRG", "otherOrg" ) );
+        UserData user = accountFixture.userStorage().createUser( new User( "other@other.com", "Other", "User",
+            "pass", false ), Map.of( organizationData.organization.id, USER ) ).object;
 
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )

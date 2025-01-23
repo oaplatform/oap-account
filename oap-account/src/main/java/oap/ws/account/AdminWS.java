@@ -24,31 +24,76 @@
 
 package oap.ws.account;
 
+import lombok.extern.slf4j.Slf4j;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
+
+import java.util.List;
 
 import static oap.http.server.nio.HttpServerExchange.HttpMethod.DELETE;
 import static oap.ws.WsParam.From.PATH;
 
+@Slf4j
 public class AdminWS {
-    private final Accounts accounts;
+    private final OrganizationStorage organizationStorage;
+    private final UserStorage userStorage;
 
-    public AdminWS( Accounts accounts ) {
-        this.accounts = accounts;
+    public AdminWS( OrganizationStorage organizationStorage, UserStorage userStorage ) {
+        this.organizationStorage = organizationStorage;
+        this.userStorage = userStorage;
     }
 
+    @SuppressWarnings( "checkstyle:UnnecessaryParentheses" )
     @WsMethod( method = DELETE, path = "/organizations/{organizationId}" )
     public void deleteOrganization( @WsParam( from = PATH ) String organizationId ) {
-        accounts.permanentlyDeleteOrganization( organizationId );
+        log.debug( "permanentlyDeleteOrganization {}", organizationId );
+
+        userStorage
+            .select()
+            .filter( ud -> ud.accounts.containsKey( organizationId ) || ud.roles.containsKey( organizationId ) )
+            .forEach( ud -> {
+                if( ( ud.accounts.containsKey( organizationId ) && ud.accounts.size() == 1 )
+                    || ( ud.roles.containsKey( organizationId ) && ud.roles.size() == 1 ) ) {
+                    log.trace( "permanentlyDeleteOrganization#delete user {}", ud.getEmail() );
+                    userStorage.permanentlyDelete( ud.getEmail() );
+                } else {
+                    log.trace( "permanentlyDeleteOrganization#update user {}", ud.getEmail() );
+                    userStorage.update( ud.getEmail(), d -> {
+                        d.accounts.remove( organizationId );
+                        d.roles.remove( organizationId );
+                        return d;
+                    } );
+                }
+            } );
+
+        organizationStorage.permanentlyDelete( organizationId );
     }
 
     @WsMethod( method = DELETE, path = "/all" )
     public void deleteAll() {
-        accounts.permanentlyDeleteAll();
+        List<String> users = userStorage.select()
+            .filter( u -> !userStorage.defaultSystemAdminEmail.equals( u.user.email ) )
+            .map( u -> u.user.email )
+            .toList();
+
+        for( String user : users ) {
+            userStorage.permanentlyDelete( user );
+        }
+
+        List<String> organizations = organizationStorage.select()
+            .filter( o -> !organizationStorage.defaultOrganizationId.equals( o.organization.id ) )
+            .map( o -> o.organization.id )
+            .toList();
+
+        for( String organization : organizations ) {
+            organizationStorage.permanentlyDelete( organization );
+        }
     }
 
     @WsMethod( method = DELETE, path = "/users/{email}" )
     public void deleteUser( @WsParam( from = PATH ) String email ) {
-        accounts.permanentlyDeleteUser( email );
+        log.debug( "permanentlyDeleteUser {}", email );
+
+        userStorage.permanentlyDelete( UserStorage.prepareEmail( email ) );
     }
 }

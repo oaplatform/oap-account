@@ -12,7 +12,9 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 import oap.json.ext.Ext;
 import oap.json.properties.PropertiesDeserializer;
@@ -37,10 +39,6 @@ public class UserData implements oap.ws.sso.User, Serializable {
     @Serial
     private static final long serialVersionUID = -3371939128187130008L;
     private static final String ALL_ACCOUNTS = "*";
-    @JsonIgnore
-    public final View view = new View();
-    @JsonIgnore
-    public final SecureView secureView = new SecureView();
     @JsonIgnore
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Map<String, String> roles = new HashMap<>();
@@ -101,12 +99,6 @@ public class UserData implements oap.ws.sso.User, Serializable {
     @Override
     public long getCounter() {
         return user.counter;
-    }
-
-    @JsonIgnore
-    @Override
-    public View getView() {
-        return view;
     }
 
     public boolean canAccessAccount( String organizationId, String accountId ) {
@@ -229,68 +221,39 @@ public class UserData implements oap.ws.sso.User, Serializable {
         return ( T ) properties.get( property );
     }
 
-    public class View implements oap.ws.sso.User.View {
-        public String getEmail() {
-            return user.email;
-        }
-
-        public String getFirstName() {
-            return user.firstName;
-        }
-
-        public String getLastName() {
-            return user.lastName;
-        }
-
-        public Map<String, List<String>> getAccounts() {
-            return accounts;
-        }
-
-        public Map<String, String> getRoles() {
-            return roles;
-        }
-
-        public boolean isBanned() {
-            return banned;
-        }
-
-        public boolean isConfirmed() {
-            return user.confirmed;
-        }
-
-        public boolean isTfaEnabled() {
-            return user.tfaEnabled;
-        }
-
-        public Map<String, String> getDefaultAccounts() {
-            return user.defaultAccounts;
-        }
-
-        public String getDefaultOrganization() {
-            return user.defaultOrganization;
-        }
-
-        @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd" )
-        public DateTime getLastLogin() {
-            return lastLogin;
-        }
-
-        public Ext getExt() {
-            return user.ext;
-        }
+    @Getter
+    @AllArgsConstructor
+    public static class View {
+        public final String email;
+        public final String firstName;
+        public final String lastName;
+        public final Map<String, List<String>> accounts;
+        public final Map<String, String> roles;
+        public final boolean banned;
+        public final boolean confirmed;
+        public final boolean tfaEnabled;
+        public final Map<String, String> defaultAccounts;
+        public final String defaultOrganization;
+        public final DateTime lastLogin;
+        public final Ext ext;
     }
 
-    public class SecureView extends View {
-        public String getApiKey() {
-            return user.apiKey;
-        }
+    @Getter
+    public static class SecureView extends View {
+        public final String apiKey;
+        public final String accessKey;
+        public final String secretKey;
 
-        public String getAccessKey() {
-            return user.getAccessKey();
-        }
+        public SecureView( String email, String firstName, String lastName, Map<String, List<String>> accounts,
+                           Map<String, String> roles, boolean banned, boolean confirmed, boolean tfaEnabled,
+                           Map<String, String> defaultAccounts, String defaultOrganization, DateTime lastLogin, Ext ext,
+                           String apiKey, String accessKey, String secretKey ) {
 
-        public String getSecretKey() {
-            return user.getSecretKey();
+            super( email, firstName, lastName, accounts, roles, banned, confirmed, tfaEnabled, defaultAccounts, defaultOrganization, lastLogin, ext );
+
+            this.apiKey = apiKey;
+            this.accessKey = accessKey;
+            this.secretKey = secretKey;
         }
     }
 }

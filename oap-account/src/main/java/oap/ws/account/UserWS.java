@@ -28,10 +28,10 @@ import static oap.ws.sso.WsSecurity.USER;
 @Slf4j
 public class UserWS extends AbstractWS {
 
-    protected Accounts accounts;
+    protected UserStorage userStorage;
 
-    public UserWS( Accounts accounts ) {
-        this.accounts = accounts;
+    public UserWS( UserStorage userStorage ) {
+        this.userStorage = userStorage;
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/{email}", description = "Returns user with given email" )
@@ -40,15 +40,15 @@ public class UserWS extends AbstractWS {
     public Optional<UserData.View> get( @WsParam( from = PATH ) String organizationId,
                                         @WsParam( from = PATH ) String email,
                                         @WsParam( from = SESSION ) UserData loggedUser ) {
-        return accounts.getUser( email )
+        return userStorage.getMetadata( email )
             .map( u -> email.equals( loggedUser.user.email ) || isSystem( loggedUser )
-                ? u.secureView
-                : u.view );
+                ? Users.userMetadataToSecureView( u )
+                : Users.userMetadataToView( u ) );
     }
 
     protected ValidationErrors validateSameOrganization( String organizationId, String email ) {
-        return accounts.getUser( email )
-            .filter( user -> user.canAccessOrganization( organizationId ) )
+        return userStorage.getMetadata( email )
+            .filter( user -> user.object.canAccessOrganization( organizationId ) )
             .map( user -> ValidationErrors.empty() )
             .orElseGet( () -> ValidationErrors.error( HttpURLConnection.HTTP_NOT_FOUND, "not found " + email ) );
     }
@@ -57,7 +57,8 @@ public class UserWS extends AbstractWS {
     @WsValidate( { "validateUserLoggedIn" } )
     @WsSecurity( realm = USER, permissions = {} )
     public Optional<UserData.SecureView> current( @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
-        return loggedUser.map( u -> u.secureView );
+        return loggedUser
+            .flatMap( u -> userStorage.getMetadata( u.user.email ) )
+            .map( Users::userMetadataToSecureView );
     }
-
 }

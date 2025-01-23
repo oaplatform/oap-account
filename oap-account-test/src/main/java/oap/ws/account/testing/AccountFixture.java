@@ -208,7 +208,7 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles ) {
-        return accounts().createUser( new User( mail, mail, mail, pass, true ), roles ).user;
+        return userStorage().createUser( new User( mail, mail, mail, pass, true ), roles ).object.user;
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
@@ -216,7 +216,7 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
         if( tfaEnabled ) {
             user.secretKey = UserProvider.toAccessKey( mail );
         }
-        return accounts().createUser( user, roles ).user;
+        return userStorage().createUser( user, roles ).object.user;
     }
 
     public UserData addUser( UserData userData ) {

@@ -17,6 +17,7 @@ import oap.id.Identifier;
 import oap.json.ext.Ext;
 import oap.json.properties.PropertiesDeserializer;
 import oap.util.AssocList;
+import org.joda.time.DateTime;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.io.Serial;
@@ -38,8 +39,6 @@ public class OrganizationData implements Serializable {
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Organization organization;
     public Accounts accounts = new Accounts();
-    @JsonIgnore
-    public View view = new View();
 
     @JsonCreator
     public OrganizationData( Organization organization ) {
@@ -87,28 +86,10 @@ public class OrganizationData implements Serializable {
         }
     }
 
-    public class View implements Serializable {
+    public record View( String id, String name, String description, List<Account> accounts,
+                       DateTime created, DateTime modified,
+                       Ext ext ) implements Serializable {
         @Serial
         private static final long serialVersionUID = 9049298204022935855L;
-
-        public String getId() {
-            return OrganizationData.this.organization.id;
-        }
-
-        public String getName() {
-            return OrganizationData.this.organization.name;
-        }
-
-        public String getDescription() {
-            return OrganizationData.this.organization.description;
-        }
-
-        public List<Account> getAccounts() {
-            return OrganizationData.this.accounts.stream().toList();
-        }
-
-        public Ext getExt() {
-            return OrganizationData.this.organization.ext;
-        }
     }
 }
