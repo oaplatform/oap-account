@@ -83,7 +83,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void store() {
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         accountFixture.assertSystemAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id ), "{\"id\":\"" + data.organization.id + "\", \"name\":\"newname\"}", APPLICATION_JSON )
             .hasCode( OK );
@@ -93,7 +93,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void storeOrgAdmin() {
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLogin( user.user.email, DEFAULT_PASSWORD );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id ), "{\"id\":\"" + data.organization.id + "\", \"name\":\"newname\"}", APPLICATION_JSON )
@@ -124,7 +124,7 @@ public class OrganizationWSTest extends Fixtures {
     public void listOrgAdmin() {
         Dates.setTimeFixed( 2015, 1, 23, 17, 22, 49 );
 
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLogin( user.user.email, DEFAULT_PASSWORD );
         assertGet( accountFixture.httpUrl( "/organizations" ) )
@@ -142,7 +142,7 @@ public class OrganizationWSTest extends Fixtures {
     public void list() {
         Dates.setTimeFixed( 2015, 1, 23, 17, 22, 49 );
 
-        accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         accountFixture.assertAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations" ) )
             .respondedJson( OK, "OK", """
@@ -174,7 +174,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void storeAccountOrgAdmin() {
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLogin( user.user.email, DEFAULT_PASSWORD );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ), "{\"name\":\"acc1\"}", APPLICATION_JSON )
@@ -184,7 +184,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void listAccountsOrgAdmin() {
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc2", "acc2" ) );
         accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc1", "acc1" ) );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
@@ -195,7 +195,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void listAccountsUser() {
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc2", "acc2" ) );
         accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc1", "acc1" ) );
         accountFixture.organizationStorage().store( data );
@@ -229,7 +229,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void account404() {
-        OrganizationData data = accountFixture.accounts().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLogin( user.user.email, DEFAULT_PASSWORD );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ), "{\"id\":\"acc1\", \"name\":\"acc1\"}", APPLICATION_JSON )
@@ -572,8 +572,8 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void changeDefaultAccountUser() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
         final String orgId = org1.organization.id;
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc1", "acc1" ) );
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc2", "acc2" ) );
@@ -595,7 +595,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void setTheSameDefaultAccountToUser() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc1", "acc1" ) );
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc2", "acc2" ) );
@@ -615,8 +615,8 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void setAccountToNonExistingUser() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
         final String orgId = org1.organization.id;
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc1", "acc1" ) );
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc2", "acc2" ) );
@@ -630,7 +630,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void setNonExistingDefaultAccountToUser() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc1", "acc1" ) );
         accountFixture.organizationStorage().storeAccount( orgId, new Account( "acc2", "acc2" ) );
@@ -650,8 +650,8 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void addOrganizationToUserBySystemAdmin() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
@@ -668,8 +668,8 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void addOrganizationToUserByAdminInSeveralOrganizations() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
 
         Map<String, String> adminRoles = new HashMap<>();
         adminRoles.put( org1.organization.id, ADMIN );
@@ -694,8 +694,8 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void addOrganizationToUserByUserWithDifferentRolesInOrganizations() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
 
         Map<String, String> adminRoles = new HashMap<>();
         adminRoles.put( org1.organization.id, ADMIN );
@@ -719,8 +719,8 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void removeOrganizationFromUserBySystemAdmin() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
@@ -740,7 +740,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void removeAccountFromUserBySystemAdmin() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
@@ -763,7 +763,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void assignRoleToUser() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
@@ -780,7 +780,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void assignNonExistingRoleToUser() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
@@ -797,7 +797,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void listAllRoles() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
 
         accountFixture.assertSystemAdminLogin();
@@ -808,13 +808,13 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void listUserRoles() {
-        OrganizationData org1 = accountFixture.accounts().storeOrganization( new Organization( "First", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
         roles.put( orgId, USER );
 
-        OrganizationData org2 = accountFixture.accounts().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
         final String orgId2 = org2.organization.id;
 
         roles.put( orgId2, ORGANIZATION_ADMIN );

@@ -33,8 +33,6 @@ import oap.mail.TransportMock;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.TestDirectoryFixture;
 import oap.ws.account.AccountMailman;
-import oap.ws.account.Accounts;
-import oap.ws.account.AccountsService;
 import oap.ws.account.OrganizationStorage;
 import oap.ws.account.User;
 import oap.ws.account.UserData;
@@ -153,10 +151,6 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
 
     public OrganizationStorage organizationStorage() {
         return service( "oap-account", OrganizationStorage.class );
-    }
-
-    public Accounts accounts() {
-        return service( "oap-account", AccountsService.class );
     }
 
     public UserStorage userStorage() {

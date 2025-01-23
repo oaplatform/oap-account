@@ -65,6 +65,12 @@ public class OrganizationStorage extends MemoryStorage<String, OrganizationData>
         }
     }
 
+    public OrganizationData storeOrganization( Organization organization ) {
+        return update( organization.id,
+            o -> o.update( organization ),
+            () -> new OrganizationData( organization ) );
+    }
+
     public Optional<Metadata<OrganizationData>> storeAccount( String organizationId, Account account ) {
         log.debug( "storeAccount organizationId {} account {}", organizationId, account );
 

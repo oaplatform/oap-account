@@ -114,7 +114,7 @@ public class UserWSTest extends Fixtures {
 
     @Test
     public void accessOtherOrgUser() {
-        OrganizationData organizationData = accountFixture.accounts().storeOrganization( new Organization( "THRRG", "otherOrg" ) );
+        OrganizationData organizationData = accountFixture.organizationStorage().storeOrganization( new Organization( "THRRG", "otherOrg" ) );
         UserData user = accountFixture.userStorage().createUser( new User( "other@other.com", "Other", "User",
             "pass", false ), Map.of( organizationData.organization.id, USER ) ).object;
 

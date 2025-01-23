@@ -80,7 +80,6 @@ import static oap.ws.validate.ValidationErrors.error;
 public class OrganizationWS extends AbstractWS {
 
     public static final String ORGANIZATION_ID = "organizationId";
-    protected final Accounts accounts;
     protected final OrganizationStorage organizationStorage;
     protected final UserStorage userStorage;
     protected final OauthService oauthService;
@@ -89,14 +88,12 @@ public class OrganizationWS extends AbstractWS {
     protected final boolean selfRegistrationEnabled;
     protected final SecurityRoles roles;
 
-    public OrganizationWS( Accounts accounts,
-                           OrganizationStorage organizationStorage,
+    public OrganizationWS( OrganizationStorage organizationStorage,
                            UserStorage userStorage,
                            AccountMailman mailman,
                            String confirmUrlFinish,
                            boolean selfRegistrationEnabled,
                            OauthService oauthService, SecurityRoles roles ) {
-        this.accounts = accounts;
         this.organizationStorage = organizationStorage;
         this.userStorage = userStorage;
         this.mailman = mailman;
@@ -126,7 +123,7 @@ public class OrganizationWS extends AbstractWS {
                                @WsParam( from = SESSION ) UserData loggedUser ) {
 
         log.debug( "store id {} organization {}", organizationId, organization );
-        return accounts.storeOrganization( organization ).organization;
+        return organizationStorage.storeOrganization( organization ).organization;
     }
 
     @WsMethod( method = POST, path = "/" )
@@ -135,7 +132,7 @@ public class OrganizationWS extends AbstractWS {
                                @WsParam( from = SESSION ) UserData loggedUser ) {
         log.debug( "store organization {}", organization );
 
-        return accounts.storeOrganization( organization ).organization;
+        return organizationStorage.storeOrganization( organization ).organization;
     }
 
     @WsMethod( method = GET, path = "/{organizationId}" )
@@ -236,7 +233,7 @@ public class OrganizationWS extends AbstractWS {
     @WsValidate( "validateUserRegistered" )
     public UserData.View register( @WsValidateJson( schema = User.SCHEMA_REGISTRATION ) @WsParam( from = BODY ) User user,
                                    @WsParam( from = QUERY ) String organizationName ) {
-        OrganizationData organizationData = accounts.storeOrganization( new Organization( organizationName ) );
+        OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ) );
         final String orgId = organizationData.organization.id;
         user.defaultOrganization = orgId;
         Metadata<UserData> userCreated = userStorage.createUser( user, new HashMap<>( Map.of( orgId, ORGANIZATION_ADMIN ) ) );
@@ -248,7 +245,7 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = POST, path = "/register/oauth" )
     @WsValidate( "validateUserRegistered" )
     public Optional<UserData.View> register( @WsParam( from = QUERY ) String organizationName, String externalOauthToken, OauthProvider source, Ext ext ) {
-        OrganizationData organizationData = accounts.storeOrganization( new Organization( organizationName ) );
+        OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ) );
         final String orgId = organizationData.organization.id;
         final Optional<TokenInfo> tokenInfo = oauthService.getOauthProvider( source ).getTokenInfo( externalOauthToken );
         if( tokenInfo.isPresent() ) {
@@ -279,7 +276,7 @@ public class OrganizationWS extends AbstractWS {
                                            @WsParam( from = PATH ) String email,
                                            @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
 
-        return accounts.refreshApikey( email ).map( u -> u.user.apiKey );
+        return userStorage.refreshApikey( email ).map( u -> u.user.apiKey );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/ban/{email}" )
@@ -324,7 +321,7 @@ public class OrganizationWS extends AbstractWS {
             .addParameter( "passwd", String.valueOf( !user.hasPassword() ) )
             .build();
 
-        UserData userConfirmed = accounts.confirm( email ).orElse( null );
+        UserData userConfirmed = userStorage.confirm( email ).orElse( null );
         return userConfirmed != null ? Response.redirect( redirect ) : Response.notFound();
     }
 

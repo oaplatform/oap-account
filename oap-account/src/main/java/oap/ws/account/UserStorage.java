@@ -169,4 +169,15 @@ public class UserStorage extends MemoryStorage<String, UserData> {
 
         return getMetadata( email );
     }
+
+    public Optional<UserData> refreshApikey( String email ) {
+        log.debug( "refresh apikey to user: {}", email );
+
+        return update( UserStorage.prepareEmail( email ), UserData::refreshApikey );
+    }
+
+    public Optional<UserData> confirm( String email ) {
+        log.debug( "confirming: {}", email );
+        return update( UserStorage.prepareEmail( email ), user -> user.confirm( true ) );
+    }
 }
