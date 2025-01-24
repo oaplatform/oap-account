@@ -39,7 +39,6 @@ import static oap.mail.test.MessageAssertion.assertMessage;
 import static oap.mail.test.MessagesAssertion.assertMessages;
 import static oap.testng.Asserts.assertEventually;
 import static oap.testng.Asserts.assertString;
-import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.account.Roles.ADMIN;
 import static oap.ws.account.Roles.ORGANIZATION_ADMIN;
 import static oap.ws.account.Roles.USER;
@@ -245,17 +244,67 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void users() {
+        Dates.setTimeFixed( 2025, 1, 23, 17, 22, 49 );
+
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users" ) )
-            .respondedJson( OK, "OK",
-                contentOfTestResource( getClass(), "users.json", Map.of( "LAST_LOGIN", TODAY ) ) );
+            .respondedJson( OK, "OK", """
+                [ {
+                     "banned" : false,
+                     "confirmed" : true,
+                     "created" : "2010-01-23T17:22:49.000Z",
+                     "defaultOrganization" : "SYSTEM",
+                     "email" : "systemadmin@admin.com",
+                     "firstName" : "System",
+                     "lastName" : "Admin",
+                     "modified" : "2010-01-23T17:22:49.000Z",
+                     "roles" : {
+                       "DFLT" : "ORGANIZATION_ADMIN",
+                       "SYSTEM" : "ADMIN"
+                     },
+                     "tfaEnabled" : false
+                   }, {
+                     "banned" : false,
+                     "confirmed" : true,
+                     "created" : "2010-01-23T17:22:49.000Z",
+                     "defaultOrganization" : "SYSTEM",
+                     "email" : "xenoss@xenoss.io",
+                     "firstName" : "System",
+                     "lastName" : "Admin",
+                     "modified" : "2010-01-23T17:22:49.000Z",
+                     "roles" : {
+                       "DFLT" : "ADMIN",
+                       "SYSTEM" : "ADMIN"
+                     },
+                     "tfaEnabled" : false
+                   }, {
+                     "banned" : false,
+                     "confirmed" : true,
+                     "created" : "2010-01-23T17:22:49.000Z",
+                     "defaultOrganization" : "DFLT",
+                     "email" : "orgadmin@admin.com",
+                     "firstName" : "Johnny",
+                     "lastLogin" : "2025-01-23",
+                     "lastName" : "Walker",
+                     "modified" : "2025-01-23T17:22:49.000Z",
+                     "roles" : {
+                       "DFLT" : "ORGANIZATION_ADMIN"
+                     },
+                     "tfaEnabled" : false
+                   } ]""" );
     }
 
     @Test
     public void storeUserAdminByAdminCreateNew() {
         accountFixture.assertAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=ADMIN" ),
-            contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com"
+                }""" )
             .hasCode( OK );
         assertThat( accountFixture.userStorage().get( "newadmin@admins.com" ) )
             .isPresent()
@@ -268,20 +317,30 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void addUser() {
-        String userEmail = "vk@xenoss.io";
         accountFixture.assertAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=USER" ),
-            contentOfTestResource( getClass(), "user.json", Map.of( "EMAIL", userEmail ) ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "vk@xenoss.io",
+                  "roles": { "DFLT":"USER"}
+                }""" )
             .hasCode( OK );
         assertEventually( 100, 100, () -> {
             assertMessages( accountFixture.getTransportMock().messages )
-                .sentTo( userEmail, message -> assertMessage( message )
+                .sentTo( "vk@xenoss.io", message -> assertMessage( message )
                     .hasSubject( "You've been invited" ) );
         } );
         accountFixture.assertLogout();
-        assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + userEmail + "\", \"password\": \"pass\"}" )
+        assertPost( accountFixture.httpUrl( "/auth/login" ), """
+            {
+              "email": "vk@xenoss.io",
+              "password": "pass"
+            }""" )
             .hasCode( Http.StatusCode.UNAUTHORIZED );
-        UserData user = accountFixture.userStorage().get( userEmail ).orElseThrow();
+        UserData user = accountFixture.userStorage().get( "vk@xenoss.io" ).orElseThrow();
         String confirmUrl = accountFixture.accountMailman().confirmUrl( user );
         assertGet( confirmUrl )
             .hasCode( Http.StatusCode.FOUND )
@@ -289,16 +348,41 @@ public class OrganizationWSTest extends Fixtures {
                 + "&email=vk%40xenoss.io" + "&passwd=true" );
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/passwd?accessKey=" + user.getAccessKey() + "&apiKey=" + user.user.apiKey ), "{\"email\": \"vk@xenoss.io\", \"password\": \"pass\"}" )
             .hasCode( OK );
-        accountFixture.assertLogin( userEmail, "pass" );
+        accountFixture.assertLogin( "vk@xenoss.io", "pass" );
     }
 
     @Test
 
     public void registerUser() {
+        Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
+
         String userEmail = "vk@xenoss.io";
         assertPost( accountFixture.httpUrl( "/organizations/register?organizationName=xenoss.io" ),
-            contentOfTestResource( getClass(), "register-user.json", Map.of() ), APPLICATION_JSON )
-            .respondedJson( getClass(), "registered-user.json" );
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "vk@xenoss.io",
+                  "organization": "xenoss.io",
+                  "password": "pass"
+                }
+                """ )
+            .respondedJson( """
+                {
+                  "banned" : false,
+                  "confirmed" : false,
+                  "created" : "2025-01-24T17:22:49.000Z",
+                  "defaultOrganization" : "XNSS",
+                  "email" : "vk@xenoss.io",
+                  "firstName" : "John",
+                  "lastName" : "Smith",
+                  "modified" : "2025-01-24T17:22:49.000Z",
+                  "roles" : {
+                    "XNSS" : "ORGANIZATION_ADMIN"
+                  },
+                  "tfaEnabled" : false
+                }""" );
         UserData user = accountFixture.userStorage().get( userEmail ).orElseThrow();
         assertEventually( 100, 100, () -> {
             assertMessages( accountFixture.getTransportMock().messages )
@@ -320,7 +404,17 @@ public class OrganizationWSTest extends Fixtures {
     public void storeUserAdminByAdminNotNewNotExist() {
         accountFixture.assertAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users" ),
-            contentOfTestResource( getClass(), "store-user-admin-not-new.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com",
+                  "roles": {
+                    "XNSS": "ADMIN"
+                  },
+                  "tfaEnabled" : false
+                }
+                """ )
             .hasCode( Http.StatusCode.NOT_FOUND )
             .satisfies( response -> assertValidation( response )
                 .hasErrors( "user newadmin@admins.com does not exists" ) );
@@ -330,10 +424,22 @@ public class OrganizationWSTest extends Fixtures {
     public void storeUserDuplicate() {
         accountFixture.assertAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=ADMIN" ),
-            contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com"
+                }""" )
             .hasCode( OK );
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=ADMIN" ),
-            contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com"
+                }""" )
             .hasCode( Http.StatusCode.CONFLICT )
             .satisfies( response -> assertValidation( response )
                 .hasErrors( "user with email newadmin@admins.com already exists" ) );
@@ -343,7 +449,13 @@ public class OrganizationWSTest extends Fixtures {
     public void storeUserAdminByNotAdmin() {
         accountFixture.assertOrgAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=ADMIN" ),
-            contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com"
+                }""" )
             .hasCode( Http.StatusCode.FORBIDDEN );
     }
 
@@ -351,7 +463,13 @@ public class OrganizationWSTest extends Fixtures {
     public void storeUserWrongOrg() {
         accountFixture.assertOrgAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/fake-org/users" ),
-            contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com"
+                }""" )
             .hasCode( UNAUTHORIZED );
     }
 
@@ -393,37 +511,63 @@ public class OrganizationWSTest extends Fixtures {
 
     @Test
     public void ban() {
-        final String email = "user@admin.com";
-        var user = accountFixture.addUser( new UserData( new User( email, "Joe", "Epstein", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
-        accountFixture.assertLogin( email, "pass123" );
+        Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
+
+        UserData user = accountFixture.addUser( new UserData( new User( "user@admin.com", "Joe", "Epstein", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.assertLogin( "user@admin.com", "pass123" );
         accountFixture.assertLogout();
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/ban/" + user.user.email ) )
-            .respondedJson( OK, "OK",
-                contentOfTestResource( getClass(), "banned-user.json", Map.of(
-                    "LAST_LOGIN", TODAY,
-                    "BANNED", true
-                ) ) );
+            .respondedJson( OK, "OK", """
+                {
+                  "banned" : true,
+                  "confirmed" : true,
+                  "created" : "2025-01-24T17:22:49.000Z",
+                  "email" : "user@admin.com",
+                  "firstName" : "Joe",
+                  "lastLogin" : "2025-01-24",
+                  "lastName" : "Epstein",
+                  "modified" : "2025-01-24T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "USER"
+                  },
+                  "tfaEnabled" : false
+                }""" );
         accountFixture.assertLogout();
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{\"email\": \"" + user.user.email + "\", \"password\": \"pass\"}" )
             .hasCode( Http.StatusCode.UNAUTHORIZED );
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/unban/" + user.user.email ) )
-            .respondedJson( OK, "OK",
-                contentOfTestResource( getClass(), "banned-user.json", Map.of(
-                    "LAST_LOGIN", TODAY,
-                    "BANNED", false,
-                    "API_KEY", user.user.apiKey
-                ) ) );
+            .respondedJson( OK, "OK", """
+                {
+                   "banned" : false,
+                   "confirmed" : true,
+                   "created" : "2025-01-24T17:22:49.000Z",
+                   "email" : "user@admin.com",
+                   "firstName" : "Joe",
+                   "lastLogin" : "2025-01-24",
+                   "lastName" : "Epstein",
+                   "modified" : "2025-01-24T17:22:49.000Z",
+                   "roles" : {
+                     "DFLT" : "USER"
+                   },
+                   "tfaEnabled" : false
+                 }""" );
         accountFixture.assertLogout();
-        accountFixture.assertLogin( email, "pass123" );
+        accountFixture.assertLogin( "user@admin.com", "pass123" );
     }
 
     @Test
     public void deleteUserByAdmin() {
         accountFixture.assertAdminLogin();
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users?role=ADMIN" ),
-            contentOfTestResource( getClass(), "store-user-admin.json", Map.of() ), APPLICATION_JSON )
+            """
+                {
+                  "create": true,
+                  "firstName": "John",
+                  "lastName": "Smith",
+                  "email": "newadmin@admins.com"
+                }""" )
             .hasCode( OK );
         assertThat( accountFixture.userStorage().get( "newadmin@admins.com" ) ).isPresent();
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/delete/newadmin@admins.com" ) )
@@ -803,7 +947,12 @@ public class OrganizationWSTest extends Fixtures {
         accountFixture.assertSystemAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/roles" ) )
             .hasCode( OK )
-            .respondedJson( getClass(), "roles.json" );
+            .respondedJson( """
+                {
+                  "ADMIN" : [ "account:read", "user:edit_self", "organization:user_passwd", "organization:user_account", "organization:read", "unban:user", "account:list", "organization:user_apikey", "organization:store_user", "ALLOWED", "account:store", "organization:assign_role", "user:read", "account:delete", "ban:user", "organization:store", "organization:update", "organization:list_users" ],
+                  "ORGANIZATION_ADMIN" : [ "account:read", "user:edit_self", "organization:user_passwd", "organization:user_account", "organization:read", "unban:user", "account:list", "organization:user_apikey", "organization:store_user", "account:store", "organization:assign_role", "user:read", "account:delete", "ban:user", "organization:update", "organization:list_users" ],
+                  "USER" : [ "account:read", "user:apikey", "user:edit_self", "user:passwd", "account:list" ]
+                }""" );
     }
 
     @Test
@@ -825,6 +974,11 @@ public class OrganizationWSTest extends Fixtures {
         accountFixture.assertLogin( mail, "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + orgId + "/user/roles" ) )
             .hasCode( OK )
-            .respondedJson( getClass(), "user-roles.json" );
+            .respondedJson( """
+                {
+                  "ORGANIZATION_ADMIN" : [ "account:read", "user:edit_self", "organization:user_passwd", "organization:user_account", "organization:read", "unban:user", "account:list", "organization:user_apikey", "organization:store_user", "account:store", "organization:assign_role", "user:read", "account:delete", "ban:user", "organization:update", "organization:list_users" ],
+                  "USER" : [ "account:read", "user:apikey", "user:edit_self", "user:passwd", "account:list" ]
+                }
+                """ );
     }
 }

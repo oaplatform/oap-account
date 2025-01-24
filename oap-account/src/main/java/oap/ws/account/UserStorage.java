@@ -165,9 +165,7 @@ public class UserStorage extends MemoryStorage<String, UserData> {
     }
 
     public Optional<Metadata<UserData>> deleteUser( String email ) {
-        delete( StringUtils.lowerCase( email ) );
-
-        return getMetadata( email );
+        return deleteMetadata( StringUtils.lowerCase( email ) );
     }
 
     public Optional<UserData> refreshApikey( String email ) {
@@ -179,5 +177,10 @@ public class UserStorage extends MemoryStorage<String, UserData> {
     public Optional<UserData> confirm( String email ) {
         log.debug( "confirming: {}", email );
         return update( UserStorage.prepareEmail( email ), user -> user.confirm( true ) );
+    }
+
+    @Override
+    public Optional<Metadata<UserData>> getMetadata( String id ) {
+        return super.getMetadata( prepareEmail( id ) );
     }
 }

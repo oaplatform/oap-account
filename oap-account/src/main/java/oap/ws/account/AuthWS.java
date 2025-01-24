@@ -168,7 +168,7 @@ public class AuthWS extends AbstractSecureWS {
     @WsMethod( method = GET, path = "/whoami" )
     @WsValidate( "validateUserLoggedIn" )
     @WsSecurity( realm = WsSecurity.USER, permissions = {} )
-    public Optional<UserData.View> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
+    public Optional<UserView> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
         return loggedUser
             .flatMap( user -> userStorage.getMetadata( user.getEmail() ) )
             .map( Users::userMetadataToView );

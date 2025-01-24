@@ -10,12 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
+import oap.testng.SystemTimerFixture;
 import oap.testng.TestDirectoryFixture;
+import oap.util.Dates;
 import oap.ws.account.Organization;
 import oap.ws.account.OrganizationData;
 import oap.ws.account.User;
 import oap.ws.account.UserData;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -23,14 +26,11 @@ import java.util.Random;
 
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static oap.http.test.HttpAsserts.assertGet;
-import static oap.io.content.ContentReader.ofString;
-import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.account.Roles.USER;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ADMIN_EMAIL;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ID;
 import static oap.ws.account.testing.AccountFixture.DEFAULT_PASSWORD;
-import static oap.ws.account.testing.OrganizationWSTest.TODAY;
 
 @Slf4j
 public class UserWSTest extends Fixtures {
@@ -43,6 +43,7 @@ public class UserWSTest extends Fixtures {
     };
 
     public UserWSTest() {
+        fixture( new SystemTimerFixture( false ) );
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
         accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
@@ -52,6 +53,14 @@ public class UserWSTest extends Fixtures {
                 System.arraycopy( randomBytes, 0, bytes, 0, 20 );
             }
         };
+    }
+
+    @BeforeMethod
+    @Override
+    public void fixBeforeMethod() {
+        Dates.setTimeFixed( 2010, 1, 23, 17, 22, 49 );
+
+        super.fixBeforeMethod();
     }
 
     @AfterMethod
@@ -67,17 +76,33 @@ public class UserWSTest extends Fixtures {
 
     @Test
     public void current() {
+        Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
+
         assertGet( accountFixture.httpUrl( "/user/current" ) )
             .hasCode( Http.StatusCode.UNAUTHORIZED );
         accountFixture.assertAdminLogin();
         UserData admin = accountFixture.userStorage().get( DEFAULT_ADMIN_EMAIL ).orElseThrow();
         assertGet( accountFixture.httpUrl( "/user/current" ) )
-            .respondedJson( contentOfTestResource( getClass(), "current.json", Map.of(
-                "LAST_LOGIN", TODAY,
-                "ACCESS_KEY", admin.user.getAccessKey(),
-                "API_KEY", admin.user.apiKey,
-                "SECRET_KEY", admin.user.secretKey
-            ) ) );
+            .respondedJson( """
+                {
+                  "accessKey" : "SSKRSYSXXIPP",
+                  "apiKey" : "%s",
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "SYSTEM",
+                  "email" : "xenoss@xenoss.io",
+                  "firstName" : "System",
+                  "lastLogin" : "2025-01-24",
+                  "lastName" : "Admin",
+                  "modified" : "2025-01-24T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ADMIN",
+                    "SYSTEM" : "ADMIN"
+                  },
+                  "secretKey" : "CIQREMSCLEJSEERYOBRBIIYSAUJHEFJE",
+                  "tfaEnabled" : false
+                }""".formatted( admin.user.apiKey ) );
     }
 
     @Test
@@ -85,30 +110,71 @@ public class UserWSTest extends Fixtures {
         accountFixture.assertAdminLogin();
         UserData organizationAdmin = accountFixture.userStorage().get( DEFAULT_ORGANIZATION_ADMIN_EMAIL ).orElseThrow();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + organizationAdmin.user.email ) )
-            .respondedJson( contentOfTestResource( getClass(), "org-admin-never-logged-in.json", Map.of(
-                "ACCESS_KEY", organizationAdmin.getAccessKey(),
-                "API_KEY", organizationAdmin.user.apiKey,
-                "SECRET_KEY", organizationAdmin.user.secretKey
-            ) ) );
+            .respondedJson( """
+                {
+                  "accessKey" : "HMWDDRMHNGKU",
+                  "apiKey" : "%s",
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "DFLT",
+                  "email" : "orgadmin@admin.com",
+                  "firstName" : "Johnny",
+                  "lastName" : "Walker",
+                  "modified" : "2010-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ORGANIZATION_ADMIN"
+                  },
+                  "secretKey" : "CIQREMSCLEJSEERYOBRBIIYSAUJHEFJE",
+                  "tfaEnabled" : false
+                }""".formatted( organizationAdmin.user.apiKey ) );
         accountFixture.assertLogout();
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + organizationAdmin.user.email ) )
-            .respondedJson( contentOfTestResource( getClass(), "org-admin.json", Map.of(
-                "LAST_LOGIN", TODAY,
-                "ACCESS_KEY", organizationAdmin.getAccessKey(),
-                "API_KEY", organizationAdmin.user.apiKey,
-                "SECRET_KEY", organizationAdmin.user.secretKey
-            ) ) );
+            .respondedJson( """
+                {
+                  "accessKey" : "HMWDDRMHNGKU",
+                  "apiKey" : "%s",
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "DFLT",
+                  "email" : "orgadmin@admin.com",
+                  "firstName" : "Johnny",
+                  "lastLogin" : "2010-01-23",
+                  "lastName" : "Walker",
+                  "modified" : "2010-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ORGANIZATION_ADMIN"
+                  },
+                  "secretKey" : "CIQREMSCLEJSEERYOBRBIIYSAUJHEFJE",
+                  "tfaEnabled" : false
+                }""".formatted( organizationAdmin.user.apiKey ) );
         accountFixture.assertLogout();
     }
 
     @Test
     public void noSecureData() {
+        Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
+
         UserData user = accountFixture.userStorage().createUser( new User( "user@user.com", "Johnny", "Walker",
             "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ).object;
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )
-            .respondedJson( contentOfTestResource( getClass(), "user.json", ofString() ) );
+            .respondedJson( """
+                {
+                   "banned" : false,
+                   "confirmed" : true,
+                   "created" : "2025-01-24T17:22:49.000Z",
+                   "email" : "user@user.com",
+                   "firstName" : "Johnny",
+                   "lastName" : "Walker",
+                   "modified" : "2025-01-24T17:22:49.000Z",
+                   "roles" : {
+                     "DFLT" : "USER"
+                   },
+                   "tfaEnabled" : false
+                 }""" );
         accountFixture.assertLogout();
     }
 
@@ -128,12 +194,25 @@ public class UserWSTest extends Fixtures {
     public void loginEmailCaseInsencitive() {
         accountFixture.assertLogin( DEFAULT_ADMIN_EMAIL.toUpperCase(), DEFAULT_PASSWORD );
         UserData organizationAdmin = accountFixture.userStorage().get( DEFAULT_ORGANIZATION_ADMIN_EMAIL ).orElseThrow();
-        assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + organizationAdmin.user.email.toUpperCase() ) )
-            .respondedJson( contentOfTestResource( getClass(), "org-admin-never-logged-in.json", Map.of(
-                "ACCESS_KEY", organizationAdmin.getAccessKey(),
-                "API_KEY", organizationAdmin.user.apiKey,
-                "SECRET_KEY", organizationAdmin.user.secretKey
-            ) ) );
+        assertGet( accountFixture.httpUrl( "/user/DFLT/ORGADMIN@ADMIN.COM" ) )
+            .respondedJson( """
+                {
+                  "accessKey" : "HMWDDRMHNGKU",
+                  "apiKey" : "%s",
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "DFLT",
+                  "email" : "orgadmin@admin.com",
+                  "firstName" : "Johnny",
+                  "lastName" : "Walker",
+                  "modified" : "2010-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ORGANIZATION_ADMIN"
+                  },
+                  "secretKey" : "CIQREMSCLEJSEERYOBRBIIYSAUJHEFJE",
+                  "tfaEnabled" : false
+                }""".formatted( organizationAdmin.user.apiKey ) );
         accountFixture.assertLogout();
     }
 

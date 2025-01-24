@@ -12,9 +12,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.ToString;
 import oap.json.ext.Ext;
 import oap.json.properties.PropertiesDeserializer;
@@ -219,41 +217,5 @@ public class UserData implements oap.ws.sso.User, Serializable {
     @SuppressWarnings( "unchecked" )
     public <T> T getProperty( String property ) {
         return ( T ) properties.get( property );
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public static class View {
-        public final String email;
-        public final String firstName;
-        public final String lastName;
-        public final Map<String, List<String>> accounts;
-        public final Map<String, String> roles;
-        public final boolean banned;
-        public final boolean confirmed;
-        public final boolean tfaEnabled;
-        public final Map<String, String> defaultAccounts;
-        public final String defaultOrganization;
-        public final DateTime lastLogin;
-        public final Ext ext;
-    }
-
-    @Getter
-    public static class SecureView extends View {
-        public final String apiKey;
-        public final String accessKey;
-        public final String secretKey;
-
-        public SecureView( String email, String firstName, String lastName, Map<String, List<String>> accounts,
-                           Map<String, String> roles, boolean banned, boolean confirmed, boolean tfaEnabled,
-                           Map<String, String> defaultAccounts, String defaultOrganization, DateTime lastLogin, Ext ext,
-                           String apiKey, String accessKey, String secretKey ) {
-
-            super( email, firstName, lastName, accounts, roles, banned, confirmed, tfaEnabled, defaultAccounts, defaultOrganization, lastLogin, ext );
-
-            this.apiKey = apiKey;
-            this.accessKey = accessKey;
-            this.secretKey = secretKey;
-        }
     }
 }
