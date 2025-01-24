@@ -1,7 +1,0 @@
-{
-  "create": true,
-  "firstName": "John",
-  "lastName": "Smith",
-  "email": "${EMAIL}",
-  "roles": { "DFLT":"USER"}
-}

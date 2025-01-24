@@ -38,10 +38,6 @@ public class UserData implements oap.ws.sso.User, Serializable {
     private static final long serialVersionUID = -3371939128187130008L;
     private static final String ALL_ACCOUNTS = "*";
     @JsonIgnore
-    public final View view = new View();
-    @JsonIgnore
-    public final SecureView secureView = new SecureView();
-    @JsonIgnore
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Map<String, String> roles = new HashMap<>();
     public Map<String, List<String>> accounts = new HashMap<>();
@@ -101,12 +97,6 @@ public class UserData implements oap.ws.sso.User, Serializable {
     @Override
     public long getCounter() {
         return user.counter;
-    }
-
-    @JsonIgnore
-    @Override
-    public View getView() {
-        return view;
     }
 
     public boolean canAccessAccount( String organizationId, String accountId ) {
@@ -227,70 +217,5 @@ public class UserData implements oap.ws.sso.User, Serializable {
     @SuppressWarnings( "unchecked" )
     public <T> T getProperty( String property ) {
         return ( T ) properties.get( property );
-    }
-
-    public class View implements oap.ws.sso.User.View {
-        public String getEmail() {
-            return user.email;
-        }
-
-        public String getFirstName() {
-            return user.firstName;
-        }
-
-        public String getLastName() {
-            return user.lastName;
-        }
-
-        public Map<String, List<String>> getAccounts() {
-            return accounts;
-        }
-
-        public Map<String, String> getRoles() {
-            return roles;
-        }
-
-        public boolean isBanned() {
-            return banned;
-        }
-
-        public boolean isConfirmed() {
-            return user.confirmed;
-        }
-
-        public boolean isTfaEnabled() {
-            return user.tfaEnabled;
-        }
-
-        public Map<String, String> getDefaultAccounts() {
-            return user.defaultAccounts;
-        }
-
-        public String getDefaultOrganization() {
-            return user.defaultOrganization;
-        }
-
-        @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd" )
-        public DateTime getLastLogin() {
-            return lastLogin;
-        }
-
-        public Ext getExt() {
-            return user.ext;
-        }
-    }
-
-    public class SecureView extends View {
-        public String getApiKey() {
-            return user.apiKey;
-        }
-
-        public String getAccessKey() {
-            return user.getAccessKey();
-        }
-
-        public String getSecretKey() {
-            return user.getSecretKey();
-        }
     }
 }

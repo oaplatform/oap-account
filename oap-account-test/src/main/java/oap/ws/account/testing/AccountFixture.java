@@ -33,8 +33,6 @@ import oap.mail.TransportMock;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.TestDirectoryFixture;
 import oap.ws.account.AccountMailman;
-import oap.ws.account.Accounts;
-import oap.ws.account.AccountsService;
 import oap.ws.account.OrganizationStorage;
 import oap.ws.account.User;
 import oap.ws.account.UserData;
@@ -155,10 +153,6 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
         return service( "oap-account", OrganizationStorage.class );
     }
 
-    public Accounts accounts() {
-        return service( "oap-account", AccountsService.class );
-    }
-
     public UserStorage userStorage() {
         return service( "oap-account", UserStorage.class );
     }
@@ -208,7 +202,7 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles ) {
-        return accounts().createUser( new User( mail, mail, mail, pass, true ), roles ).user;
+        return userStorage().createUser( new User( mail, mail, mail, pass, true ), roles ).object.user;
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
@@ -216,7 +210,7 @@ public class AccountFixture extends AbstractKernelFixture<AccountFixture> {
         if( tfaEnabled ) {
             user.secretKey = UserProvider.toAccessKey( mail );
         }
-        return accounts().createUser( user, roles ).user;
+        return userStorage().createUser( user, roles ).object.user;
     }
 
     public UserData addUser( UserData userData ) {

@@ -35,19 +35,6 @@ public class UserTest {
     }
 
     @Test
-    public void marshalSecureView() {
-        UserData user = new UserData( new User( "email", "John", "Smith" ), Map.of( "r1", "ADMIN", "r2", "USER" ) );
-        user.addAccount( "org1", "acc1" );
-        user.addAccount( "org1", "acc2" );
-        user.addAccount( "org1", "acc2" );
-        user.user.defaultOrganization = "r1";
-        String json = Binder.json.marshal( user.secureView );
-        assertJson( json ).isStructurallyEqualTo( contentOfTestResource( getClass(), "secure-view.json", Map.of(
-            "API_KEY", user.user.apiKey, "SECRET_KEY", user.user.secretKey
-        ) ) );
-    }
-
-    @Test
     public void id() {
         assertThat( Identifier.forAnnotationFixed().get( new User( "mail" ) ) )
             .isEqualTo( "mail" );

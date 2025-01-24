@@ -67,17 +67,20 @@ public class AuthWS extends AbstractSecureWS {
 
     private final Authenticator authenticator;
     private final SessionManager sessionManager;
+    private final UserStorage userStorage;
 
     private final OauthService oauthService;
 
-    public AuthWS( Authenticator authenticator, SessionManager sessionManager, OauthService oauthService ) {
+    public AuthWS( Authenticator authenticator, UserStorage userStorage,
+                   SessionManager sessionManager, OauthService oauthService ) {
         this.authenticator = authenticator;
+        this.userStorage = userStorage;
         this.sessionManager = sessionManager;
         this.oauthService = oauthService;
     }
 
-    public AuthWS( Authenticator authenticator, SessionManager sessionManager ) {
-        this( authenticator, sessionManager, null );
+    public AuthWS( Authenticator authenticator, UserStorage userStorage, SessionManager sessionManager ) {
+        this( authenticator, userStorage, sessionManager, null );
     }
 
     @WsMethod( method = POST, path = "/login" )
@@ -94,7 +97,7 @@ public class AuthWS extends AbstractSecureWS {
                            @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
-        var result = authenticator.authenticate( AccountsService.prepareEmail( email ), password, tfaCode );
+        var result = authenticator.authenticate( UserStorage.prepareEmail( email ), password, tfaCode );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( TFA_REQUIRED == result.getFailureValue() )
@@ -112,7 +115,7 @@ public class AuthWS extends AbstractSecureWS {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         final Optional<TokenInfo> tokenInfo = oauthService.getOauthProvider( credentials.source ).getTokenInfo( credentials.accessToken );
         if( tokenInfo.isPresent() ) {
-            var result = authenticator.authenticate( AccountsService.prepareEmail( tokenInfo.get().email ), credentials.tfaCode );
+            var result = authenticator.authenticate( UserStorage.prepareEmail( tokenInfo.get().email ), credentials.tfaCode );
             if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
                 sessionManager.cookieDomain, sessionManager.cookieSecure );
             else if( TFA_REQUIRED == result.getFailureValue() )
@@ -165,7 +168,9 @@ public class AuthWS extends AbstractSecureWS {
     @WsMethod( method = GET, path = "/whoami" )
     @WsValidate( "validateUserLoggedIn" )
     @WsSecurity( realm = WsSecurity.USER, permissions = {} )
-    public Optional<oap.ws.sso.User.View> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
-        return loggedUser.map( oap.ws.sso.User::getView );
+    public Optional<UserView> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
+        return loggedUser
+            .flatMap( user -> userStorage.getMetadata( user.getEmail() ) )
+            .map( Users::userMetadataToView );
     }
 }

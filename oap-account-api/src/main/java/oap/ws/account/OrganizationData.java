@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import oap.id.Identifier;
-import oap.json.ext.Ext;
 import oap.json.properties.PropertiesDeserializer;
 import oap.util.AssocList;
 
@@ -22,7 +21,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static oap.id.Identifier.Option.COMPACT;
@@ -38,8 +36,6 @@ public class OrganizationData implements Serializable {
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
     public Organization organization;
     public Accounts accounts = new Accounts();
-    @JsonIgnore
-    public View view = new View();
 
     @JsonCreator
     public OrganizationData( Organization organization ) {
@@ -84,31 +80,6 @@ public class OrganizationData implements Serializable {
         @Override
         protected String keyOf( Account account ) {
             return account.id;
-        }
-    }
-
-    public class View implements Serializable {
-        @Serial
-        private static final long serialVersionUID = 9049298204022935855L;
-
-        public String getId() {
-            return OrganizationData.this.organization.id;
-        }
-
-        public String getName() {
-            return OrganizationData.this.organization.name;
-        }
-
-        public String getDescription() {
-            return OrganizationData.this.organization.description;
-        }
-
-        public List<Account> getAccounts() {
-            return OrganizationData.this.accounts.stream().toList();
-        }
-
-        public Ext getExt() {
-            return OrganizationData.this.organization.ext;
         }
     }
 }

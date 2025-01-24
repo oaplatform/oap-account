@@ -32,6 +32,7 @@ import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
 import oap.ws.account.User;
 import org.bson.Document;
+import org.joda.time.DateTimeUtils;
 
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class DefaultOrgAdminUnit {
                         "roles", new Document( Map.of( "DFLT", "ORGANIZATION_ADMIN" ) )
                     ) ),
                     "object:type", "user",
-                    "modified", System.currentTimeMillis()
+                    "modified", DateTimeUtils.currentTimeMillis()
                 ) ), new ReplaceOptions().upsert( true ) );
 
         mongoDatabase.getCollection( "users" )
@@ -75,7 +76,7 @@ public class DefaultOrgAdminUnit {
                         "roles", new Document( Map.of( "DFLT", "ORGANIZATION_ADMIN", "SYSTEM", "ADMIN" ) )
                     ) ),
                     "object:type", "user",
-                    "modified", System.currentTimeMillis()
+                    "modified", DateTimeUtils.currentTimeMillis()
                 ) ), new ReplaceOptions().upsert( true ) );
     }
 
