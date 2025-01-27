@@ -112,10 +112,10 @@ public class JwtUserAuthenticator implements Authenticator {
     private Authentication generateTokens( User user ) {
         incUserCounter( user );
 
-        var accessToken = jwtTokenGenerator.generateAccessToken( user );
-        var refreshToken = jwtTokenGenerator.generateRefreshToken( user );
+        Authentication.Token accessToken = jwtTokenGenerator.generateAccessToken( user );
+        Authentication.Token refreshToken = jwtTokenGenerator.generateRefreshToken( user );
         log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
-        return new Authentication( accessToken, refreshToken, user );
+        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() ) );
     }
 
     private void incUserCounter( User user ) {
@@ -128,7 +128,7 @@ public class JwtUserAuthenticator implements Authenticator {
         var accessToken = jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId );
         var refreshToken = jwtTokenGenerator.generateRefreshToken( user );
         log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
-        return new Authentication( accessToken, refreshToken, user );
+        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() ) );
     }
 
     public Result<Authentication, AuthenticationFailure> refreshToken( String refreshToken, Optional<String> orgId ) {
@@ -159,7 +159,7 @@ public class JwtUserAuthenticator implements Authenticator {
         var authentication = new Authentication(
             jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId ),
             jwtTokenGenerator.generateRefreshToken( user ),
-            user
+            Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() )
         );
 
         return Result.success( authentication );
