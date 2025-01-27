@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import oap.json.ext.Ext;
 import oap.json.properties.PropertiesDeserializer;
 import oap.util.Hash;
@@ -31,8 +29,6 @@ import java.util.Optional;
 
 import static oap.ws.sso.WsSecurity.SYSTEM;
 
-@ToString( exclude = { "view", "secureView" } )
-@EqualsAndHashCode( exclude = { "view", "secureView" } )
 public class UserData implements oap.ws.sso.User, Serializable {
     @Serial
     private static final long serialVersionUID = -3371939128187130008L;
@@ -77,13 +73,11 @@ public class UserData implements oap.ws.sso.User, Serializable {
     }
 
     @JsonIgnore
-    @Override
     public Optional<String> getDefaultOrganization() {
         return Optional.ofNullable( user.defaultOrganization );
     }
 
     @JsonIgnore
-    @Override
     public Map<String, String> getDefaultAccounts() {
         return user.defaultAccounts;
     }

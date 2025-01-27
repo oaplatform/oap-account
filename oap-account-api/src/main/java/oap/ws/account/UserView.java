@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class UserView implements Serializable {
+public class UserView implements oap.ws.sso.UserView, Serializable {
     @Serial
     private static final long serialVersionUID = -4649450901635794223L;
 

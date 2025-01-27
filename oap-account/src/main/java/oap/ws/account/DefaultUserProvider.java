@@ -1,6 +1,7 @@
 package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
+import oap.storage.Metadata;
 import oap.util.Result;
 import oap.ws.SessionManager;
 import oap.ws.sso.Authentication;
@@ -84,7 +85,8 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
 
                     if( refreshTokenStatus == JWTExtractor.TokenStatus.VALID ) {
                         JwtToken jwtRefreshToken = jwtExtractor.decodeJWT( rt );
-                        UserData currentUser = userStorage.get( jwtRefreshToken.getUserEmail() ).orElse( null );
+                        Metadata<UserData> currentUserMetadata = userStorage.getMetadata( jwtRefreshToken.getUserEmail() ).orElse( null );
+                        UserData currentUser = currentUserMetadata.object;
 
                         if( currentUser == null || currentUser.getCounter() != jwtRefreshToken.getCounter() ) {
                             return Result.failure( "an outdated version of the refresh token" );
@@ -92,7 +94,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
 
                         Authentication.Token responseAccessToken = jwtTokenGenerator.generateAccessToken( currentUser );
                         Authentication.Token responseRefreshAccessToken = jwtTokenGenerator.generateRefreshToken( currentUser );
-                        Authentication authentication = new Authentication( responseAccessToken, responseRefreshAccessToken, currentUser );
+                        Authentication authentication = new Authentication( responseAccessToken, responseRefreshAccessToken, Users.userMetadataToView( currentUserMetadata ) );
 
                         responseAccessCookie = Optional.of( SSO.createAccessAndRefreshTokensFromRefreshToken( authentication, sessionManager.cookieDomain, sessionManager.cookieSecure ) );
                         token = responseAccessToken.jwt;

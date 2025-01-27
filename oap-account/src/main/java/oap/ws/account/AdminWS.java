@@ -54,11 +54,11 @@ public class AdminWS {
             .forEach( ud -> {
                 if( ( ud.accounts.containsKey( organizationId ) && ud.accounts.size() == 1 )
                     || ( ud.roles.containsKey( organizationId ) && ud.roles.size() == 1 ) ) {
-                    log.trace( "permanentlyDeleteOrganization#delete user {}", ud.getEmail() );
-                    userStorage.permanentlyDelete( ud.getEmail() );
+                    log.trace( "permanentlyDeleteOrganization#delete user {}", ud.user.getEmail() );
+                    userStorage.permanentlyDelete( ud.user.getEmail() );
                 } else {
-                    log.trace( "permanentlyDeleteOrganization#update user {}", ud.getEmail() );
-                    userStorage.update( ud.getEmail(), d -> {
+                    log.trace( "permanentlyDeleteOrganization#update user {}", ud.user.getEmail() );
+                    userStorage.update( ud.user.getEmail(), d -> {
                         d.accounts.remove( organizationId );
                         d.roles.remove( organizationId );
                         return d;
