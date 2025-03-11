@@ -77,6 +77,9 @@ public class OrganizationData implements Serializable {
     }
 
     public static class Accounts extends AssocList<String, Account> {
+        @Serial
+        private static final long serialVersionUID = -7513787380810132946L;
+
         @Override
         protected String keyOf( Account account ) {
             return account.id;
