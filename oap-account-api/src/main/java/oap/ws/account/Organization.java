@@ -6,6 +6,7 @@
 
 package oap.ws.account;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import oap.json.ext.Ext;
@@ -23,6 +24,10 @@ public class Organization implements Serializable {
     public String id;
     public String name;
     public String description;
+    @JsonInclude( JsonInclude.Include.NON_NULL )
+    public String contactName;
+    @JsonInclude( JsonInclude.Include.NON_NULL )
+    public String contactEmail;
     public Ext ext;
 
     public Organization() {

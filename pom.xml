@@ -56,7 +56,7 @@
     </distributionManagement>
 
     <properties>
-        <oap.project.version>22.6.4</oap.project.version>
+        <oap.project.version>22.6.5</oap.project.version>
 
         <oap.deps.oap.version>22.9.6</oap.deps.oap.version>
 
