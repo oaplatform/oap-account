@@ -17,7 +17,7 @@ import java.util.Optional;
 import static oap.storage.Storage.Lock.SERIALIZED;
 
 @Slf4j
-public class OrganizationStorage extends MemoryStorage<String, OrganizationData> {
+public class OrganizationStorage extends MemoryStorage<String, OrganizationData> implements OrganizationService {
     public final String defaultOrganizationId;
     public final String defaultOrganizationName;
     public final String defaultOrganizationDescription;
