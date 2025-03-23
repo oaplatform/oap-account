@@ -84,6 +84,16 @@ public class OrganizationWSTest extends Fixtures {
     public void store() {
         OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
         accountFixture.assertSystemAdminLogin();
+
+        assertPost( accountFixture.httpUrl( "/organizations" ), """
+            {
+              "name": "newname",
+              "description": "description",
+              "contactName": "my name",
+              "contactEmail": "myemail@test.com"
+            }""", APPLICATION_JSON )
+            .hasCode( OK );
+
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id ), "{\"id\":\"" + data.organization.id + "\", \"name\":\"newname\"}", APPLICATION_JSON )
             .hasCode( OK );
         assertThat( accountFixture.organizationStorage().get( data.organization.id ) ).isPresent().get()
