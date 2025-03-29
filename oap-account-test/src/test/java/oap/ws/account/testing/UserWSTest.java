@@ -27,10 +27,10 @@ import java.util.Random;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static oap.http.test.HttpAsserts.assertGet;
 import static oap.ws.account.Roles.USER;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_ADMIN_EMAIL;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ID;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_PASSWORD;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_ADMIN_EMAIL;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_ORGANIZATION_ID;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_PASSWORD;
 
 @Slf4j
 public class UserWSTest extends Fixtures {
