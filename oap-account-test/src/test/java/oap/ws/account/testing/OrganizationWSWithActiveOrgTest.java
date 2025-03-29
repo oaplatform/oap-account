@@ -58,11 +58,11 @@ import static oap.testng.Asserts.assertString;
 import static oap.ws.account.Roles.ADMIN;
 import static oap.ws.account.Roles.ORGANIZATION_ADMIN;
 import static oap.ws.account.Roles.USER;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_ORGANIZATION_ID;
-import static oap.ws.account.testing.AccountFixture.DEFAULT_PASSWORD;
-import static oap.ws.account.testing.AccountFixture.ORG_ADMIN_USER;
-import static oap.ws.account.testing.AccountFixture.REGULAR_USER;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_ORGANIZATION_ADMIN_EMAIL;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_ORGANIZATION_ID;
+import static oap.ws.account.testing.AbstractAccountFixture.DEFAULT_PASSWORD;
+import static oap.ws.account.testing.AbstractAccountFixture.ORG_ADMIN_USER;
+import static oap.ws.account.testing.AbstractAccountFixture.REGULAR_USER;
 import static oap.ws.validate.testng.ValidationAssertion.assertValidation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.joda.time.DateTimeZone.UTC;
@@ -79,7 +79,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
         var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
         accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture )
-            .withConfResource( AccountFixture.class, "/application-account.fixture-org.conf" ) );
+            .withConfResource( AbstractAccountFixture.class, "/application-account.fixture-org.conf" ) );
     }
 
     @BeforeMethod
