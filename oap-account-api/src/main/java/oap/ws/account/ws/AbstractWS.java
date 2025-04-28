@@ -11,6 +11,9 @@ import oap.ws.account.UserData;
 import oap.ws.sso.AbstractSecureWS;
 import oap.ws.validate.ValidationErrors;
 
+import javax.annotation.Nonnull;
+
+import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.ws.account.Roles.ORGANIZATION_ADMIN;
 import static oap.ws.sso.WsSecurity.SYSTEM;
 import static oap.ws.validate.ValidationErrors.empty;
@@ -56,4 +59,9 @@ public abstract class AbstractWS extends AbstractSecureWS {
         return ORGANIZATION_ADMIN.equals( loggedUser.roles.get( organizationId ) );
     }
 
+    public ValidationErrors validateSystemAdminRole( @Nonnull UserData loggedUser ) {
+        if( !isSystem( loggedUser ) ) {
+            return error( FORBIDDEN, "Only System ADMIN can access to this api" );
+        } else return empty();
+    }
 }
