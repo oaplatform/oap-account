@@ -1001,6 +1001,8 @@ public class OrganizationWSTest extends Fixtures {
             new UserData( new User( email, "Recover", "User", "secret123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) )
         );
 
+        accountFixture.userStorage().store( user );
+
         assertPost( accountFixture.httpUrl( "/organizations/users/recover-password" ),
             "{\"email\": \"" + email + "\"}" )
             .hasCode( OK );
@@ -1020,6 +1022,8 @@ public class OrganizationWSTest extends Fixtures {
         UserData user = accountFixture.addUser(
             new UserData( new User( email, "First", "Last", "old-password", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) )
         );
+
+        accountFixture.userStorage().store( user );
 
         String token = UUID.randomUUID().toString();
         accountFixture.recoveryTokenService().store( token, email, Duration.ofMinutes( 30 ).toMillis() );
