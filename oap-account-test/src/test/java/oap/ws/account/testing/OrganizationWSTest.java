@@ -1008,6 +1008,8 @@ public class OrganizationWSTest extends Fixtures {
                 .sentTo( email, message -> assertMessage( message )
                     .hasSubject( "Password Recovery" ) );
         } );
+
+        accountFixture.assertLogin( user.user.email, "secret123" );
     }
 
 }
