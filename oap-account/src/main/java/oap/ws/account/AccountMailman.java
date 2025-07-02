@@ -38,6 +38,18 @@ public class AccountMailman {
         sendUserCreatedEmail( user, "user-registered" );
     }
 
+    public void sendRecoveryEmail( @Nonnull UserData user, String token ) {
+        Template template = Template.of( "/oap/ws/account/mail/user-recovery-password.default" )
+                .orElseGet( () -> Template.of( "/oap/ws/account/mail/user-recovery-password.default" ).orElseThrow() );
+        template.bind( "user", user.user );
+        template.bind( "recoveryUrl", confirmUrl + "/reset-password?token=" + token );
+        Message message = template.buildMessage();
+        message.from = MailAddress.of( fromPersonal, fromEmail );
+        message.to.add( MailAddress.of( user.user.firstName + " " + user.user.lastName, user.user.email ) );
+        log.trace( "sending recovery email {}", message );
+        mailman.send( message );
+    }
+
     private void sendUserCreatedEmail( @Nonnull UserData user, @Nonnull String xmail ) {
         Template template = Template.of( "/oap/ws/account/mail/" + xmail )
             .orElseGet( () -> Template.of( "/oap/ws/account/mail/" + xmail + ".default" ).orElseThrow() );

@@ -425,6 +425,20 @@ public class OrganizationWS extends AbstractWS {
             ) );
     }
 
+    @WsMethod( method = POST, path = "/users/recover-password", description = "Recovery password endpoint" )
+    public Response recoverPassword( @WsParam( from = BODY ) RecoverPasswordRequest recoverPasswordRequest ) {
+        Optional<UserData> userData = userStorage.get( recoverPasswordRequest.email );
+
+        if( userData.isEmpty() ) return Response.notFound().withReasonPhrase( "User not found" );
+
+        String token = java.util.UUID.randomUUID().toString();
+        log.info( "Generated recovery token for {}: {}", recoverPasswordRequest.email, token );
+
+        mailman.sendRecoveryEmail( userData.get(), token );
+
+        return Response.ok();
+    }
+
     protected ValidationErrors validateUserAccess( String organizationId, @Nonnull Passwd passwd, @Nonnull UserData loggedUser ) {
         return Objects.equals( passwd.email, loggedUser.user.email )
             || isSystem( loggedUser )

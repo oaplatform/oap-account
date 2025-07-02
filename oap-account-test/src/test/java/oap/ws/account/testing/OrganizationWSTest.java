@@ -991,4 +991,23 @@ public class OrganizationWSTest extends Fixtures {
                 }
                 """ );
     }
+
+    @Test
+    public void recoverPassword() {
+        String email = "recoverme@test.com";
+        UserData user = accountFixture.addUser(
+            new UserData( new User( email, "Recover", "User", "secret123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) )
+        );
+
+        assertPost( accountFixture.httpUrl( "/organizations/users/recover-password" ),
+            "{\"email\": \"" + email + "\"}" )
+            .hasCode( OK );
+
+        assertEventually( 100, 100, () -> {
+            assertMessages( accountFixture.getTransportMock().messages )
+                .sentTo( email, message -> assertMessage( message )
+                    .hasSubject( "Password Recovery" ) );
+        } );
+    }
+
 }
