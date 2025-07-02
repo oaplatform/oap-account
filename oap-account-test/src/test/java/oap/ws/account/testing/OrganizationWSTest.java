@@ -1015,7 +1015,7 @@ public class OrganizationWSTest extends Fixtures {
     }
 
     @Test
-    public void resetPassword_shouldUpdatePassword() {
+    public void resetPasswordShouldUpdatePassword() {
         String email = "resetme@test.com";
         UserData user = accountFixture.addUser(
             new UserData( new User( email, "First", "Last", "old-password", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) )
