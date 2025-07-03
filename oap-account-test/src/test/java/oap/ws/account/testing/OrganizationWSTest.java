@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static oap.http.Http.ContentType.APPLICATION_JSON;
 import static oap.http.Http.StatusCode.BAD_REQUEST;
@@ -991,4 +992,47 @@ public class OrganizationWSTest extends Fixtures {
                 }
                 """ );
     }
+
+    @Test
+    public void recoverPassword() {
+        String email = "recoverme@test.com";
+        UserData user = accountFixture.addUser(
+            new UserData( new User( email, "Recover", "User", "secret123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) )
+        );
+
+        accountFixture.userStorage().store( user );
+
+        assertPost( accountFixture.httpUrl( "/organizations/users/recover-password" ),
+            "{\"email\": \"" + email + "\"}" )
+            .hasCode( OK );
+
+        assertEventually( 100, 100, () -> {
+            assertMessages( accountFixture.getTransportMock().messages )
+                .sentTo( email, message -> assertMessage( message )
+                    .hasSubject( "Password Recovery" ) );
+        } );
+
+        accountFixture.assertLogin( user.user.email, "secret123" );
+    }
+
+    @Test
+    public void resetPasswordShouldUpdatePassword() {
+        String email = "resetme@test.com";
+        UserData user = accountFixture.addUser(
+            new UserData( new User( email, "First", "Last", "old-password", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) )
+        );
+
+        accountFixture.userStorage().store( user );
+
+        String token = UUID.randomUUID().toString();
+        accountFixture.recoveryTokenService().store( token, email );
+
+        assertPost( accountFixture.httpUrl( "/organizations/users/reset-password" ),
+            "{ \"token\": \"" + token + "\", \"newPassword\": \"new-password\" }" )
+            .hasCode( OK );
+
+
+        accountFixture.assertLogin( email, "new-password" );
+    }
+
 }

@@ -15,6 +15,7 @@ import oap.util.Stream;
 import oap.ws.Response;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
+import oap.ws.account.utils.RecoveryTokenService;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.account.ws.AbstractWS;
 import oap.ws.sso.SecurityRoles;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -87,19 +89,21 @@ public class OrganizationWS extends AbstractWS {
     protected final String confirmUrlFinish;
     protected final boolean selfRegistrationEnabled;
     protected final SecurityRoles roles;
+    private final RecoveryTokenService recoveryTokenService;
 
     public OrganizationWS( OrganizationStorage organizationStorage,
                            UserStorage userStorage,
                            AccountMailman mailman,
                            String confirmUrlFinish,
                            boolean selfRegistrationEnabled,
-                           OauthService oauthService, SecurityRoles roles ) {
+                           OauthService oauthService, RecoveryTokenService recoveryTokenService, SecurityRoles roles ) {
         this.organizationStorage = organizationStorage;
         this.userStorage = userStorage;
         this.mailman = mailman;
         this.confirmUrlFinish = confirmUrlFinish;
         this.selfRegistrationEnabled = selfRegistrationEnabled;
         this.oauthService = oauthService;
+        this.recoveryTokenService = recoveryTokenService;
         this.roles = roles;
     }
 
@@ -424,6 +428,36 @@ public class OrganizationWS extends AbstractWS {
                 ( a, b ) -> a
             ) );
     }
+
+    @WsMethod( method = POST, path = "/users/recover-password", description = "Recovery password endpoint" )
+    public Response recoverPassword( @WsParam( from = BODY ) RecoverPasswordRequest recoverPasswordRequest ) {
+        Optional<UserData> userData = userStorage.get( recoverPasswordRequest.email );
+
+        if( userData.isPresent() ) {
+            String token = UUID.randomUUID().toString();
+            recoveryTokenService.store( token, userData.get().user.email );
+            log.info( "Generated recovery token for {}: {}", recoverPasswordRequest.email, token );
+            mailman.sendRecoveryEmail( userData.get(), token );
+        } else {
+            log.info( "User not found" );
+        }
+
+        return Response.ok();
+    }
+
+    @WsMethod( method = POST, path = "/users/reset-password", description = "Reset password endpoint" )
+    public Response resetPassword( @WsParam( from = BODY ) ResetPasswordRequest request ) {
+        Optional<String> email = recoveryTokenService.getEmailByToken( request.token );
+        if( email.isPresent() ) {
+            Optional<UserView> userView = userStorage.passwd( email.get(), request.newPassword ).map( Users::userMetadataToView );
+            recoveryTokenService.invalidate( request.token );
+        } else {
+            log.info( "Invalid or expired token" );
+        }
+
+        return Response.ok();
+    }
+
 
     protected ValidationErrors validateUserAccess( String organizationId, @Nonnull Passwd passwd, @Nonnull UserData loggedUser ) {
         return Objects.equals( passwd.email, loggedUser.user.email )
