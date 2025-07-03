@@ -9,7 +9,7 @@ package oap.ws.account.utils;
 import java.util.Optional;
 
 public interface RecoveryTokenService {
-    void store( String token, String email, long ttlMillis );
+    void store( String token, String email );
 
     Optional<String> getEmailByToken( String token );
 

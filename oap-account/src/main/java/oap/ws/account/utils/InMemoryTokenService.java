@@ -6,27 +6,40 @@
 
 package oap.ws.account.utils;
 
-import java.util.Map;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class InMemoryTokenService implements RecoveryTokenService {
-    private final Map<String, RecoveryToken> tokens = new ConcurrentHashMap<>();
+    private final Cache<String, String> tokens;
+
+    public InMemoryTokenService( long ttlMillis ) {
+        this.tokens = CacheBuilder.newBuilder()
+            .expireAfterWrite( ttlMillis, TimeUnit.MILLISECONDS )
+            .build();
+    }
+
+    public InMemoryTokenService() {
+        this.tokens = CacheBuilder.newBuilder()
+            .expireAfterWrite( Duration.ofMinutes( 30 ).toMillis(), TimeUnit.MILLISECONDS )
+            .build();
+    }
 
     @Override
-    public void store( String token, String email, long ttlMillis ) {
-        tokens.put( token, new RecoveryToken( token, email, ttlMillis ) );
+    public void store( String token, String email ) {
+        tokens.put( token, email );
     }
 
     @Override
     public Optional<String> getEmailByToken( String token ) {
-        RecoveryToken rt = tokens.get( token );
-        if( rt == null || System.currentTimeMillis() > rt.expiresAt ) return Optional.empty();
-        return Optional.of( rt.email );
+        return Optional.ofNullable( tokens.getIfPresent( token ) );
     }
 
     @Override
     public void invalidate( String token ) {
-        tokens.remove( token );
+        tokens.invalidate( token );
     }
 }

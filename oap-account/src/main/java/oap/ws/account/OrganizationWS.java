@@ -29,7 +29,6 @@ import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
-import java.time.Duration;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
@@ -434,12 +433,14 @@ public class OrganizationWS extends AbstractWS {
     public Response recoverPassword( @WsParam( from = BODY ) RecoverPasswordRequest recoverPasswordRequest ) {
         Optional<UserData> userData = userStorage.get( recoverPasswordRequest.email );
 
-        if( userData.isEmpty() ) return Response.notFound().withReasonPhrase( "User not found" );
-
-        String token = UUID.randomUUID().toString();
-        recoveryTokenService.store( token, userData.get().user.email, Duration.ofMinutes( 30 ).toMillis() );
-        log.info( "Generated recovery token for {}: {}", recoverPasswordRequest.email, token );
-        mailman.sendRecoveryEmail( userData.get(), token );
+        if( userData.isPresent() ) {
+            String token = UUID.randomUUID().toString();
+            recoveryTokenService.store( token, userData.get().user.email );
+            log.info( "Generated recovery token for {}: {}", recoverPasswordRequest.email, token );
+            mailman.sendRecoveryEmail( userData.get(), token );
+        } else {
+            log.info( "User not found" );
+        }
 
         return Response.ok();
     }
@@ -447,12 +448,14 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = POST, path = "/users/reset-password", description = "Reset password endpoint" )
     public Response resetPassword( @WsParam( from = BODY ) ResetPasswordRequest request ) {
         Optional<String> email = recoveryTokenService.getEmailByToken( request.token );
-        if( email.isEmpty() ) return Response.notFound().withReasonPhrase( "Invalid or expired token" );
+        if( email.isPresent() ) {
+            Optional<UserView> userView = userStorage.passwd( email.get(), request.newPassword ).map( Users::userMetadataToView );
+            recoveryTokenService.invalidate( request.token );
+        } else {
+            log.info( "Invalid or expired token" );
+        }
 
-        Optional<UserView> userView = userStorage.passwd( email.get(), request.newPassword ).map( Users::userMetadataToView );
-        recoveryTokenService.invalidate( request.token );
-
-        return Response.ok().withBody( userView );
+        return Response.ok();
     }
 
 
