@@ -45,7 +45,7 @@ public class UserWSTest extends Fixtures {
     public UserWSTest() {
         fixture( new SystemTimerFixture( false ) );
         TestDirectoryFixture testDirectoryFixture = fixture( new TestDirectoryFixture() );
-        var mongoFixture = fixture( new MongoFixture( "MONGO" ) );
+        MongoFixture mongoFixture = fixture( new MongoFixture( "MONGO" ) );
         accountFixture = fixture( new AccountFixture( testDirectoryFixture, mongoFixture ) );
         User.random = new Random() {
             @Override
