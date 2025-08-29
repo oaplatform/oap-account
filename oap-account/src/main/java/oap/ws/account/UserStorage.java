@@ -12,6 +12,7 @@ import oap.storage.MemoryStorage;
 import oap.storage.Metadata;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +21,7 @@ import java.util.function.Consumer;
 import static oap.storage.Storage.Lock.SERIALIZED;
 
 @Slf4j
-public class UserStorage extends MemoryStorage<String, UserData> {
+public class UserStorage extends MemoryStorage<String, UserData> implements UserService {
     public final String defaultSystemAdminEmail;
     public final String defaultSystemAdminPassword;
     public final String defaultSystemAdminFirstName;
@@ -182,5 +183,21 @@ public class UserStorage extends MemoryStorage<String, UserData> {
     @Override
     public Optional<Metadata<UserData>> getMetadata( String id ) {
         return super.getMetadata( prepareEmail( id ) );
+    }
+
+    @Override
+    public List<UserInfo> getInfo( String... emails ) {
+        ArrayList<UserInfo> list = new ArrayList<>();
+
+        for( String email : emails ) {
+            get( email )
+                .ifPresentOrElse(
+                    u -> {
+                        list.add( new UserInfo( u.getEmail(), u.user.firstName, u.user.lastName ) );
+                    },
+                    () -> list.add( new UserInfo( email, null, null ) ) );
+        }
+
+        return list;
     }
 }
