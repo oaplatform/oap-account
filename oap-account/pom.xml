@@ -106,8 +106,20 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-storage-mongo</artifactId>
+            <artifactId>oap-storagev2</artifactId>
             <version>${oap.deps.oap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-storagev2-mongo</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-stdlib-test</artifactId>
+            <version>${oap.deps.oap.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

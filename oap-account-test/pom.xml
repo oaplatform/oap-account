@@ -68,7 +68,7 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-storage-mongo-test</artifactId>
+            <artifactId>oap-storagev2-mongo-test</artifactId>
             <version>${oap.deps.oap.version}</version>
             <scope>provided</scope>
         </dependency>
