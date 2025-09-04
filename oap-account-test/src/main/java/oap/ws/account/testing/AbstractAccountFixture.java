@@ -30,6 +30,7 @@ import oap.http.test.HttpAsserts;
 import oap.json.Binder;
 import oap.mail.MailQueue;
 import oap.mail.TransportMock;
+import oap.storage.Storage;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.TestDirectoryFixture;
 import oap.ws.account.AccountMailman;
@@ -247,7 +248,7 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles ) {
-        return userStorage().createUser( new User( mail, mail, mail, pass, true ), roles ).object.user;
+        return userStorage().createUser( new User( mail, mail, mail, pass, true ), roles, Storage.MODIFIED_BY_SYSTEM ).object.user;
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
@@ -255,14 +256,14 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
         if( tfaEnabled ) {
             user.secretKey = UserProvider.toAccessKey( mail );
         }
-        return userStorage().createUser( user, roles ).object.user;
+        return userStorage().createUser( user, roles, Storage.MODIFIED_BY_SYSTEM ).object.user;
     }
 
     public UserData addUser( UserData userData ) {
         UserData cloned = Binder.json.clone( userData );
         cloned.user.encryptPassword( cloned.user.password );
 
-        return userStorage().store( cloned );
+        return userStorage().store( cloned, Storage.MODIFIED_BY_SYSTEM );
     }
 
     @SuppressWarnings( "unchecked" )

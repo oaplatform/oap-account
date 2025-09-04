@@ -26,6 +26,7 @@ package oap.ws.account.testing;
 
 import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
+import oap.storage.Storage;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
@@ -97,7 +98,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void storeOrgAdmin() {
-        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id ), "{\"id\":\"" + data.organization.id + "\", \"name\":\"newname\"}", Http.ContentType.APPLICATION_JSON )
@@ -108,7 +109,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void getOrgAdmin() {
-        OrganizationData data = accountFixture.organizationStorage().store( new OrganizationData( new Organization( "test", "test" ) ) );
+        OrganizationData data = accountFixture.organizationStorage().store( new OrganizationData( new Organization( "test", "test" ) ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertGet( accountFixture.httpUrl( "/organizations/" + data.organization.id ) )
@@ -126,7 +127,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     public void listOrgAdmin() {
         Dates.setTimeFixed( 2015, 1, 23, 17, 22, 49 );
 
-        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLogin( user.user.email, DEFAULT_PASSWORD );
         assertGet( accountFixture.httpUrl( "/organizations" ) )
@@ -144,7 +145,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     public void list() {
         Dates.setTimeFixed( 2015, 1, 23, 17, 22, 49 );
 
-        accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
+        accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
         accountFixture.assertAdminLogin();
         assertGet( accountFixture.httpUrl( "/organizations" ) )
             .respondedJson( OK, "OK", """
@@ -176,7 +177,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void storeAccountOrgAdmin() {
-        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ), "{\"name\":\"acc1\"}", Http.ContentType.APPLICATION_JSON )
@@ -186,9 +187,9 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void listAccountsOrgAdmin() {
-        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
-        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc2", "acc2" ) );
-        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc1", "acc1" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
+        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc2", "acc2" ), Storage.MODIFIED_BY_SYSTEM );
+        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc1", "acc1" ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertGet( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ) )
@@ -197,10 +198,10 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void listAccountsUser() {
-        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
-        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc2", "acc2" ) );
-        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc1", "acc1" ) );
-        accountFixture.organizationStorage().store( data );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
+        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc2", "acc2" ), Storage.MODIFIED_BY_SYSTEM );
+        accountFixture.organizationStorage().storeAccount( data.organization.id, new Account( "acc1", "acc1" ), Storage.MODIFIED_BY_SYSTEM );
+        accountFixture.organizationStorage().store( data, Storage.MODIFIED_BY_SYSTEM );
         UserData user = new UserData( REGULAR_USER, Map.of( data.organization.id, USER ) );
         user.addAccount( data.organization.id, "acc1" );
         accountFixture.addUser( user );
@@ -216,7 +217,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         OrganizationData data = new OrganizationData( new Organization( "test", "test" ) )
             .addOrUpdateAccount( account2 )
             .addOrUpdateAccount( account1 );
-        accountFixture.organizationStorage().store( data );
+        accountFixture.organizationStorage().store( data, Storage.MODIFIED_BY_SYSTEM );
         UserData user = new UserData( REGULAR_USER, Map.of( data.organization.id, USER ) );
         user.addAccount( data.organization.id, "acc1" );
         accountFixture.addUser( user );
@@ -231,7 +232,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void account404() {
-        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ) );
+        OrganizationData data = accountFixture.organizationStorage().storeOrganization( new Organization( "test", "test" ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.addUser( new UserData( ORG_ADMIN_USER, Map.of( data.organization.id, ORGANIZATION_ADMIN ) ) );
         accountFixture.assertLoginIntoOrg( user.user.email, DEFAULT_PASSWORD, data.organization.id );
         assertPost( accountFixture.httpUrl( "/organizations/" + data.organization.id + "/accounts" ), "{\"id\":\"acc1\", \"name\":\"acc1\"}", Http.ContentType.APPLICATION_JSON )
@@ -711,8 +712,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addOrganizationToUserBySystemAdmin() {
-        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ), Storage.MODIFIED_BY_SYSTEM );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ), Storage.MODIFIED_BY_SYSTEM );
         final String orgId = org1.organization.id;
 
         Map<String, String> roles = new HashMap<>();
@@ -729,8 +730,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addOrganizationToUserByAdminInSeveralOrganizations() {
-        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ), Storage.MODIFIED_BY_SYSTEM );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ), Storage.MODIFIED_BY_SYSTEM );
 
         Map<String, String> adminRoles = new HashMap<>();
         adminRoles.put( org1.organization.id, ADMIN );
@@ -755,8 +756,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void addOrganizationToUserByUserWithDIfferentRolesInOrganizations() {
-        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ) );
-        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ) );
+        OrganizationData org1 = accountFixture.organizationStorage().storeOrganization( new Organization( "First", "test" ), Storage.MODIFIED_BY_SYSTEM );
+        OrganizationData org2 = accountFixture.organizationStorage().storeOrganization( new Organization( "Second", "test" ), Storage.MODIFIED_BY_SYSTEM );
 
         Map<String, String> adminRoles = new HashMap<>();
         adminRoles.put( org1.organization.id, ADMIN );

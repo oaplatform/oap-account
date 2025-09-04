@@ -1,5 +1,6 @@
 package oap.ws.account;
 
+import oap.storage.Storage;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -10,7 +11,7 @@ public class UserStorageTest {
     @Test
     public void testGetInfo() {
         UserStorage userStorage = new UserStorage( "1", "2", "3", "4", Map.of(), true );
-        userStorage.store( new UserData( new User( "test@email", "fn", "ln" ) ) );
+        userStorage.store( new UserData( new User( "test@email", "fn", "ln" ) ), Storage.MODIFIED_BY_SYSTEM );
 
         assertThat( userStorage.getInfo( "test@email", "unknown" ) )
             .containsExactly(

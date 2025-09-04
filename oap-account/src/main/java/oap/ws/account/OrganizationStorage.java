@@ -56,7 +56,7 @@ public class OrganizationStorage extends MemoryStorage<String, OrganizationData>
         }, () -> {
             Organization defaultOrganization = new Organization( defaultOrganizationId, defaultOrganizationName, defaultOrganizationDescription );
             return new OrganizationData( defaultOrganization );
-        } );
+        }, MODIFIED_BY_SYSTEM );
     }
 
     public void deleteAllPermanently() {
@@ -65,19 +65,20 @@ public class OrganizationStorage extends MemoryStorage<String, OrganizationData>
         }
     }
 
-    public OrganizationData storeOrganization( Organization organization ) {
+    public OrganizationData storeOrganization( Organization organization, String changedBy ) {
         return update( organization.id,
             o -> o.update( organization ),
-            () -> new OrganizationData( organization ) );
+            () -> new OrganizationData( organization ),
+            changedBy );
     }
 
-    public Optional<Metadata<OrganizationData>> storeAccount( String organizationId, Account account ) {
+    public Optional<Metadata<OrganizationData>> storeAccount( String organizationId, Account account, String changedBy ) {
         log.debug( "storeAccount organizationId {} account {}", organizationId, account );
 
         update( organizationId, o -> {
             o.addOrUpdateAccount( account );
             return o;
-        } );
+        }, changedBy );
 
         return getMetadata( organizationId );
     }

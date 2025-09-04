@@ -155,7 +155,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
             ud.lastAccess = DateTime.now( UTC );
 
             return ud;
-        } );
+        }, email );
 
         return Result.success( new UserWithCookies( userData, responseAccessCookie.map( c -> c.accessToken ), responseAccessCookie.map( c -> c.refreshToken ) ) );
     }
@@ -197,7 +197,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
                 userStorage.update( email, user -> {
                     user.lastLogin = DateTime.now( UTC );
                     return user;
-                } );
+                }, email );
                 return Result.success( userData );
             } else {
                 if( tfaCode.isEmpty() ) {
