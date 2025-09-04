@@ -82,25 +82,25 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
 
             user.defaultOrganization = defaultSystemAdminRoles.keySet().stream().findAny().get();
             return new UserData( user, defaultSystemAdminRoles );
-        } );
+        }, MODIFIED_BY_SYSTEM );
     }
 
     public void deleteAllPermanently() {
         for( var user : this ) memory.removePermanently( user.user.email );
     }
 
-    public Optional<Metadata<UserData>> addAccountToUser( String email, String organizationId, String accountId ) {
+    public Optional<Metadata<UserData>> addAccountToUser( String email, String organizationId, String accountId, String changedBy ) {
         log.debug( "add account: {} to user: {} in organization: {}", accountId, email, organizationId );
 
-        update( prepareEmail( email ), u -> u.addAccount( organizationId, accountId ) );
+        update( prepareEmail( email ), u -> u.addAccount( organizationId, accountId ), changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> removeAccountFromUser( String email, String organizationId, String accountId ) {
+    public Optional<Metadata<UserData>> removeAccountFromUser( String email, String organizationId, String accountId, String changedBy ) {
         log.debug( "remove account: {} from user: {} in organization: {}", accountId, email, organizationId );
 
-        update( prepareEmail( email ), u -> u.removeAccount( organizationId, accountId ) );
+        update( prepareEmail( email ), u -> u.removeAccount( organizationId, accountId ), changedBy );
 
         return getMetadata( email );
     }
@@ -111,73 +111,73 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
             .toList();
     }
 
-    public Metadata<UserData> createUser( User user, Map<String, String> roles ) {
+    public Metadata<UserData> createUser( User user, Map<String, String> roles, String changedBy ) {
         log.debug( "createUser user {} roles {}", user, roles );
         user.email = prepareEmail( user.email );
         if( get( user.email ).isPresent() )
             throw new IllegalArgumentException( "user: " + user.email + " is already registered" );
         user.password = User.encrypt( user.password );
-        store( new UserData( user, roles ) );
+        store( new UserData( user, roles ), changedBy );
 
         return getMetadata( user.email ).orElseThrow();
     }
 
-    public Optional<Metadata<UserData>> updateUser( String email, Consumer<User> update ) {
+    public Optional<Metadata<UserData>> updateUser( String email, Consumer<User> update, String changedBy ) {
         log.debug( "updateUser email {}", email );
 
         update( prepareEmail( email ), u -> {
             update.accept( u.user );
             return u;
-        } );
+        }, changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> addOrganizationToUser( String email, String organizationId, String role ) {
-        update( prepareEmail( email ), u -> u.addOrganization( organizationId, role ) );
+    public Optional<Metadata<UserData>> addOrganizationToUser( String email, String organizationId, String role, String changedBy ) {
+        update( prepareEmail( email ), u -> u.addOrganization( organizationId, role ), changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> removeUserFromOrganization( String email, String organizationId ) {
-        update( prepareEmail( email ), u -> u.removeOrganization( organizationId ) );
+    public Optional<Metadata<UserData>> removeUserFromOrganization( String email, String organizationId, String changedBy ) {
+        update( prepareEmail( email ), u -> u.removeOrganization( organizationId ), changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> assignRole( String email, String organizationId, String role ) {
+    public Optional<Metadata<UserData>> assignRole( String email, String organizationId, String role, String changedBy ) {
         log.debug( "assign role: {} to user: {} in organization: {}", role, email, organizationId );
-        update( prepareEmail( email ), u -> u.assignRole( organizationId, role ) );
+        update( prepareEmail( email ), u -> u.assignRole( organizationId, role ), changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> passwd( String email, String password ) {
-        update( prepareEmail( email ), user -> user.encryptPassword( password ) );
+    public Optional<Metadata<UserData>> passwd( String email, String password, String changedBy ) {
+        update( prepareEmail( email ), user -> user.encryptPassword( password ), changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> ban( String email, boolean banStatus ) {
+    public Optional<Metadata<UserData>> ban( String email, boolean banStatus, String changedBy ) {
         log.debug( ( banStatus ? "ban" : "unban" ) + " user " + email );
-        update( prepareEmail( email ), user -> user.ban( banStatus ) );
+        update( prepareEmail( email ), user -> user.ban( banStatus ), changedBy );
 
         return getMetadata( email );
     }
 
-    public Optional<Metadata<UserData>> deleteUser( String email ) {
-        return deleteMetadata( StringUtils.lowerCase( email ) );
+    public Optional<Metadata<UserData>> deleteUser( String email, String changedBy ) {
+        return deleteMetadata( StringUtils.lowerCase( email ), changedBy );
     }
 
-    public Optional<UserData> refreshApikey( String email ) {
+    public Optional<UserData> refreshApikey( String email, String changedBy ) {
         log.debug( "refresh apikey to user: {}", email );
 
-        return update( UserStorage.prepareEmail( email ), UserData::refreshApikey );
+        return update( UserStorage.prepareEmail( email ), UserData::refreshApikey, changedBy );
     }
 
-    public Optional<UserData> confirm( String email ) {
+    public Optional<UserData> confirm( String email, String changedBy ) {
         log.debug( "confirming: {}", email );
-        return update( UserStorage.prepareEmail( email ), user -> user.confirm( true ) );
+        return update( UserStorage.prepareEmail( email ), user -> user.confirm( true ), changedBy );
     }
 
     @Override

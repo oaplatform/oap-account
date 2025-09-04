@@ -68,21 +68,18 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-storagev2-mongo-test</artifactId>
+            <artifactId>oap-storage-mongo-test</artifactId>
             <version>${oap.deps.oap.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>oap</groupId>
             <artifactId>oap-mail-test</artifactId>
             <version>${oap.deps.oap.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>oap</groupId>
             <artifactId>oap-ws-sso</artifactId>
             <version>${oap.deps.oap.version}</version>
-            <scope>test</scope>
         </dependency>
 
 

@@ -119,7 +119,7 @@ public class JwtUserAuthenticator implements Authenticator {
     }
 
     private void incUserCounter( User user ) {
-        userStorage.update( user.getEmail(), UserData::incCounter );
+        userStorage.update( user.getEmail(), UserData::incCounter, user.getEmail() );
     }
 
     private Authentication generateTokenWithOrgId( User user, String activeOrgId ) {
@@ -194,6 +194,6 @@ public class JwtUserAuthenticator implements Authenticator {
 
     @Override
     public void invalidate( String email ) {
-        userStorage.update( email, UserData::incCounter );
+        userStorage.update( email, UserData::incCounter, email );
     }
 }

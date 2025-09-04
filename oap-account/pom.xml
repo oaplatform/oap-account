@@ -106,12 +106,12 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-storagev2</artifactId>
+            <artifactId>oap-storage</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-storagev2-mongo</artifactId>
+            <artifactId>oap-storage-mongo</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
 

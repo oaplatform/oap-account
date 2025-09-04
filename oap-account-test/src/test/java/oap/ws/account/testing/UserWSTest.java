@@ -8,6 +8,7 @@ package oap.ws.account.testing;
 
 import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
+import oap.storage.Storage;
 import oap.storage.mongo.MongoFixture;
 import oap.testng.Fixtures;
 import oap.testng.SystemTimerFixture;
@@ -158,7 +159,7 @@ public class UserWSTest extends Fixtures {
         Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
 
         UserData user = accountFixture.userStorage().createUser( new User( "user@user.com", "Johnny", "Walker",
-            "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ).object;
+            "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ), Storage.MODIFIED_BY_SYSTEM ).object;
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )
             .respondedJson( """
@@ -180,9 +181,9 @@ public class UserWSTest extends Fixtures {
 
     @Test
     public void accessOtherOrgUser() {
-        OrganizationData organizationData = accountFixture.organizationStorage().storeOrganization( new Organization( "THRRG", "otherOrg" ) );
+        OrganizationData organizationData = accountFixture.organizationStorage().storeOrganization( new Organization( "THRRG", "otherOrg" ), Storage.MODIFIED_BY_SYSTEM );
         UserData user = accountFixture.userStorage().createUser( new User( "other@other.com", "Other", "User",
-            "pass", false ), Map.of( organizationData.organization.id, USER ) ).object;
+            "pass", false ), Map.of( organizationData.organization.id, USER ), Storage.MODIFIED_BY_SYSTEM ).object;
 
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )

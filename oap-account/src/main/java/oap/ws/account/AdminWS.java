@@ -25,6 +25,7 @@
 package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
+import oap.storage.Storage;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
 
@@ -62,7 +63,7 @@ public class AdminWS {
                         d.accounts.remove( organizationId );
                         d.roles.remove( organizationId );
                         return d;
-                    } );
+                    }, Storage.MODIFIED_BY_SYSTEM );
                 }
             } );
 
