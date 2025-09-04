@@ -451,12 +451,10 @@ public class OrganizationWS extends AbstractWS {
     }
 
     @WsMethod( method = POST, path = "/users/reset-password", description = "Reset password endpoint" )
-    public Response resetPassword(
-        @WsParam( from = BODY ) ResetPasswordRequest request,
-        @WsParam( from = SESSION ) UserData loggedUser ) {
-        Optional<String> email = recoveryTokenService.getEmailByToken( request.token );
-        if( email.isPresent() ) {
-            Optional<UserView> userView = userStorage.passwd( email.get(), request.newPassword, loggedUser.getEmail() ).map( Users::userMetadataToView );
+    public Response resetPassword( @WsParam( from = BODY ) ResetPasswordRequest request ) {
+        String email = recoveryTokenService.getEmailByToken( request.token ).orElse( null );
+        if( email != null ) {
+            Optional<UserView> userView = userStorage.passwd( email, request.newPassword, email ).map( Users::userMetadataToView );
             recoveryTokenService.invalidate( request.token );
         } else {
             log.info( "Invalid or expired token" );
