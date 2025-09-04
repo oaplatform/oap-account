@@ -235,12 +235,11 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = POST, path = "/register" )
     @WsValidate( "validateUserRegistered" )
     public UserView register( @WsValidateJson( schema = User.SCHEMA_REGISTRATION ) @WsParam( from = BODY ) User user,
-                              @WsParam( from = QUERY ) String organizationName,
-                              @WsParam( from = SESSION ) UserData loggedUser ) {
-        OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), loggedUser.getEmail() );
+                              @WsParam( from = QUERY ) String organizationName ) {
+        OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), user.email );
         final String orgId = organizationData.organization.id;
         user.defaultOrganization = orgId;
-        Metadata<UserData> userCreated = userStorage.createUser( user, new HashMap<>( Map.of( orgId, ORGANIZATION_ADMIN ) ), loggedUser.getEmail() );
+        Metadata<UserData> userCreated = userStorage.createUser( user, new HashMap<>( Map.of( orgId, ORGANIZATION_ADMIN ) ), user.email );
         mailman.sendRegisteredEmail( userCreated.object );
         return Users.userMetadataToView( userCreated );
     }
@@ -317,10 +316,11 @@ public class OrganizationWS extends AbstractWS {
     @WsValidate( { "validateUserLoggedIn" } )
     @SneakyThrows
     public Response confirm( @WsParam( from = PATH ) String email,
-                             @WsParam( from = SESSION ) UserData loggedUser ) {
-        log.debug( "confirm email {} loggedUser {} hasPassword {}", email, loggedUser, loggedUser.user.hasPassword() );
+                             // validateUserLoggedIn( Optinal )
+                             @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+        log.debug( "confirm email {} loggedUser {} hasPassword {}", email, loggedUser, loggedUser.get().user.hasPassword() );
 
-        User user = loggedUser.user;
+        User user = loggedUser.get().user;
         URI redirect = new URIBuilder( confirmUrlFinish )
             .addParameter( "apiKey", user.apiKey )
             .addParameter( "accessKey", user.getAccessKey() )
@@ -328,7 +328,7 @@ public class OrganizationWS extends AbstractWS {
             .addParameter( "passwd", String.valueOf( !user.hasPassword() ) )
             .build();
 
-        UserData userConfirmed = userStorage.confirm( email, loggedUser.getEmail() ).orElse( null );
+        UserData userConfirmed = userStorage.confirm( email, loggedUser.get().getEmail() ).orElse( null );
         return userConfirmed != null ? Response.redirect( redirect ) : Response.notFound();
     }
 
