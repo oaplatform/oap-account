@@ -18,8 +18,6 @@ import oap.ws.account.Organization;
 import oap.ws.account.OrganizationData;
 import oap.ws.account.User;
 import oap.ws.account.UserData;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -50,15 +48,12 @@ import static oap.ws.account.testing.AbstractAccountFixture.ORG_ADMIN_USER;
 import static oap.ws.account.testing.AbstractAccountFixture.REGULAR_USER;
 import static oap.ws.validate.testng.ValidationAssertion.assertValidation;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.joda.time.DateTimeZone.UTC;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertNull;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class OrganizationWSTest extends Fixtures {
-    public static final String TODAY = DateTimeFormat.forPattern( "yyyy-MM-dd" ).print( DateTime.now( UTC ) );
-
     protected final AccountFixture accountFixture;
 
     public OrganizationWSTest() {

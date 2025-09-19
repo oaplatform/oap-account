@@ -101,7 +101,7 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-storage</artifactId>
+            <artifactId>oap-logstream</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
         <dependency>

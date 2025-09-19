@@ -85,10 +85,6 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
         }, MODIFIED_BY_SYSTEM );
     }
 
-    public void deleteAllPermanently() {
-        for( var user : this ) memory.removePermanently( user.user.email );
-    }
-
     public Optional<Metadata<UserData>> addAccountToUser( String email, String organizationId, String accountId, String changedBy ) {
         log.debug( "add account: {} to user: {} in organization: {}", accountId, email, organizationId );
 
