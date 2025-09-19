@@ -1,7 +1,7 @@
 package oap.ws.account;
 
 import oap.http.Http.StatusCode;
-import oap.logstream.formats.rowbinary.RowBinaryUtils;
+import oap.logstream.formats.rowbinary.RowBinaryOutputStream;
 import oap.util.Throwables;
 import oap.ws.Response;
 import oap.ws.WsMethod;
@@ -25,17 +25,18 @@ public class ExportDictionaryWS {
             case "organizations" -> {
                 try {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    baos.write( RowBinaryUtils.line( List.of( "id", "name" ) ) );
+                    RowBinaryOutputStream rowBinaryOutputStream = new RowBinaryOutputStream( baos, List.of( "id", "name" ) );
                     organizationStorage
                         .select( false )
                         .sorted( Comparator.comparing( o -> o.organization.name ) )
                         .forEach( data -> {
-                        try {
-                            baos.write( RowBinaryUtils.line( List.of( data.organization.id, data.organization.name ) ) );
-                        } catch( IOException e ) {
-                            throw Throwables.propagate( e );
-                        }
-                    } );
+                            try {
+                                rowBinaryOutputStream.writeString( data.organization.id );
+                                rowBinaryOutputStream.writeString( data.organization.name );
+                            } catch( IOException e ) {
+                                throw Throwables.propagate( e );
+                            }
+                        } );
 
                     return new Response( StatusCode.OK ).withBody( baos.toByteArray(), true );
                 } catch( IOException e ) {
