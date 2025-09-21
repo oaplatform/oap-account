@@ -59,12 +59,6 @@ public class OrganizationStorage extends MemoryStorage<String, OrganizationData>
         }, MODIFIED_BY_SYSTEM );
     }
 
-    public void deleteAllPermanently() {
-        for( OrganizationData organizationData : this ) {
-            memory.removePermanently( organizationData.organization.id );
-        }
-    }
-
     public OrganizationData storeOrganization( Organization organization, String changedBy ) {
         return update( organization.id,
             o -> o.update( organization ),
