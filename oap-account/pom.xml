@@ -45,11 +45,6 @@
         </dependency>
         <dependency>
             <groupId>oap</groupId>
-            <artifactId>oap-remote-application</artifactId>
-            <version>${oap.deps.oap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>oap</groupId>
             <artifactId>oap-http-prometheus</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>

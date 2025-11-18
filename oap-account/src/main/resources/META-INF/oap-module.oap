@@ -32,12 +32,12 @@ services {
     implementation = oap.storage.MongoPersistence
     parameters {
       uniqueName = <services.self.name>
-      mongoClient: <modules.oap-storage-mongo.mongo-client>
+      mongoClient = <modules.oap-storage-mongo.mongo-client>
       collectionName = organizations
       delay = 1m
       storage = <modules.this.organization-storage>
       watch = true
-      crashDumpPath = <change me>
+      crashDumpPath = "change me"
     }
     supervision.supervise = true
   }
@@ -50,7 +50,7 @@ services {
       defaultSystemAdminPassword = Xenoss123
       defaultSystemAdminFirstName = System
       defaultSystemAdminLastName = Admin
-      defaultSystemAdminRoles = {SYSTEM: ADMIN, DFLT: ADMIN}
+      defaultSystemAdminRoles {SYSTEM = ADMIN, DFLT = ADMIN}
       defaultSystemAdminReadOnly = true
     }
     supervision.supervise = true
@@ -65,7 +65,7 @@ services {
       delay = 1m
       storage = <modules.this.user-storage>
       watch = true
-      crashDumpPath = <change me>
+      crashDumpPath = "change me"
     }
     supervision.supervise = true
   }
@@ -73,8 +73,8 @@ services {
   oap-ws-sso-token-extractor {
     implementation = oap.ws.sso.JWTExtractor
     parameters {
-      secret = <change me>
-      issuer = <change me>
+      secret = "change me"
+      issuer = "change me"
       roles = <modules.oap-ws-sso-api.oap-ws-sso-roles>
     }
   }
@@ -94,9 +94,9 @@ services {
   jwt-token-generator {
     implementation = oap.ws.sso.JwtTokenGenerator
     parameters {
-      accessSecret = <change me>
-      refreshSecret = <change me>
-      issuer = <change me>
+      accessSecret = "change me"
+      refreshSecret = "change me"
+      issuer = "change me"
       accessSecretExpiration = 2m
       refreshSecretExpiration = 30d
     }
@@ -105,8 +105,8 @@ services {
   oap-ws-sso-token-extractor {
     implementation = oap.ws.sso.JWTExtractor
     parameters {
-      secret = <change me>
-      issuer = <change me>
+      secret = "change me"
+      issuer = "change me"
       roles = <modules.oap-ws-sso-api.oap-ws-sso-roles>
     }
   }
@@ -125,9 +125,9 @@ services {
     implementation = oap.ws.account.AccountMailman
     parameters {
       mailman = <modules.oap-mail.oap-mail-mailman>
-      fromPersonal = <change me>
-      fromEmail = <change me>
-      confirmUrl = <change me>
+      fromPersonal = "change me"
+      fromEmail = "change me"
+      confirmUrl = "change me"
     }
   }
 
@@ -161,8 +161,8 @@ services {
       path = organizations
       sessionAware = true
       interceptors = [
-        oap-ws-sso-api.oap-ws-sso-api-key-interceptor
-        oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor
+        <modules.oap-ws-sso-api.oap-ws-sso-api-key-interceptor>
+        <modules.oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor>
       ]
     }
   }
@@ -175,7 +175,7 @@ services {
     ws-service {
       path = user
       sessionAware = true
-      interceptors = oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor
+      interceptors = <modules.oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor>
     }
   }
 
@@ -203,8 +203,8 @@ services {
       path = auth
       sessionAware = true
       interceptors = [
-        oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor
-        oap-ws-sso-api.oap-ws-sso-throttle-login-interceptor
+        <modules.oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor>
+        <modules.oap-ws-sso-api.oap-ws-sso-throttle-login-interceptor>
       ]
     }
   }
@@ -220,7 +220,7 @@ services {
       path = refresh
       sessionAware = true
       interceptors = [
-        oap-ws-sso-api.oap-ws-sso-throttle-login-interceptor
+        <modules.oap-ws-sso-api.oap-ws-sso-throttle-login-interceptor>
       ]
     }
   }
@@ -246,7 +246,7 @@ services {
 configurations = [
   {
     loader = oap.json.TypeIdFactory
-    config = {
+    config {
       organization = oap.ws.account.OrganizationData
       user = oap.ws.account.UserData
     }
