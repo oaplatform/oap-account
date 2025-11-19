@@ -4,9 +4,9 @@
      auth0-provider {
          implementation = oap.ws.account.Auth0Provider
          parameters {
-             issuer = <change me>
-             claimPrefix = <change me>
-             secret = <change me>
+             issuer = "change me"
+             claimPrefix = "change me"
+             secret = "change me"
          }
      }
 
@@ -24,14 +24,14 @@
      google-provider {
          implementation = oap.ws.account.GoogleProvider
          parameters {
-              clientId = <change me>
+              clientId = "change me"
          }
      }
 
      oauth-service {
         implementation = oap.ws.account.OauthService
         parameters {
-          providers = {
+          providers {
              AUTH0 = <modules.this.auth0-provider>
              FACEBOOK = <modules.this.facebook-provider>
              GOOGLE =  <modules.this.google-provider>
