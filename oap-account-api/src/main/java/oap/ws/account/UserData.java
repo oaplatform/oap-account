@@ -9,6 +9,7 @@ package oap.ws.account;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -52,6 +53,7 @@ public class UserData implements oap.ws.sso.User, Serializable {
         this.roles = roles;
     }
 
+    @JsonCreator
     public UserData( User user ) {
         this.user = user;
     }
