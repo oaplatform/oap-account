@@ -29,13 +29,14 @@ public class OrganizationStorage extends MemoryStorage<String, OrganizationData>
      * @param defaultOrganizationDescription default organization description
      * @param defaultOrganizationReadOnly    if true, the storage modifies the default organization to the default values on startup
      */
-    public OrganizationStorage( String defaultOrganizationId,
+    public OrganizationStorage( int transactionLogSize,
+                                String defaultOrganizationId,
                                 String defaultOrganizationName,
                                 String defaultOrganizationDescription,
                                 boolean defaultOrganizationReadOnly ) {
         super( Identifier.<OrganizationData>forId( o -> o.organization.id, ( o, id ) -> o.organization.id = id )
             .suggestion( o -> o.organization.name )
-            .build(), SERIALIZED );
+            .build(), SERIALIZED, transactionLogSize );
 
         this.defaultOrganizationId = defaultOrganizationId;
         this.defaultOrganizationName = defaultOrganizationName;
