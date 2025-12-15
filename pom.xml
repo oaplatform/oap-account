@@ -6,7 +6,7 @@
     <parent>
         <groupId>oap</groupId>
         <artifactId>oap.maven</artifactId>
-        <version>25.0.0</version>
+        <version>25.0.2</version>
     </parent>
 
     <packaging>pom</packaging>
@@ -20,7 +20,7 @@
             <dependency>
                 <groupId>oap</groupId>
                 <artifactId>oap-dependencies</artifactId>
-                <version>25.0.0</version>
+                <version>25.0.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -37,28 +37,28 @@
     <repositories>
         <repository>
             <id>oap</id>
-            <url>https://artifacts.oaplatform.org/repository/oap-maven/</url>
+            <url>https://maven.xenoss.net/repository/oap-maven/</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>oap</id>
-            <url>https://artifacts.oaplatform.org/repository/oap-maven/</url>
+            <url>https://maven.xenoss.net/repository/oap-maven/</url>
         </pluginRepository>
     </pluginRepositories>
 
     <distributionManagement>
         <repository>
             <id>oap</id>
-            <url>https://artifacts.oaplatform.org/repository/oap-maven/</url>
+            <url>https://maven.xenoss.net/repository/oap-maven/</url>
         </repository>
     </distributionManagement>
 
     <properties>
-        <oap.project.version>25.0.4</oap.project.version>
+        <oap.project.version>25.0.5</oap.project.version>
 
-        <oap.deps.oap.version>25.0.13</oap.deps.oap.version>
+        <oap.deps.oap.version>25.1.0</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.12.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.7.0</oap.deps.google.api-client>

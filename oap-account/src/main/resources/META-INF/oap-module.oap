@@ -19,11 +19,11 @@ services {
   organization-storage {
     implementation = oap.ws.account.OrganizationStorage
     parameters {
-      uniqueName = <services.self.name>
       defaultOrganizationId = DFLT
       defaultOrganizationName = Default
       defaultOrganizationDescription = Default organization
       defaultOrganizationReadOnly = true
+      transactionLogSize = 256
     }
     supervision.supervise = true
   }
@@ -45,13 +45,13 @@ services {
   user-storage {
     implementation = oap.ws.account.UserStorage
     parameters {
-      uniqueName = <services.self.name>
       defaultSystemAdminEmail = "xenoss@xenoss.io"
       defaultSystemAdminPassword = Xenoss123
       defaultSystemAdminFirstName = System
       defaultSystemAdminLastName = Admin
       defaultSystemAdminRoles {SYSTEM = ADMIN, DFLT = ADMIN}
       defaultSystemAdminReadOnly = true
+      transactionLogSize = 4096
     }
     supervision.supervise = true
   }
@@ -99,15 +99,6 @@ services {
       issuer = "change me"
       accessSecretExpiration = 2m
       refreshSecretExpiration = 30d
-    }
-  }
-
-  oap-ws-sso-token-extractor {
-    implementation = oap.ws.sso.JWTExtractor
-    parameters {
-      secret = "change me"
-      issuer = "change me"
-      roles = <modules.oap-ws-sso-api.oap-ws-sso-roles>
     }
   }
 
@@ -214,7 +205,6 @@ services {
     parameters {
       authenticator = <modules.this.oap-ws-sso-authenticator>
       sessionManager = <modules.oap-ws.session-manager>
-      oauthService = <modules.oap-account-social.oauth-service>
     }
     ws-service {
       path = refresh

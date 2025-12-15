@@ -37,7 +37,8 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
      * @param defaultSystemAdminRoles     default user roles map ( hocon/json format )
      * @param defaultSystemAdminReadOnly  if true, the storage modifies the default user to the default values on startup
      */
-    public UserStorage( String defaultSystemAdminEmail,
+    public UserStorage( int transactionLogSize,
+                        String defaultSystemAdminEmail,
                         String defaultSystemAdminPassword,
                         String defaultSystemAdminFirstName,
                         String defaultSystemAdminLastName,
@@ -45,7 +46,7 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
                         boolean defaultSystemAdminReadOnly ) {
         super( Identifier.<UserData>forId( u -> u.user.email, ( o, id ) -> o.user.email = id )
             .suggestion( u -> u.user.email )
-            .build(), SERIALIZED );
+            .build(), SERIALIZED, transactionLogSize );
 
         this.defaultSystemAdminEmail = defaultSystemAdminEmail;
         this.defaultSystemAdminPassword = defaultSystemAdminPassword;
