@@ -34,23 +34,25 @@ public class UserWS extends AbstractWS {
         this.userStorage = userStorage;
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/{email}", description = "Returns user with given email" )
+    @SuppressWarnings( "checkstyle:UnnecessaryParentheses" )
+    @WsMethod( method = GET, path = "/{organizationId}/{idOrEmail}", description = "Returns user with given email" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { USER_READ, MANAGE_SELF } )
     @WsValidate( { "validateOrganizationAccess", "validateSameOrganization" } )
     public Optional<UserView> get( @WsParam( from = PATH ) String organizationId,
-                                   @WsParam( from = PATH ) String id,
+                                   @WsParam( from = PATH, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
                                    @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.getMetadata( id )
-            .map( u -> id.equals( loggedUser.user.id ) || isSystem( loggedUser )
-                ? Users.userMetadataToSecureView( u )
-                : Users.userMetadataToView( u ) );
+        return userStorage.getMetadata( idOrEmail )
+            .map( u ->
+                ( idOrEmail.equalsIgnoreCase( loggedUser.user.id ) || idOrEmail.equalsIgnoreCase( loggedUser.user.email ) ) || isSystem( loggedUser )
+                    ? Users.userMetadataToSecureView( u )
+                    : Users.userMetadataToView( u ) );
     }
 
-    protected ValidationErrors validateSameOrganization( String organizationId, String id ) {
-        return userStorage.getMetadata( id )
+    protected ValidationErrors validateSameOrganization( String organizationId, String idOrEmail ) {
+        return userStorage.getMetadata( idOrEmail )
             .filter( user -> user.object.canAccessOrganization( organizationId ) )
             .map( user -> ValidationErrors.empty() )
-            .orElseGet( () -> ValidationErrors.error( HttpURLConnection.HTTP_NOT_FOUND, "not found " + id ) );
+            .orElseGet( () -> ValidationErrors.error( HttpURLConnection.HTTP_NOT_FOUND, "not found " + idOrEmail ) );
     }
 
     @WsMethod( method = GET, path = "/current", description = "Returns a current logged user" )

@@ -125,10 +125,10 @@ public class JwtUserAuthenticator implements Authenticator {
     private Authentication generateTokenWithOrgId( User user, String activeOrgId ) {
         incUserCounter( user );
 
-        var accessToken = jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId );
-        var refreshToken = jwtTokenGenerator.generateRefreshToken( user );
+        Authentication.Token accessToken = jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId );
+        Authentication.Token refreshToken = jwtTokenGenerator.generateRefreshToken( user );
         log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
-        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() ) );
+        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getId() ).get() ) );
     }
 
     public Result<Authentication, AuthenticationFailure> refreshToken( String refreshToken, Optional<String> orgId ) {

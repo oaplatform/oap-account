@@ -49,8 +49,9 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
                         String defaultSystemAdminLastName,
                         Map<String, String> defaultSystemAdminRoles,
                         boolean defaultSystemAdminReadOnly ) {
-        super( Identifier.<UserData>forId( u -> u.user.email, ( o, id ) -> o.user.email = id )
+        super( Identifier.<UserData>forId( u -> u.user.id, ( o, id ) -> o.user.id = id )
             .suggestion( u -> u.user.email )
+            .options( Identifier.Option.COMPACT )
             .build(), SERIALIZED, transactionLogSize );
 
         this.defaultSystemAdminEmail = defaultSystemAdminEmail;
@@ -216,6 +217,10 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
         }
 
         return null;
+    }
+
+    public Optional<UserData> get( @Nonnull String idOrEmail ) {
+        return getMetadata( idOrEmail ).map( metadata -> metadata.object );
     }
 
     public Optional<UserData> update( @Nonnull String idOrEmail, @Nonnull Function<UserData, UserData> update, String modifiedBy ) {
