@@ -253,9 +253,9 @@ public class OrganizationWS extends AbstractWS {
         String externalOauthToken, OauthProvider source, Ext ext ) {
         OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), loggedUser.getEmail() );
         final String orgId = organizationData.organization.id;
-        final Optional<TokenInfo> tokenInfo = oauthService.getOauthProvider( source ).getTokenInfo( externalOauthToken );
-        if( tokenInfo.isPresent() ) {
-            final User user = new User( tokenInfo.get().email, tokenInfo.get().firstName, tokenInfo.get().lastName, null, true, false );
+        TokenInfo tokenInfo = oauthService.getOauthProvider( source ).getTokenInfo( externalOauthToken ).orElse( null );
+        if( tokenInfo != null ) {
+            final User user = new User( null, tokenInfo.email, tokenInfo.firstName, tokenInfo.lastName, null, true, false );
             user.ext = ext;
             user.defaultOrganization = orgId;
             Metadata<UserData> userCreated = userStorage.createUser( user, new HashMap<>( Map.of( orgId, ORGANIZATION_ADMIN ) ), loggedUser.getEmail() );
@@ -301,7 +301,7 @@ public class OrganizationWS extends AbstractWS {
     public Optional<UserView> delete( @WsParam( from = PATH ) String organizationId,
                                       @WsParam( from = PATH ) String email,
                                       @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.deleteUser( email, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.deleteMetadata( email ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/unban/{email}" )

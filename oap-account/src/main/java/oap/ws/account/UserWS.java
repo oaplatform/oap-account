@@ -38,19 +38,19 @@ public class UserWS extends AbstractWS {
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { USER_READ, MANAGE_SELF } )
     @WsValidate( { "validateOrganizationAccess", "validateSameOrganization" } )
     public Optional<UserView> get( @WsParam( from = PATH ) String organizationId,
-                                   @WsParam( from = PATH ) String email,
+                                   @WsParam( from = PATH ) String id,
                                    @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.getMetadata( email )
-            .map( u -> email.equals( loggedUser.user.email ) || isSystem( loggedUser )
+        return userStorage.getMetadata( id )
+            .map( u -> id.equals( loggedUser.user.id ) || isSystem( loggedUser )
                 ? Users.userMetadataToSecureView( u )
                 : Users.userMetadataToView( u ) );
     }
 
-    protected ValidationErrors validateSameOrganization( String organizationId, String email ) {
-        return userStorage.getMetadata( email )
+    protected ValidationErrors validateSameOrganization( String organizationId, String id ) {
+        return userStorage.getMetadata( id )
             .filter( user -> user.object.canAccessOrganization( organizationId ) )
             .map( user -> ValidationErrors.empty() )
-            .orElseGet( () -> ValidationErrors.error( HttpURLConnection.HTTP_NOT_FOUND, "not found " + email ) );
+            .orElseGet( () -> ValidationErrors.error( HttpURLConnection.HTTP_NOT_FOUND, "not found " + id ) );
     }
 
     @WsMethod( method = GET, path = "/current", description = "Returns a current logged user" )
@@ -58,7 +58,7 @@ public class UserWS extends AbstractWS {
     @WsSecurity( realm = USER, permissions = {} )
     public Optional<UserSecureView> current( @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
         return loggedUser
-            .flatMap( u -> userStorage.getMetadata( u.user.email ) )
+            .flatMap( u -> userStorage.getMetadata( u.user.id ) )
             .map( Users::userMetadataToSecureView );
     }
 }

@@ -56,14 +56,14 @@ public class JwtUserAuthenticator implements Authenticator {
     }
 
     @Override
-    public Result<Authentication, AuthenticationFailure> authenticate( String email, String password, Optional<String> tfaCode ) {
-        Result<? extends oap.ws.sso.User, AuthenticationFailure> authResult = userProvider.getAuthenticated( email, password, tfaCode );
+    public Result<Authentication, AuthenticationFailure> authenticate( String idOrEmail, String password, Optional<String> tfaCode ) {
+        Result<? extends oap.ws.sso.User, AuthenticationFailure> authResult = userProvider.getAuthenticated( idOrEmail, password, tfaCode );
         return getAuthenticationTokens( authResult );
     }
 
     @Override
-    public Result<Authentication, AuthenticationFailure> authenticate( String email, Optional<String> tfaCode ) {
-        var authResult = userProvider.getAuthenticated( email, tfaCode );
+    public Result<Authentication, AuthenticationFailure> authenticate( String idOrEmail, Optional<String> tfaCode ) {
+        var authResult = userProvider.getAuthenticated( idOrEmail, tfaCode );
         return getAuthenticationTokens( authResult );
     }
 
@@ -167,8 +167,8 @@ public class JwtUserAuthenticator implements Authenticator {
 
 
     @Override
-    public Optional<Authentication> authenticateTrusted( String email ) {
-        return userProvider.getUser( email )
+    public Optional<Authentication> authenticateTrusted( String idOrEmail ) {
+        return userProvider.getUser( idOrEmail )
             .map( user -> {
                 try {
                     return generateTokens( user );

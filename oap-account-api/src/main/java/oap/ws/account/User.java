@@ -20,6 +20,7 @@ import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serial;
 import java.io.Serializable;
 import java.security.SecureRandom;
@@ -37,6 +38,7 @@ public class User implements Serializable {
     public static RandomGenerator random = new SecureRandom();
     public long counter = 0;
     @Id
+    public String id;
     public String email;
     public String firstName;
     public String lastName;
@@ -52,20 +54,21 @@ public class User implements Serializable {
     public String secretKey = generateSecretKey();
 
     @JsonCreator
-    public User( String email ) {
+    public User( @Nullable String id, @Nonnull String email ) {
+        this.id = id;
         this.email = email;
     }
 
-    public User( String email, String firstName, String lastName, String password, boolean confirmed ) {
-        this( email );
+    public User( @Nullable String id, @Nonnull String email, String firstName, String lastName, String password, boolean confirmed ) {
+        this( id, email );
         this.firstName = firstName;
         this.lastName = lastName;
         this.confirmed = confirmed;
         this.password = password;
     }
 
-    public User( String email, String firstName, String lastName, String password, boolean confirmed, boolean tfaEnabled ) {
-        this( email );
+    public User( @Nullable String id, @Nonnull String email, String firstName, String lastName, String password, boolean confirmed, boolean tfaEnabled ) {
+        this( id, email );
         this.firstName = firstName;
         this.lastName = lastName;
         this.confirmed = confirmed;
@@ -74,8 +77,8 @@ public class User implements Serializable {
     }
 
 
-    public User( String email, String firstName, String lastName ) {
-        this( email, firstName, lastName, null, false );
+    public User( @Nullable String id, @Nonnull String email, String firstName, String lastName ) {
+        this( id, email, firstName, lastName, null, false );
     }
 
     public static String encrypt( String password ) {

@@ -73,8 +73,8 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
     public static final String DEFAULT_ORGANIZATION_ADMIN_EMAIL = "orgadmin@admin.com";
     public static final String SYSTEM_ORGANIZATION_ADMIN_EMAIL = "systemadmin@admin.com";
     public static final String DEFAULT_ADMIN_EMAIL = "xenoss@xenoss.io";
-    public static final User ORG_ADMIN_USER = new User( "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
-    public static final User REGULAR_USER = new User( "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
+    public static final User ORG_ADMIN_USER = new User( null, "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
+    public static final User REGULAR_USER = new User( null, "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
 
     public AbstractAccountFixture( TestDirectoryFixture testDirectoryFixture, MongoFixture mongoFixture ) {
         super( testDirectoryFixture, urlOrThrow( AbstractAccountFixture.class, "/application-account.fixture.conf" ) );
@@ -248,11 +248,11 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles ) {
-        return userStorage().createUser( new User( mail, mail, mail, pass, true ), roles, Storage.MODIFIED_BY_SYSTEM ).object.user;
+        return userStorage().createUser( new User( null, mail, mail, mail, pass, true ), roles, Storage.MODIFIED_BY_SYSTEM ).object.user;
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
-        User user = new User( mail, mail, mail, pass, true, tfaEnabled );
+        User user = new User( null, mail, mail, mail, pass, true, tfaEnabled );
         if( tfaEnabled ) {
             user.secretKey = UserProvider.toAccessKey( mail );
         }

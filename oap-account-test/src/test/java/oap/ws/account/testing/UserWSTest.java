@@ -158,7 +158,7 @@ public class UserWSTest extends Fixtures {
     public void noSecureData() {
         Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
 
-        UserData user = accountFixture.userStorage().createUser( new User( "user@user.com", "Johnny", "Walker",
+        UserData user = accountFixture.userStorage().createUser( new User( null, "user@user.com", "Johnny", "Walker",
             "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ), Storage.MODIFIED_BY_SYSTEM ).object;
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )
@@ -182,7 +182,7 @@ public class UserWSTest extends Fixtures {
     @Test
     public void accessOtherOrgUser() {
         OrganizationData organizationData = accountFixture.organizationStorage().storeOrganization( new Organization( "THRRG", "otherOrg" ), Storage.MODIFIED_BY_SYSTEM );
-        UserData user = accountFixture.userStorage().createUser( new User( "other@other.com", "Other", "User",
+        UserData user = accountFixture.userStorage().createUser( new User( null, "other@other.com", "Other", "User",
             "pass", false ), Map.of( organizationData.organization.id, USER ), Storage.MODIFIED_BY_SYSTEM ).object;
 
         accountFixture.assertOrgAdminLogin();

@@ -27,7 +27,7 @@ public class ExportDictionaryWS {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     RowBinaryOutputStream rowBinaryOutputStream = new RowBinaryOutputStream( baos, List.of( "id", "name" ) );
                     organizationStorage
-                        .select( false )
+                        .select()
                         .sorted( Comparator.comparing( o -> o.organization.name ) )
                         .forEach( data -> {
                             try {

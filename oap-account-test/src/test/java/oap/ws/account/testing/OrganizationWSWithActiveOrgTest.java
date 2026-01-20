@@ -473,7 +473,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void passwd() {
         var email = "newuser@gmail.com";
-        accountFixture.addUser( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( null, "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLoginIntoOrg( email, "pass123", DEFAULT_ORGANIZATION_ID );
         assertPost( accountFixture.httpUrl( "/organizations/hackit/users/passwd" ), "{\"email\": \"" + email + "\", \"password\": \"newpass\"}" )
             .hasCode( UNAUTHORIZED );
@@ -509,7 +509,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     public void ban() {
         Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
 
-        UserData user = accountFixture.addUser( new UserData( new User( "user@admin.com", "Joe", "Epstein", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        UserData user = accountFixture.addUser( new UserData( new User( null, "user@admin.com", "Joe", "Epstein", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( "user@admin.com", "pass123" );
         accountFixture.assertLogout();
         accountFixture.assertOrgAdminLogin();
@@ -688,8 +688,8 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @Test
     public void refreshApiKeyByOneUserToAnother() {
-        final UserData userData = accountFixture.addUser( new UserData( new User( "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
-        accountFixture.addUser( new UserData( new User( "jga@test.com" ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        final UserData userData = accountFixture.addUser( new UserData( new User( null, "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( null, "jga@test.com" ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( userData.user.email, "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/apikey/" + "jga@test.com" ) )
             .hasCode( FORBIDDEN );
@@ -698,7 +698,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     @Test
     public void generateTfaAuthorizationLink() {
         final String email = "john@test.com";
-        accountFixture.addUser( new UserData( new User( email, "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( null, email, "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( email, "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/users/tfa/" + email ) )
             .isOk().satisfies( response -> {
@@ -720,7 +720,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         roles.put( orgId, USER );
 
         final String mail = "user@usr.com";
-        UserData user = new UserData( new User( mail, "John", "Smith", "pass123", true ), roles );
+        UserData user = new UserData( new User( null, mail, "John", "Smith", "pass123", true ), roles );
         accountFixture.addUser( user );
 
         accountFixture.assertSystemAdminLogin();
@@ -738,12 +738,12 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         adminRoles.put( org2.organization.id, ADMIN );
 
         final String adminMail = "orgadmin@usr.com";
-        UserData admin = new UserData( new User( adminMail, "John", "Smith", "pass123", true ), adminRoles );
+        UserData admin = new UserData( new User( null, adminMail, "John", "Smith", "pass123", true ), adminRoles );
 
         final String userMail = "user@usr.com";
         Map<String, String> roles = new HashMap<>();
         roles.put( org1.organization.id, USER );
-        UserData user = new UserData( new User( userMail, "John", "Smith", "pass", true ), roles );
+        UserData user = new UserData( new User( null, userMail, "John", "Smith", "pass", true ), roles );
 
         accountFixture.addUser( admin );
         accountFixture.addUser( user );
@@ -764,12 +764,12 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
         adminRoles.put( org2.organization.id, USER );
 
         final String adminMail = "orgadmin@usr.com";
-        UserData admin = new UserData( new User( adminMail, "John", "Smith", "pass123", true ), adminRoles );
+        UserData admin = new UserData( new User( null, adminMail, "John", "Smith", "pass123", true ), adminRoles );
 
         final String userMail = "user@usr.com";
         Map<String, String> roles = new HashMap<>();
         roles.put( org1.organization.id, USER );
-        UserData user = new UserData( new User( userMail, "John", "Smith", "pass", true ), roles );
+        UserData user = new UserData( new User( null, userMail, "John", "Smith", "pass", true ), roles );
 
         accountFixture.addUser( admin );
         accountFixture.addUser( user );

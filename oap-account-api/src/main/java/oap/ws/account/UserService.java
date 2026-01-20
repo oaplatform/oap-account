@@ -16,11 +16,13 @@ public interface UserService {
         @Serial
         private static final long serialVersionUID = -8190806637390172209L;
 
+        public final String id;
         public final String email;
         public final String firstName;
         public final String lastName;
 
-        public UserInfo( String email, String firstName, String lastName ) {
+        public UserInfo( String id, String email, String firstName, String lastName ) {
+            this.id = id;
             this.email = email;
             this.firstName = firstName;
             this.lastName = lastName;
