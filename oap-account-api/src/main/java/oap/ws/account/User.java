@@ -54,6 +54,10 @@ public class User implements Serializable {
     public String secretKey = generateSecretKey();
 
     @JsonCreator
+    public User( @Nonnull String email ) {
+        this( null, email );
+    }
+
     public User( @Nullable String id, @Nonnull String email ) {
         this.id = id;
         this.email = email;

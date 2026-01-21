@@ -705,7 +705,7 @@ public class OrganizationWSTest extends Fixtures {
     @Test
     public void refreshApiKeyByOneUserToAnother() {
         final UserData userData = accountFixture.addUser( new UserData( new User( null, "newuser@gmail.com", "John", "Smith", "pass123", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
-        accountFixture.addUser( new UserData( new User( null, "jga@test.com" ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
+        accountFixture.addUser( new UserData( new User( "jga@test.com" ), Map.of( DEFAULT_ORGANIZATION_ID, USER ) ) );
         accountFixture.assertLogin( userData.user.email, "pass123" );
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/apikey/" + "jga@test.com" ) )
             .hasCode( FORBIDDEN );
