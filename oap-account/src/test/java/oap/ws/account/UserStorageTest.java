@@ -15,7 +15,7 @@ public class UserStorageTest {
 
         assertThat( userStorage.getInfo( "test@email", "unknown" ) )
             .containsExactly(
-                new UserService.UserInfo( null, "test@email", "fn", "ln" ),
-                new UserService.UserInfo( null, "unknown", null, null ) );
+                new UserService.UserInfo( "TSTML", "test@email", "fn", "ln" ),
+                new UserService.UserInfo( "unknown", "unknown", null, null ) );
     }
 }

@@ -16,6 +16,7 @@
     "defaultAccounts" : {
       "org1" : "acc1"
     },
+    "id" : "id",
     "email" : "email",
     "firstName" : "John",
     "lastName" : "Smith",

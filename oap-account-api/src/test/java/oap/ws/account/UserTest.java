@@ -36,8 +36,8 @@ public class UserTest {
 
     @Test
     public void id() {
-        assertThat( Identifier.forAnnotationFixed().get( new User( null, "mail" ) ) )
-            .isEqualTo( "mail" );
+        assertThat( Identifier.forAnnotationFixed().get( new User( "id", "mail" ) ) )
+            .isEqualTo( "id" );
     }
 
 }
