@@ -66,7 +66,7 @@ public class AuthWSTest extends IntegratedTest {
                 assertTrue( response.containsKey( "accessToken" ) );
                 assertTrue( response.containsKey( "refreshToken" ) );
                 assertThat( resp.contentString() ).contains( """
-                    "user":{"email":"admin@admin.com","firstName":"admin@admin.com","lastName":"admin@admin.com","roles":{"r1":"ADMIN"},"banned":false,"confirmed":true,"tfaEnabled":false,""" );
+                    "user":{"id":"DMNDMNCM","email":"admin@admin.com","firstName":"admin@admin.com","lastName":"admin@admin.com","roles":{"r1":"ADMIN"},"banned":false,"confirmed":true,"tfaEnabled":false,""" );
             } );
     }
 

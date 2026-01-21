@@ -73,7 +73,7 @@ public class OrganizationWSTest extends Fixtures {
 
     @AfterMethod
     public void afterMethod() {
-        accountFixture.assertLogout();
+        accountFixture.logout();
     }
 
     @Test
@@ -256,48 +256,51 @@ public class OrganizationWSTest extends Fixtures {
         assertGet( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users" ) )
             .respondedJson( OK, "OK", """
                 [ {
-                     "banned" : false,
-                     "confirmed" : true,
-                     "created" : "2010-01-23T17:22:49.000Z",
-                     "defaultOrganization" : "SYSTEM",
-                     "email" : "systemadmin@admin.com",
-                     "firstName" : "System",
-                     "lastName" : "Admin",
-                     "modified" : "2010-01-23T17:22:49.000Z",
-                     "roles" : {
-                       "DFLT" : "ORGANIZATION_ADMIN",
-                       "SYSTEM" : "ADMIN"
-                     },
-                     "tfaEnabled" : false
-                   }, {
-                     "banned" : false,
-                     "confirmed" : true,
-                     "created" : "2010-01-23T17:22:49.000Z",
-                     "defaultOrganization" : "SYSTEM",
-                     "email" : "xenoss@xenoss.io",
-                     "firstName" : "System",
-                     "lastName" : "Admin",
-                     "modified" : "2010-01-23T17:22:49.000Z",
-                     "roles" : {
-                       "DFLT" : "ADMIN",
-                       "SYSTEM" : "ADMIN"
-                     },
-                     "tfaEnabled" : false
-                   }, {
-                     "banned" : false,
-                     "confirmed" : true,
-                     "created" : "2010-01-23T17:22:49.000Z",
-                     "defaultOrganization" : "DFLT",
-                     "email" : "orgadmin@admin.com",
-                     "firstName" : "Johnny",
-                     "lastLogin" : "2025-01-23",
-                     "lastName" : "Walker",
-                     "modified" : "2025-01-23T17:22:49.000Z",
-                     "roles" : {
-                       "DFLT" : "ORGANIZATION_ADMIN"
-                     },
-                     "tfaEnabled" : false
-                   } ]""" );
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "DFLT",
+                  "email" : "orgadmin@admin.com",
+                  "firstName" : "Johnny",
+                  "id" : "RGDMNDMNCM",
+                  "lastLogin" : "2025-01-23",
+                  "lastName" : "Walker",
+                  "modified" : "2025-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ORGANIZATION_ADMIN"
+                  },
+                  "tfaEnabled" : false
+                }, {
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "SYSTEM",
+                  "email" : "systemadmin@admin.com",
+                  "firstName" : "System",
+                  "id" : "SSTMDMNDMN",
+                  "lastName" : "Admin",
+                  "modified" : "2010-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ORGANIZATION_ADMIN",
+                    "SYSTEM" : "ADMIN"
+                  },
+                  "tfaEnabled" : false
+                }, {
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "SYSTEM",
+                  "email" : "xenoss@xenoss.io",
+                  "firstName" : "System",
+                  "id" : "XNSSXNSS",
+                  "lastName" : "Admin",
+                  "modified" : "2010-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ADMIN",
+                    "SYSTEM" : "ADMIN"
+                  },
+                  "tfaEnabled" : false
+                } ]""" );
     }
 
     @Test
@@ -380,6 +383,7 @@ public class OrganizationWSTest extends Fixtures {
                   "confirmed" : false,
                   "created" : "2025-01-24T17:22:49.000Z",
                   "defaultOrganization" : "XNSS",
+                  "id" : "VKXNSS",
                   "email" : "vk@xenoss.io",
                   "firstName" : "John",
                   "lastName" : "Smith",
@@ -529,6 +533,7 @@ public class OrganizationWSTest extends Fixtures {
                   "banned" : true,
                   "confirmed" : true,
                   "created" : "2025-01-24T17:22:49.000Z",
+                  "id" : "SRDMNCM",
                   "email" : "user@admin.com",
                   "firstName" : "Joe",
                   "lastLogin" : "2025-01-24",
@@ -549,6 +554,7 @@ public class OrganizationWSTest extends Fixtures {
                    "banned" : false,
                    "confirmed" : true,
                    "created" : "2025-01-24T17:22:49.000Z",
+                   "id" : "SRDMNCM",
                    "email" : "user@admin.com",
                    "firstName" : "Joe",
                    "lastLogin" : "2025-01-24",

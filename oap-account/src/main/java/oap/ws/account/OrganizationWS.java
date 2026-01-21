@@ -31,6 +31,7 @@ import javax.annotation.Nonnull;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,6 +213,7 @@ public class OrganizationWS extends AbstractWS {
                                  @WsParam( from = SESSION ) UserData loggedUser ) {
         return Stream.of( userStorage.getUsers( organizationId ) )
             .map( Users::userMetadataToView )
+            .sorted( Comparator.comparing( UserView::getEmail ) )
             .toList();
     }
 
@@ -388,10 +390,10 @@ public class OrganizationWS extends AbstractWS {
     @WsValidate( "validateAdminOrganizationAccess" )
     public Optional<UserView> addUserToOrganization( @WsParam( from = PATH ) String organizationId,
                                                      @WsParam( from = QUERY ) String userOrganizationId,
-                                                     @WsParam( from = QUERY ) String email,
+                                                     @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
                                                      @WsParam( from = QUERY ) String role,
                                                      @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.addOrganizationToUser( email, userOrganizationId, role, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.addOrganizationToUser( idOrEmail, userOrganizationId, role, loggedUser.getEmail() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/remove", description = "Remove user from existing organization" )
@@ -408,8 +410,8 @@ public class OrganizationWS extends AbstractWS {
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
     @WsValidate( "validateRole" )
     public Optional<UserView> assignRole( @WsParam( from = PATH ) String organizationId,
-                                          @WsParam( from = QUERY ) String idOrEmail,
-                                          @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String role,
+                                          @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
+                                          @WsParam( from = QUERY ) String role,
                                           @WsParam( from = SESSION ) UserData loggedUser ) {
         return userStorage.assignRole( idOrEmail, organizationId, role, loggedUser.getEmail() ).map( Users::userMetadataToView );
     }
@@ -480,14 +482,15 @@ public class OrganizationWS extends AbstractWS {
         return validateEmailOrganizationAccess( organizationId, passwd.email );
     }
 
-    protected ValidationErrors validateCreateApikey( UserData loggedUser, String organizationId, @Nonnull String email ) {
+    protected ValidationErrors validateCreateApikey( UserData loggedUser, String organizationId, @Nonnull String idOrEmail ) {
         final Optional<String> role = loggedUser.getRole( organizationId );
         if( role.isPresent() && ORGANIZATION_ADMIN.equals( role.get() )
-            || loggedUser.user.email.equals( email )
+            || loggedUser.user.email.equals( idOrEmail )
+            || loggedUser.user.id.equals( idOrEmail )
             || isSystemAdmin( loggedUser ) ) {
             return empty();
         }
-        return error( FORBIDDEN, "User " + loggedUser.user.email + " is not allowed to change apikey of another user " + email );
+        return error( FORBIDDEN, "User " + loggedUser.user.email + " is not allowed to change apikey of another user " + idOrEmail );
     }
 
     private ValidationErrors validateEmailOrganizationAccess( String organizationId, String email ) {
@@ -523,8 +526,9 @@ public class OrganizationWS extends AbstractWS {
             : empty();
     }
 
-    protected ValidationErrors validateAdminBanAccess( String email, UserData loggedUser, String organizationId ) {
-        if( userStorage.get( email ).isPresent() && ADMIN.equals( userStorage.get( email ).get().getRole( organizationId ).orElse( null ) )
+    protected ValidationErrors validateAdminBanAccess( String idOrEmail, UserData loggedUser, String organizationId ) {
+        UserData userData = userStorage.get( idOrEmail ).orElse( null );
+        if( userData != null && ADMIN.equals( userData.getRole( organizationId ).orElse( null ) )
             && !ADMIN.equals( loggedUser.getRole( organizationId ).orElse( null ) )
             && !isSystemAdmin( loggedUser ) ) {
             return error( "ADMIN can be banned only by other ADMIN" );
@@ -533,7 +537,7 @@ public class OrganizationWS extends AbstractWS {
         }
     }
 
-    protected ValidationErrors validateAdminOrganizationAccess( String email, UserData loggedUser, String userOrganizationId ) {
+    protected ValidationErrors validateAdminOrganizationAccess( String idOrEmail, UserData loggedUser, String userOrganizationId ) {
         final String loggedUserRoleInNewOrganization = loggedUser.roles.getOrDefault( userOrganizationId, "" );
         if( loggedUserRoleInNewOrganization.isEmpty() && !isSystemAdmin( loggedUser ) ) {
             return error( FORBIDDEN, "User is not allowed to add users to organization (%s)", userOrganizationId );
@@ -541,16 +545,16 @@ public class OrganizationWS extends AbstractWS {
         if( !loggedUserRoleInNewOrganization.equals( ADMIN ) && !isSystemAdmin( loggedUser ) ) {
             return error( FORBIDDEN, "Only ADMIN can add user to organization" );
         }
-        if( userStorage.get( email ).isPresent() && isSystemAdmin( loggedUser ) ) {
+        if( userStorage.get( idOrEmail ).isPresent() && isSystemAdmin( loggedUser ) ) {
             return empty();
         }
         return empty();
     }
 
-    protected ValidationErrors validateDefaultOrganization( String email, String organizationId ) {
-        Optional<UserData> user = userStorage.get( email );
+    protected ValidationErrors validateDefaultOrganization( String idOrEmail, String organizationId ) {
+        Optional<UserData> user = userStorage.get( idOrEmail );
         if( user.isEmpty() ) {
-            return error( NOT_FOUND, String.format( "User (%s) doesn't exist", email ) );
+            return error( NOT_FOUND, String.format( "User (%s) doesn't exist", idOrEmail ) );
         }
         final Optional<OrganizationData> organization = organizationStorage.get( organizationId );
         if( organization.isEmpty() ) {
@@ -562,10 +566,10 @@ public class OrganizationWS extends AbstractWS {
         return empty();
     }
 
-    protected ValidationErrors validateDefaultAccount( String email, String organizationId, String accountId ) {
-        Optional<UserData> user = userStorage.get( email );
+    protected ValidationErrors validateDefaultAccount( String idOrEmail, String organizationId, String accountId ) {
+        Optional<UserData> user = userStorage.get( idOrEmail );
         if( user.isEmpty() ) {
-            return error( NOT_FOUND, String.format( "User (%s) doesn't exist", email ) );
+            return error( NOT_FOUND, String.format( "User (%s) doesn't exist", idOrEmail ) );
         }
         final Optional<OrganizationData> organization = organizationStorage.get( organizationId );
         if( organization.isEmpty() ) {

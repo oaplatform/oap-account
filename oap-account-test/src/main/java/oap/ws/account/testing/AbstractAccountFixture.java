@@ -186,6 +186,10 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
         return ( Self ) this;
     }
 
+    public void logout() {
+        SecureWSHelper.logout( defaultHttpPort() );
+    }
+
     @SuppressWarnings( "unchecked" )
     public Self assertLogout() {
         SecureWSHelper.assertLogout( defaultHttpPort() );

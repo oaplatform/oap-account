@@ -93,7 +93,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
 
     @AfterMethod
     public void afterMethod() {
-        accountFixture.assertLogout();
+        accountFixture.logout();
     }
 
     @Test
@@ -255,9 +255,25 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                   "banned" : false,
                   "confirmed" : true,
                   "created" : "2010-01-23T17:22:49.000Z",
+                  "defaultOrganization" : "DFLT",
+                  "email" : "orgadmin@admin.com",
+                  "firstName" : "Johnny",
+                  "id" : "RGDMNDMNCM",
+                  "lastLogin" : "2010-01-23",
+                  "lastName" : "Walker",
+                  "modified" : "2010-01-23T17:22:49.000Z",
+                  "roles" : {
+                    "DFLT" : "ORGANIZATION_ADMIN"
+                  },
+                  "tfaEnabled" : false
+                }, {
+                  "banned" : false,
+                  "confirmed" : true,
+                  "created" : "2010-01-23T17:22:49.000Z",
                   "defaultOrganization" : "SYSTEM",
                   "email" : "systemadmin@admin.com",
                   "firstName" : "System",
+                  "id" : "SSTMDMNDMN",
                   "lastName" : "Admin",
                   "modified" : "2010-01-23T17:22:49.000Z",
                   "roles" : {
@@ -272,25 +288,12 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                   "defaultOrganization" : "SYSTEM",
                   "email" : "xenoss@xenoss.io",
                   "firstName" : "System",
+                  "id" : "XNSSXNSS",
                   "lastName" : "Admin",
                   "modified" : "2010-01-23T17:22:49.000Z",
                   "roles" : {
                     "DFLT" : "ADMIN",
                     "SYSTEM" : "ADMIN"
-                  },
-                  "tfaEnabled" : false
-                }, {
-                  "banned" : false,
-                  "confirmed" : true,
-                  "created" : "2010-01-23T17:22:49.000Z",
-                  "defaultOrganization" : "DFLT",
-                  "email" : "orgadmin@admin.com",
-                  "firstName" : "Johnny",
-                  "lastLogin" : "2010-01-23",
-                  "lastName" : "Walker",
-                  "modified" : "2010-01-23T17:22:49.000Z",
-                  "roles" : {
-                    "DFLT" : "ORGANIZATION_ADMIN"
                   },
                   "tfaEnabled" : false
                 } ]""" );
@@ -350,7 +353,6 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
     }
 
     @Test
-
     public void registerUser() {
         Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
 
@@ -371,6 +373,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                   "confirmed" : false,
                   "created" : "2025-01-24T17:22:49.000Z",
                   "defaultOrganization" : "XNSS",
+                  "id" : "VKXNSS",
                   "email" : "vk@xenoss.io",
                   "firstName" : "John",
                   "lastName" : "Smith",
@@ -519,6 +522,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                   "banned" : true,
                   "confirmed" : true,
                   "created" : "2025-01-24T17:22:49.000Z",
+                  "id" : "SRDMNCM",
                   "email" : "user@admin.com",
                   "firstName" : "Joe",
                   "lastLogin" : "2025-01-24",
@@ -539,6 +543,7 @@ public class OrganizationWSWithActiveOrgTest extends Fixtures {
                   "banned" : false,
                   "confirmed" : true,
                   "created" : "2025-01-24T17:22:49.000Z",
+                  "id" : "SRDMNCM",
                   "email" : "user@admin.com",
                   "firstName" : "Joe",
                   "lastLogin" : "2025-01-24",
