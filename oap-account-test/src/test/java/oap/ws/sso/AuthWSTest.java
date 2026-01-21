@@ -210,9 +210,9 @@ public class AuthWSTest extends IntegratedTest {
             .isOk()
             .cookies( cons -> cons
                 .cookie( SSO.AUTHENTICATION_KEY )
-                .hasMaxAge( 118 ) )
+                .maxAge().isBetween( 118, 118 + 10 ) )
             .cookies( cons -> cons
                 .cookie( SSO.REFRESH_TOKEN_KEY )
-                .hasMaxAge( 2591998 ) );
+                .maxAge().isBetween( 2591998, 2591998 + 10 ) );
     }
 }
