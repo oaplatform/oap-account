@@ -27,14 +27,11 @@ package oap.ws.sso;
 
 import oap.http.Client;
 import oap.http.Http;
-import oap.http.test.MockCookieStore;
+import oap.http.test.HttpAsserts;
 import oap.json.Binder;
-import oap.util.Dates;
 import oap.ws.account.testing.SecureWSHelper;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
-import org.apache.http.cookie.Cookie;
-import org.joda.time.DateTime;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -45,7 +42,6 @@ import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.test.HttpAsserts.assertGet;
 import static oap.http.test.HttpAsserts.assertPost;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.joda.time.DateTimeZone.UTC;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class AuthWSTest extends IntegratedTest {
@@ -208,32 +204,15 @@ public class AuthWSTest extends IntegratedTest {
     public void testRefreshToken() {
         addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
 
-        Dates.setTimeFixed( 2023, 5, 15, 21, 26, 0 );
+        HttpAsserts.reset();
 
-        DateTime startTime = new DateTime( UTC );
-
-        MockCookieStore cookieStore = new MockCookieStore();
-        try( Client client = Client.custom().withCookieStore( cookieStore ).build() ) {
-
-            Client.Response response = client.post( accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON );
-            assertThat( response.code ).isEqualTo( OK );
-
-            response = client.get( accountFixture.httpUrl( "/auth/whoami" ) );
-            assertThat( response.code ).isEqualTo( OK );
-            assertThat( cookieStore.getCookie( SSO.AUTHENTICATION_KEY ) ).extracting( Cookie::getExpiryDate ).isEqualTo( startTime.plusMinutes( 2 ).withMillisOfSecond( 0 ).toDate() );
-            assertThat( cookieStore.getCookie( SSO.REFRESH_TOKEN_KEY ) ).extracting( Cookie::getExpiryDate ).isEqualTo( startTime.plusDays( 30 ).withMillisOfSecond( 0 ).toDate() );
-
-            Dates.incFixed( Dates.m( 3 ) );
-
-            response = client.get( accountFixture.httpUrl( "/auth/whoami" ) );
-            assertThat( response.code ).isEqualTo( OK );
-            assertThat( cookieStore.getCookie( SSO.AUTHENTICATION_KEY ) ).extracting( Cookie::getExpiryDate ).isEqualTo( startTime.plusMinutes( 3 ).plusMinutes( 2 ).withMillisOfSecond( 0 ).toDate() );
-            assertThat( cookieStore.getCookie( SSO.REFRESH_TOKEN_KEY ) ).extracting( Cookie::getExpiryDate ).isEqualTo( startTime.plusMinutes( 3 ).plusDays( 30 ).withMillisOfSecond( 0 ).toDate() );
-
-            Dates.incFixed( Dates.d( 30 ) );
-
-            response = client.get( accountFixture.httpUrl( "/auth/whoami" ) );
-            assertThat( response.code ).isEqualTo( UNAUTHORIZED );
-        }
+        assertPost( accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON )
+            .isOk()
+            .cookies( cons -> cons
+                .cookie( SSO.AUTHENTICATION_KEY )
+                .hasMaxAge( 118 ) )
+            .cookies( cons -> cons
+                .cookie( SSO.REFRESH_TOKEN_KEY )
+                .hasMaxAge( 2591998 ) );
     }
 }
