@@ -39,7 +39,6 @@
             <groupId>oap</groupId>
             <artifactId>oap-ws-sso</artifactId>
             <version>${oap.deps.oap.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>oap</groupId>

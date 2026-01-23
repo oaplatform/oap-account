@@ -30,18 +30,22 @@ import com.mongodb.client.model.ReplaceOptions;
 import io.mongock.api.annotations.ChangeUnit;
 import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
+import oap.id.Identifier;
+import oap.id.StringIdentifierBuilder;
 import oap.ws.account.User;
 import org.bson.Document;
 import org.joda.time.DateTimeUtils;
 
 import java.util.Map;
 
+import static oap.id.Identifier.Option.COMPACT;
+
 @ChangeUnit( id = "DefaultOrgAdminUnit", order = "1", systemVersion = "1" )
 public class DefaultOrgAdminUnit {
     @Execution
     public void execution( MongoDatabase mongoDatabase ) {
         mongoDatabase.getCollection( "users" )
-            .replaceOne( Filters.eq( "_id", "orgadmin@admin.com" ),
+            .replaceOne( Filters.eq( "_id", Identifier.generate( "orgadmin@admin.com", StringIdentifierBuilder.DEFAULT_ID_SIZE, _ -> false, 0, COMPACT ) ),
                 new Document( Map.of(
                     "object", new Document( Map.of(
                         "user", new Document( Map.of(
@@ -61,7 +65,7 @@ public class DefaultOrgAdminUnit {
                 ) ), new ReplaceOptions().upsert( true ) );
 
         mongoDatabase.getCollection( "users" )
-            .replaceOne( Filters.eq( "_id", "systemadmin@admin.com" ),
+            .replaceOne( Filters.eq( "_id", Identifier.generate( "systemadmin@admin.com", StringIdentifierBuilder.DEFAULT_ID_SIZE, _ -> false, 0, COMPACT ) ),
                 new Document( Map.of(
                     "object", new Document( Map.of(
                         "user", new Document( Map.of(
