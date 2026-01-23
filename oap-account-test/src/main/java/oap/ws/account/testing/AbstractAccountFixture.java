@@ -82,8 +82,6 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
         addDependency( "mongo", mongoFixture );
 
         define( "SESSION_MANAGER_EXPIRATION_TIME", "24h" );
-
-        withMigration( "oap.ws.account.testing.migration" );
     }
 
     @SuppressWarnings( "unchecked" )
