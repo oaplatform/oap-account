@@ -155,7 +155,7 @@ public class AuthWS extends AbstractSecureWS {
                             Session session ) {
         loggedUser.ifPresent( user -> {
             log.debug( "Invalidating token for user [{}]", user.getEmail() );
-            authenticator.invalidate( user.getEmail() );
+            authenticator.invalidate( user.getId() );
         } );
         session.invalidate();
         return logoutResponse( sessionManager.cookieDomain );

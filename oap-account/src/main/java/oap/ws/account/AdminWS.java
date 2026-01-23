@@ -59,7 +59,7 @@ public class AdminWS {
                     userStorage.delete( ud.user.id );
                 } else {
                     log.trace( "permanentlyDeleteOrganization#update user {}", ud.user.getEmail() );
-                    userStorage.update( ud.user.getEmail(), d -> {
+                    userStorage.update( ud.user.id, d -> {
                         d.accounts.remove( organizationId );
                         d.roles.remove( organizationId );
                         return d;

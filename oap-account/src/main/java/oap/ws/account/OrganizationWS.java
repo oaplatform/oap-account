@@ -127,7 +127,7 @@ public class OrganizationWS extends AbstractWS {
                                @WsParam( from = SESSION ) UserData loggedUser ) {
 
         log.debug( "store id {} organization {}", organizationId, organization );
-        return organizationStorage.storeOrganization( organization, loggedUser.getEmail() ).organization;
+        return organizationStorage.storeOrganization( organization, loggedUser.getId() ).organization;
     }
 
     @WsMethod( method = POST, path = "/" )
@@ -136,7 +136,7 @@ public class OrganizationWS extends AbstractWS {
                                @WsParam( from = SESSION ) UserData loggedUser ) {
         log.debug( "store organization {}", organization );
 
-        return organizationStorage.storeOrganization( organization, loggedUser.getEmail() ).organization;
+        return organizationStorage.storeOrganization( organization, loggedUser.getId() ).organization;
     }
 
     @WsMethod( method = GET, path = "/{organizationId}" )
@@ -165,7 +165,7 @@ public class OrganizationWS extends AbstractWS {
                                                     @WsParam( from = BODY ) @WsValidateJson( schema = Account.SCHEMA ) Account account,
                                                     @WsParam( from = SESSION ) UserData loggedUser ) {
         return organizationStorage
-            .storeAccount( organizationId, account, loggedUser.getEmail() )
+            .storeAccount( organizationId, account, loggedUser.getId() )
             .map( OrganizationWS::organizationMetadataToView );
     }
 
@@ -194,7 +194,7 @@ public class OrganizationWS extends AbstractWS {
                                                 @WsParam( from = PATH ) String idOrEmail,
                                                 @WsParam( from = QUERY ) String accountId,
                                                 @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.addAccountToUser( idOrEmail, organizationId, accountId, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.addAccountToUser( idOrEmail, organizationId, accountId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = POST, path = "/{organizationId}/users/{idOrEmail}/accounts/remove" )
@@ -203,7 +203,7 @@ public class OrganizationWS extends AbstractWS {
                                                      @WsParam( from = PATH ) String idOrEmail,
                                                      @WsParam( from = QUERY ) String accountId,
                                                      @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.removeAccountFromUser( idOrEmail, organizationId, accountId, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.removeAccountFromUser( idOrEmail, organizationId, accountId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users" )
@@ -226,11 +226,11 @@ public class OrganizationWS extends AbstractWS {
                                @WsParam( from = SESSION ) UserData loggedUser ) {
         user.defaultOrganization = organizationId;
         if( user.create ) {
-            Metadata<UserData> userCreated = userStorage.createUser( user, role.map( r -> new HashMap<>( Map.of( organizationId, r ) ) ).orElse( null ), loggedUser.getEmail() );
+            Metadata<UserData> userCreated = userStorage.createUser( user, role.map( r -> new HashMap<>( Map.of( organizationId, r ) ) ).orElse( null ), loggedUser.getId() );
             mailman.sendInvitedEmail( userCreated.object );
             return Users.userMetadataToView( userCreated );
         }
-        return Users.userMetadataToView( userStorage.updateUser( user.email, u -> u.update( user.firstName, user.lastName, user.tfaEnabled, user.ext ), loggedUser.getEmail() )
+        return Users.userMetadataToView( userStorage.updateUser( user.email, u -> u.update( user.firstName, user.lastName, user.tfaEnabled, user.ext ), loggedUser.getId() )
             .orElseThrow() );
     }
 
@@ -253,14 +253,14 @@ public class OrganizationWS extends AbstractWS {
         @WsParam( from = QUERY ) String organizationName,
         @WsParam( from = SESSION ) UserData loggedUser,
         String externalOauthToken, OauthProvider source, Ext ext ) {
-        OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), loggedUser.getEmail() );
+        OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), loggedUser.getId() );
         final String orgId = organizationData.organization.id;
         TokenInfo tokenInfo = oauthService.getOauthProvider( source ).getTokenInfo( externalOauthToken ).orElse( null );
         if( tokenInfo != null ) {
             final User user = new User( null, tokenInfo.email, tokenInfo.firstName, tokenInfo.lastName, null, true, false );
             user.ext = ext;
             user.defaultOrganization = orgId;
-            Metadata<UserData> userCreated = userStorage.createUser( user, new HashMap<>( Map.of( orgId, ORGANIZATION_ADMIN ) ), loggedUser.getEmail() );
+            Metadata<UserData> userCreated = userStorage.createUser( user, new HashMap<>( Map.of( orgId, ORGANIZATION_ADMIN ) ), loggedUser.getId() );
             mailman.sendRegisteredEmail( userCreated.object );
             return Optional.of( Users.userMetadataToView( userCreated ) );
         }
@@ -273,7 +273,7 @@ public class OrganizationWS extends AbstractWS {
     public Optional<UserView> passwd( @WsParam( from = PATH ) String organizationId,
                                       @WsParam( from = BODY ) @WsValidateJson( schema = Passwd.SCHEMA ) Passwd passwd,
                                       @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.passwd( passwd.email, passwd.password, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.passwd( passwd.email, passwd.password, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/apikey/{idOrEmail}",
@@ -284,7 +284,7 @@ public class OrganizationWS extends AbstractWS {
                                            @WsParam( from = PATH ) String idOrEmail,
                                            @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
 
-        return userStorage.refreshApikey( idOrEmail, loggedUser.getEmail() ).map( u -> u.user.apiKey );
+        return userStorage.refreshApikey( idOrEmail, loggedUser.getId() ).map( u -> u.user.apiKey );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/ban/{idOrEmail}" )
@@ -295,7 +295,7 @@ public class OrganizationWS extends AbstractWS {
                                    @WsParam( from = SESSION ) UserData loggedUser ) {
 
 
-        return userStorage.ban( idOrEmail, true, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.ban( idOrEmail, true, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/delete/{idOrEmail}" )
@@ -311,7 +311,7 @@ public class OrganizationWS extends AbstractWS {
     public Optional<UserView> unban( @WsParam( from = PATH ) String organizationId,
                                      @WsParam( from = PATH ) String idOrEmail,
                                      @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.ban( idOrEmail, false, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.ban( idOrEmail, false, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/users/confirm/{idOrEmail}" )
@@ -330,7 +330,7 @@ public class OrganizationWS extends AbstractWS {
             .addParameter( "passwd", String.valueOf( !user.hasPassword() ) )
             .build();
 
-        UserData userConfirmed = userStorage.confirm( idOrEmail, loggedUser.get().getEmail() ).orElse( null );
+        UserData userConfirmed = userStorage.confirm( idOrEmail, loggedUser.get().getId() ).orElse( null );
         return userConfirmed != null ? Response.redirect( redirect ) : Response.notFound();
     }
 
@@ -371,7 +371,7 @@ public class OrganizationWS extends AbstractWS {
     public Optional<UserView> changeDefaultOrganization( @WsParam( from = PATH ) String idOrEmail,
                                                          @WsParam( from = PATH ) String organizationId,
                                                          @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.updateUser( idOrEmail, u -> u.defaultOrganization = organizationId, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.updateUser( idOrEmail, u -> u.defaultOrganization = organizationId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/{idOrEmail}/default-account/{accountId}", description = "Set default account in organization to user" )
@@ -381,7 +381,7 @@ public class OrganizationWS extends AbstractWS {
                                                     @WsParam( from = PATH ) String idOrEmail,
                                                     @WsParam( from = PATH ) String accountId,
                                                     @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.updateUser( idOrEmail, u -> u.defaultAccounts.put( organizationId, accountId ), loggedUser.getEmail() )
+        return userStorage.updateUser( idOrEmail, u -> u.defaultAccounts.put( organizationId, accountId ), loggedUser.getId() )
             .map( Users::userMetadataToView );
     }
 
@@ -393,7 +393,7 @@ public class OrganizationWS extends AbstractWS {
                                                      @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
                                                      @WsParam( from = QUERY ) String role,
                                                      @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.addOrganizationToUser( idOrEmail, userOrganizationId, role, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.addOrganizationToUser( idOrEmail, userOrganizationId, role, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/remove", description = "Remove user from existing organization" )
@@ -403,7 +403,7 @@ public class OrganizationWS extends AbstractWS {
                                                           @WsParam( from = QUERY ) String userOrganizationId,
                                                           @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
                                                           @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.removeUserFromOrganization( idOrEmail, userOrganizationId, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.removeUserFromOrganization( idOrEmail, userOrganizationId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = POST, path = "/{organizationId}/assign" )
@@ -413,7 +413,7 @@ public class OrganizationWS extends AbstractWS {
                                           @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
                                           @WsParam( from = QUERY ) String role,
                                           @WsParam( from = SESSION ) UserData loggedUser ) {
-        return userStorage.assignRole( idOrEmail, organizationId, role, loggedUser.getEmail() ).map( Users::userMetadataToView );
+        return userStorage.assignRole( idOrEmail, organizationId, role, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/roles", description = "List all available roles with permissions" )
