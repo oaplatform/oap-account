@@ -58,7 +58,7 @@
     <properties>
         <oap.project.version>25.1.0</oap.project.version>
 
-        <oap.deps.oap.version>25.3.0.CE-132-oap-sso-user-replace-PK-email-id.890</oap.deps.oap.version>
+        <oap.deps.oap.version>25.3.0.CE-132-oap-sso-user-replace-PK-email-id.891</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.12.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.7.0</oap.deps.google.api-client>
