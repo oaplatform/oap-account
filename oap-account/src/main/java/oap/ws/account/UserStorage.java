@@ -256,4 +256,19 @@ public class UserStorage extends MemoryStorage<String, UserData> implements User
     public Optional<UserData> delete( @Nonnull String idOrEmail ) {
         return deleteMetadata( idOrEmail ).map( m -> m.object );
     }
+
+    @Override
+    public UserData store( @Nonnull UserData userData, String modifiedBy ) throws EmailDuplicateException {
+        if( userData.getId() == null ) {
+            UserData existUserData = select()
+                .filter( ud -> ud.getEmail().equalsIgnoreCase( userData.getEmail() ) )
+                .findAny()
+                .orElse( null );
+            if( existUserData != null ) {
+                throw new EmailDuplicateException( existUserData.getId(), userData.getEmail() );
+            }
+        }
+
+        return super.store( userData, modifiedBy );
+    }
 }
