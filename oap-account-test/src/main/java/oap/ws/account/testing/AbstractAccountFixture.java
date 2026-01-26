@@ -281,14 +281,17 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
     }
 
     public void removeAllUsersExceptAdmins() {
-        for( UserData userData : userStorage() ) {
+        UserStorage userStorage = userStorage();
+        for( UserData userData : userStorage ) {
             String id = userData.getId();
-            if( DefaultOrgAdminUnit.SYSTEMADMIN_ID.equals( id )
-                || DefaultOrgAdminUnit.ORGADMIN_ID.equals( id ) ) {
+            String email = userData.getEmail();
+            if( DefaultOrgAdminUnit.SYSTEMADMIN_EMAIL.equalsIgnoreCase( email )
+                || DefaultOrgAdminUnit.ORGADMIN_EMAIL.equalsIgnoreCase( email )
+                || userStorage.defaultSystemAdminEmail.equalsIgnoreCase( email ) ) {
                 continue;
             }
 
-            userStorage().delete( id );
+            userStorage.delete( id );
         }
     }
 }
