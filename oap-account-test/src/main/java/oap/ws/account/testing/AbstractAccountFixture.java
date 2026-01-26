@@ -38,6 +38,7 @@ import oap.ws.account.OrganizationStorage;
 import oap.ws.account.User;
 import oap.ws.account.UserData;
 import oap.ws.account.UserStorage;
+import oap.ws.account.testing.migration.DefaultOrgAdminUnit;
 import oap.ws.sso.UserProvider;
 
 import java.util.Map;
@@ -277,5 +278,17 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
 
     public TransportMock getTransportMock() {
         return service( "oap-account-test", TransportMock.class );
+    }
+
+    public void removeAllUsersExceptAdmins() {
+        for( UserData userData : userStorage() ) {
+            String id = userData.getId();
+            if( DefaultOrgAdminUnit.SYSTEMADMIN_ID.equals( id )
+                || DefaultOrgAdminUnit.ORGADMIN_ID.equals( id ) ) {
+                continue;
+            }
+
+            userStorage().delete( id );
+        }
     }
 }

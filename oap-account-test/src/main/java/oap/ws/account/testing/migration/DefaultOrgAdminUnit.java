@@ -42,18 +42,26 @@ import static oap.id.Identifier.Option.COMPACT;
 
 @ChangeUnit( id = "DefaultOrgAdminUnit", order = "1", systemVersion = "1" )
 public class DefaultOrgAdminUnit {
+    public static final String ORGADMIN_EMAIL = "orgadmin@admin.com";
+    public static final String ORGADMIN_ID = Identifier.generate( ORGADMIN_EMAIL, StringIdentifierBuilder.DEFAULT_ID_SIZE, _ -> false, 0, COMPACT );
+    public static final String ORGADMIN_PASSWORD = "Xenoss123";
+
+    public static final String SYSTEMADMIN_EMAIL = "systemadmin@admin.com";
+    public static final String SYSTEMADMIN_ID = Identifier.generate( SYSTEMADMIN_EMAIL, StringIdentifierBuilder.DEFAULT_ID_SIZE, _ -> false, 0, COMPACT );
+    public static final String SYSTEMADMIN_PASSWORD = "Xenoss123";
+
     @Execution
     public void execution( MongoDatabase mongoDatabase ) {
         mongoDatabase.getCollection( "users" )
-            .replaceOne( Filters.eq( "_id", Identifier.generate( "orgadmin@admin.com", StringIdentifierBuilder.DEFAULT_ID_SIZE, _ -> false, 0, COMPACT ) ),
+            .replaceOne( Filters.eq( "_id", ORGADMIN_ID ),
                 new Document( Map.of(
                     "object", new Document( Map.of(
                         "user", new Document( Map.of(
                             "accessKey", "HMWDDRMHNGKU",
                             "firstName", "Johnny",
                             "lastName", "Walker",
-                            "email", "orgadmin@admin.com",
-                            "password", User.encrypt( "Xenoss123" ),
+                            "email", ORGADMIN_EMAIL,
+                            "password", User.encrypt( ORGADMIN_PASSWORD ),
                             "confirmed", true,
                             "defaultOrganization", "DFLT",
                             "apiKey", "pz7r93Hh8ssbcV1Qhxsopej18ng2Q"
@@ -65,14 +73,14 @@ public class DefaultOrgAdminUnit {
                 ) ), new ReplaceOptions().upsert( true ) );
 
         mongoDatabase.getCollection( "users" )
-            .replaceOne( Filters.eq( "_id", Identifier.generate( "systemadmin@admin.com", StringIdentifierBuilder.DEFAULT_ID_SIZE, _ -> false, 0, COMPACT ) ),
+            .replaceOne( Filters.eq( "_id", SYSTEMADMIN_ID ),
                 new Document( Map.of(
                     "object", new Document( Map.of(
                         "user", new Document( Map.of(
                             "firstName", "System",
                             "lastName", "Admin",
-                            "email", "systemadmin@admin.com",
-                            "password", User.encrypt( "Xenoss123" ),
+                            "email", SYSTEMADMIN_EMAIL,
+                            "password", User.encrypt( SYSTEMADMIN_PASSWORD ),
                             "confirmed", true,
                             "defaultOrganization", "SYSTEM",
                             "apiKey", "qwfqwrqfdsgrwqewgreh4t2wrge43K"
