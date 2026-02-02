@@ -56,10 +56,10 @@ public class AdminWS {
                 if( ( ud.accounts.containsKey( organizationId ) && ud.accounts.size() == 1 )
                     || ( ud.roles.containsKey( organizationId ) && ud.roles.size() == 1 ) ) {
                     log.trace( "permanentlyDeleteOrganization#delete user {}", ud.user.getEmail() );
-                    userStorage.permanentlyDelete( ud.user.getEmail() );
+                    userStorage.delete( ud.user.id );
                 } else {
                     log.trace( "permanentlyDeleteOrganization#update user {}", ud.user.getEmail() );
-                    userStorage.update( ud.user.getEmail(), d -> {
+                    userStorage.update( ud.user.id, d -> {
                         d.accounts.remove( organizationId );
                         d.roles.remove( organizationId );
                         return d;
@@ -67,7 +67,7 @@ public class AdminWS {
                 }
             } );
 
-        organizationStorage.permanentlyDelete( organizationId );
+        organizationStorage.delete( organizationId );
     }
 
     @WsMethod( method = DELETE, path = "/all" )
@@ -78,7 +78,7 @@ public class AdminWS {
             .toList();
 
         for( String user : users ) {
-            userStorage.permanentlyDelete( user );
+            userStorage.delete( user );
         }
 
         List<String> organizations = organizationStorage.select()
@@ -87,7 +87,7 @@ public class AdminWS {
             .toList();
 
         for( String organization : organizations ) {
-            organizationStorage.permanentlyDelete( organization );
+            organizationStorage.delete( organization );
         }
     }
 
@@ -95,6 +95,6 @@ public class AdminWS {
     public void deleteUser( @WsParam( from = PATH ) String email ) {
         log.debug( "permanentlyDeleteUser {}", email );
 
-        userStorage.permanentlyDelete( UserStorage.prepareEmail( email ) );
+        userStorage.delete( email );
     }
 }

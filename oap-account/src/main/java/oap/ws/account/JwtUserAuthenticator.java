@@ -56,21 +56,21 @@ public class JwtUserAuthenticator implements Authenticator {
     }
 
     @Override
-    public Result<Authentication, AuthenticationFailure> authenticate( String email, String password, Optional<String> tfaCode ) {
-        Result<? extends oap.ws.sso.User, AuthenticationFailure> authResult = userProvider.getAuthenticated( email, password, tfaCode );
+    public Result<Authentication, AuthenticationFailure> authenticate( String idOrEmail, String password, Optional<String> tfaCode ) {
+        Result<? extends oap.ws.sso.User, AuthenticationFailure> authResult = userProvider.getAuthenticated( idOrEmail, password, tfaCode );
         return getAuthenticationTokens( authResult );
     }
 
     @Override
-    public Result<Authentication, AuthenticationFailure> authenticate( String email, Optional<String> tfaCode ) {
-        var authResult = userProvider.getAuthenticated( email, tfaCode );
+    public Result<Authentication, AuthenticationFailure> authenticate( String idOrEmail, Optional<String> tfaCode ) {
+        var authResult = userProvider.getAuthenticated( idOrEmail, tfaCode );
         return getAuthenticationTokens( authResult );
     }
 
     public Result<Authentication, AuthenticationFailure> authenticateWithActiveOrgId( String jwtToken, String orgId ) {
         if( jwtExtractor.verifyToken( jwtToken ) == JWTExtractor.TokenStatus.VALID ) {
             log.trace( "generating new authentication token with active organization {} ", orgId );
-            Optional<? extends User> user = userProvider.getUser( jwtExtractor.decodeJWT( jwtToken ).getUserEmail() );
+            Optional<? extends User> user = userProvider.getUser( jwtExtractor.decodeJWT( jwtToken ).getUserId() );
             if( user.isEmpty() ) {
                 return Result.failure( AuthenticationFailure.UNAUTHENTICATED );
             }
@@ -115,20 +115,20 @@ public class JwtUserAuthenticator implements Authenticator {
         Authentication.Token accessToken = jwtTokenGenerator.generateAccessToken( user );
         Authentication.Token refreshToken = jwtTokenGenerator.generateRefreshToken( user );
         log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
-        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() ) );
+        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getId() ).get() ) );
     }
 
     private void incUserCounter( User user ) {
-        userStorage.update( user.getEmail(), UserData::incCounter, user.getEmail() );
+        userStorage.update( user.getId(), UserData::incCounter, user.getId() );
     }
 
     private Authentication generateTokenWithOrgId( User user, String activeOrgId ) {
         incUserCounter( user );
 
-        var accessToken = jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId );
-        var refreshToken = jwtTokenGenerator.generateRefreshToken( user );
+        Authentication.Token accessToken = jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId );
+        Authentication.Token refreshToken = jwtTokenGenerator.generateRefreshToken( user );
         log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
-        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() ) );
+        return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getId() ).get() ) );
     }
 
     public Result<Authentication, AuthenticationFailure> refreshToken( String refreshToken, Optional<String> orgId ) {
@@ -139,8 +139,8 @@ public class JwtUserAuthenticator implements Authenticator {
     }
 
     private Result<Authentication, AuthenticationFailure> generateAuthentication( String refreshToken, Optional<String> orgId ) {
-        String userEmail = jwtExtractor.decodeJWT( refreshToken ).getUserEmail();
-        Optional<? extends User> user = userProvider.getUser( userEmail );
+        String userId = jwtExtractor.decodeJWT( refreshToken ).getUserId();
+        Optional<? extends User> user = userProvider.getUser( userId );
 
         if( user.isEmpty() ) {
             return Result.failure( AuthenticationFailure.UNAUTHENTICATED );
@@ -159,7 +159,7 @@ public class JwtUserAuthenticator implements Authenticator {
         var authentication = new Authentication(
             jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId ),
             jwtTokenGenerator.generateRefreshToken( user ),
-            Users.userMetadataToView( userStorage.getMetadata( user.getEmail() ).get() )
+            Users.userMetadataToView( userStorage.getMetadata( user.getId() ).get() )
         );
 
         return Result.success( authentication );
@@ -167,8 +167,8 @@ public class JwtUserAuthenticator implements Authenticator {
 
 
     @Override
-    public Optional<Authentication> authenticateTrusted( String email ) {
-        return userProvider.getUser( email )
+    public Optional<Authentication> authenticateTrusted( String idOrEmail ) {
+        return userProvider.getUser( idOrEmail )
             .map( user -> {
                 try {
                     return generateTokens( user );

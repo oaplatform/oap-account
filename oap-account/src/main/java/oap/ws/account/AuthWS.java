@@ -26,12 +26,15 @@ package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
 import oap.http.Http;
+import oap.util.Result;
 import oap.ws.Response;
 import oap.ws.Session;
 import oap.ws.SessionManager;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
 import oap.ws.sso.AbstractSecureWS;
+import oap.ws.sso.Authentication;
+import oap.ws.sso.AuthenticationFailure;
 import oap.ws.sso.Authenticator;
 import oap.ws.sso.Credentials;
 import oap.ws.sso.TokenCredentials;
@@ -97,7 +100,7 @@ public class AuthWS extends AbstractSecureWS {
                            @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
-        var result = authenticator.authenticate( UserStorage.prepareEmail( email ), password, tfaCode );
+        Result<Authentication, AuthenticationFailure> result = authenticator.authenticate( email, password, tfaCode );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( TFA_REQUIRED == result.getFailureValue() )
@@ -113,9 +116,9 @@ public class AuthWS extends AbstractSecureWS {
                            @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
-        final Optional<TokenInfo> tokenInfo = oauthService.getOauthProvider( credentials.source ).getTokenInfo( credentials.accessToken );
-        if( tokenInfo.isPresent() ) {
-            var result = authenticator.authenticate( UserStorage.prepareEmail( tokenInfo.get().email ), credentials.tfaCode );
+        TokenInfo tokenInfo = oauthService.getOauthProvider( credentials.source ).getTokenInfo( credentials.accessToken ).orElse( null );
+        if( tokenInfo != null ) {
+            Result<Authentication, AuthenticationFailure> result = authenticator.authenticate( tokenInfo.email, credentials.tfaCode );
             if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
                 sessionManager.cookieDomain, sessionManager.cookieSecure );
             else if( TFA_REQUIRED == result.getFailureValue() )
@@ -135,7 +138,7 @@ public class AuthWS extends AbstractSecureWS {
                                         @WsParam( from = COOKIE ) String Authorization,
                                         Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
-        var result = authenticator.authenticateWithActiveOrgId( Authorization, organizationId );
+        Result<Authentication, AuthenticationFailure> result = authenticator.authenticateWithActiveOrgId( Authorization, organizationId );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( WRONG_ORGANIZATION == result.getFailureValue() )
@@ -152,7 +155,7 @@ public class AuthWS extends AbstractSecureWS {
                             Session session ) {
         loggedUser.ifPresent( user -> {
             log.debug( "Invalidating token for user [{}]", user.getEmail() );
-            authenticator.invalidate( user.getEmail() );
+            authenticator.invalidate( user.getId() );
         } );
         session.invalidate();
         return logoutResponse( sessionManager.cookieDomain );

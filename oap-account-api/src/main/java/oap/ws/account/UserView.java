@@ -16,6 +16,7 @@ public class UserView implements oap.ws.sso.UserView, Serializable {
     @Serial
     private static final long serialVersionUID = -4649450901635794223L;
 
+    public final String id;
     public final String email;
     public final String firstName;
     public final String lastName;

@@ -92,6 +92,7 @@ public class UserWSTest extends Fixtures {
                   "confirmed" : true,
                   "created" : "2010-01-23T17:22:49.000Z",
                   "defaultOrganization" : "SYSTEM",
+                  "id" : "XNSSXNSS",
                   "email" : "xenoss@xenoss.io",
                   "firstName" : "System",
                   "lastLogin" : "2025-01-24",
@@ -119,6 +120,7 @@ public class UserWSTest extends Fixtures {
                   "confirmed" : true,
                   "created" : "2010-01-23T17:22:49.000Z",
                   "defaultOrganization" : "DFLT",
+                  "id" : "RGDMNDMNCM",
                   "email" : "orgadmin@admin.com",
                   "firstName" : "Johnny",
                   "lastName" : "Walker",
@@ -140,6 +142,7 @@ public class UserWSTest extends Fixtures {
                   "confirmed" : true,
                   "created" : "2010-01-23T17:22:49.000Z",
                   "defaultOrganization" : "DFLT",
+                  "id" : "RGDMNDMNCM",
                   "email" : "orgadmin@admin.com",
                   "firstName" : "Johnny",
                   "lastLogin" : "2010-01-23",
@@ -158,7 +161,7 @@ public class UserWSTest extends Fixtures {
     public void noSecureData() {
         Dates.setTimeFixed( 2025, 1, 24, 17, 22, 49 );
 
-        UserData user = accountFixture.userStorage().createUser( new User( "user@user.com", "Johnny", "Walker",
+        UserData user = accountFixture.userStorage().createUser( new User( null, "user@user.com", "Johnny", "Walker",
             "pass", true ), Map.of( DEFAULT_ORGANIZATION_ID, USER ), Storage.MODIFIED_BY_SYSTEM ).object;
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( "/user/" + DEFAULT_ORGANIZATION_ID + "/" + user.user.email ) )
@@ -167,6 +170,7 @@ public class UserWSTest extends Fixtures {
                    "banned" : false,
                    "confirmed" : true,
                    "created" : "2025-01-24T17:22:49.000Z",
+                   "id" : "SRSRCM",
                    "email" : "user@user.com",
                    "firstName" : "Johnny",
                    "lastName" : "Walker",
@@ -182,7 +186,7 @@ public class UserWSTest extends Fixtures {
     @Test
     public void accessOtherOrgUser() {
         OrganizationData organizationData = accountFixture.organizationStorage().storeOrganization( new Organization( "THRRG", "otherOrg" ), Storage.MODIFIED_BY_SYSTEM );
-        UserData user = accountFixture.userStorage().createUser( new User( "other@other.com", "Other", "User",
+        UserData user = accountFixture.userStorage().createUser( new User( null, "other@other.com", "Other", "User",
             "pass", false ), Map.of( organizationData.organization.id, USER ), Storage.MODIFIED_BY_SYSTEM ).object;
 
         accountFixture.assertOrgAdminLogin();
@@ -204,6 +208,7 @@ public class UserWSTest extends Fixtures {
                   "confirmed" : true,
                   "created" : "2010-01-23T17:22:49.000Z",
                   "defaultOrganization" : "DFLT",
+                  "id" : "RGDMNDMNCM",
                   "email" : "orgadmin@admin.com",
                   "firstName" : "Johnny",
                   "lastName" : "Walker",

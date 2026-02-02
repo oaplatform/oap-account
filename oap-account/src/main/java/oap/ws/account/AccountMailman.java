@@ -63,6 +63,6 @@ public class AccountMailman {
     }
 
     public String confirmUrl( UserData user ) {
-        return confirmUrl + "/users/confirm/" + user.user.email + "?accessKey=" + user.getAccessKey() + "&apiKey=" + user.user.apiKey;
+        return confirmUrl + "/users/confirm/" + user.user.id + "?accessKey=" + user.getAccessKey() + "&apiKey=" + user.user.apiKey;
     }
 }

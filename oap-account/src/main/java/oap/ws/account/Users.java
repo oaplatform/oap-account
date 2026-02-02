@@ -12,7 +12,7 @@ public final class Users {
     public static UserView userMetadataToView( Metadata<UserData> userDataMetadata ) {
         UserData userData = userDataMetadata.object;
         User user = userData.user;
-        return new UserView( user.email, user.firstName, user.lastName, userData.accounts,
+        return new UserView( user.id, user.email, user.firstName, user.lastName, userData.accounts,
             userData.roles, userData.banned, user.confirmed, user.tfaEnabled, user.defaultAccounts,
             user.defaultOrganization, userData.lastLogin,
             new DateTime( userDataMetadata.created, UTC ), new DateTime( userDataMetadata.modified, UTC ) );
@@ -21,7 +21,7 @@ public final class Users {
     public static UserSecureView userMetadataToSecureView( Metadata<UserData> userDataMetadata ) {
         UserData userData = userDataMetadata.object;
         User user = userData.user;
-        return new UserSecureView( user.email, user.firstName, user.lastName, userData.accounts,
+        return new UserSecureView( user.id, user.email, user.firstName, user.lastName, userData.accounts,
             userData.roles, userData.banned, user.confirmed, user.tfaEnabled, user.defaultAccounts,
             user.defaultOrganization, userData.lastLogin,
             new DateTime( userDataMetadata.created, UTC ), new DateTime( userDataMetadata.modified, UTC ),

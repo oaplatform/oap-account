@@ -54,10 +54,10 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
 
     @Override
     public Result<UserWithCookies, String> getAuthenticatedByAccessToken( Optional<String> accessToken, Optional<String> refreshToken,
-                                                                          Optional<String> sessionUserEmail,
+                                                                          Optional<String> sessionUserIdOrEmail,
                                                                           SecurityRoles clientRoles, String realm, String... wssPermissions ) {
         String organization = null;
-        String email = null;
+        String idOrEmail = null;
 
         Optional<SSO.Tokens> responseAccessCookie = Optional.empty();
 
@@ -107,7 +107,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
                 return Result.failure( "Invalid token: " + token + ", reason: " + tokenStatus );
             }
             jwtToken = jwtExtractor.decodeJWT( token );
-            email = jwtToken.getUserEmail();
+            idOrEmail = jwtToken.getUserId();
             organization = jwtToken.getOrganizationId();
         } else {
             log.trace( "accessToken = null && refreshToken = null" );
@@ -117,22 +117,22 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
             return Result.failure( "realm is different from organization logged in" );
         }
 
-        if( sessionUserEmail.isPresent() && email == null ) {
-            email = sessionUserEmail.get();
+        if( sessionUserIdOrEmail.isPresent() && idOrEmail == null ) {
+            idOrEmail = sessionUserIdOrEmail.get();
         }
 
-        if( email == null ) {
+        if( idOrEmail == null ) {
             return Result.failure( "JWT token is empty" );
         }
 
-        UserData userData = userStorage.get( email ).orElse( null );
+        UserData userData = userStorage.get( idOrEmail ).orElse( null );
 
         if( userData == null ) {
-            return Result.failure( "User not found with email: " + email );
+            return Result.failure( "User not found with id: " + idOrEmail );
         } else if( userData.banned ) {
-            return Result.failure( "User with email " + email + " is banned" );
+            return Result.failure( "User with email " + userData.getEmail() + " is banned" );
         } else if( !userData.user.isConfirmed() ) {
-            return Result.failure( "User with email " + email + " is not confirmed" );
+            return Result.failure( "User with email " + userData.getEmail() + " is not confirmed" );
         }
 
         if( jwtToken != null && userData.getCounter() != jwtToken.getCounter() ) {
@@ -151,11 +151,11 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
             }
         }
 
-        userStorage.update( userData.getEmail(), ud -> {
+        userStorage.update( userData.getId(), ud -> {
             ud.lastAccess = DateTime.now( UTC );
 
             return ud;
-        }, email );
+        }, userData.getEmail() );
 
         return Result.success( new UserWithCookies( userData, responseAccessCookie.map( c -> c.accessToken ), responseAccessCookie.map( c -> c.refreshToken ) ) );
     }
@@ -176,11 +176,11 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
     }
 
     @Override
-    public Result<? extends User, AuthenticationFailure> getAuthenticated( String email, String password, Optional<String> tfaCode ) {
-        Optional<UserData> authenticated = userStorage.get( email )
+    public Result<? extends User, AuthenticationFailure> getAuthenticated( String idOrEmail, String password, Optional<String> tfaCode ) {
+        Optional<UserData> authenticated = userStorage.get( idOrEmail )
             .filter( u -> u.authenticate( password ) );
 
-        return getAuthenticationResult( email, tfaCode, authenticated );
+        return getAuthenticationResult( idOrEmail, tfaCode, authenticated );
     }
 
     @Override
@@ -190,14 +190,14 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
         return getAuthenticationResult( email, tfaCode, authenticated );
     }
 
-    private Result<? extends User, AuthenticationFailure> getAuthenticationResult( String email, Optional<String> tfaCode, Optional<UserData> authenticated ) {
+    private Result<? extends User, AuthenticationFailure> getAuthenticationResult( String idOrEmail, Optional<String> tfaCode, Optional<UserData> authenticated ) {
         if( authenticated.isPresent() ) {
             UserData userData = authenticated.get();
             if( !userData.user.tfaEnabled ) {
-                userStorage.update( email, user -> {
+                userStorage.update( idOrEmail, user -> {
                     user.lastLogin = DateTime.now( UTC );
                     return user;
-                }, email );
+                }, userData.getEmail() );
                 return Result.success( userData );
             } else {
                 if( tfaCode.isEmpty() ) {

@@ -22,7 +22,7 @@ public class UserTest {
 
     @Test
     public void marshal() {
-        UserData user = new UserData( new User( "email", "John", "Smith" ), Map.of( "r1", "ADMIN", "r2", "USER" ) );
+        UserData user = new UserData( new User( "id", "email", "John", "Smith" ), Map.of( "r1", "ADMIN", "r2", "USER" ) );
         user.addAccount( "org1", "acc1" );
         user.addAccount( "org1", "acc2" );
         user.addAccount( "org1", "acc2" );
@@ -36,8 +36,8 @@ public class UserTest {
 
     @Test
     public void id() {
-        assertThat( Identifier.forAnnotationFixed().get( new User( "mail" ) ) )
-            .isEqualTo( "mail" );
+        assertThat( Identifier.forAnnotationFixed().get( new User( "id", "mail" ) ) )
+            .isEqualTo( "id" );
     }
 
 }

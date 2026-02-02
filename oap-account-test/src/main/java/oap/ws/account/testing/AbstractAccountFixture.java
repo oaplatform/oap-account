@@ -38,6 +38,7 @@ import oap.ws.account.OrganizationStorage;
 import oap.ws.account.User;
 import oap.ws.account.UserData;
 import oap.ws.account.UserStorage;
+import oap.ws.account.testing.migration.DefaultOrgAdminUnit;
 import oap.ws.sso.UserProvider;
 
 import java.util.Map;
@@ -73,8 +74,8 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
     public static final String DEFAULT_ORGANIZATION_ADMIN_EMAIL = "orgadmin@admin.com";
     public static final String SYSTEM_ORGANIZATION_ADMIN_EMAIL = "systemadmin@admin.com";
     public static final String DEFAULT_ADMIN_EMAIL = "xenoss@xenoss.io";
-    public static final User ORG_ADMIN_USER = new User( "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
-    public static final User REGULAR_USER = new User( "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
+    public static final User ORG_ADMIN_USER = new User( null, "org@admin.com", "Joe", "Haserton", DEFAULT_PASSWORD, true );
+    public static final User REGULAR_USER = new User( null, "user@admin.com", "Joe", "Epstein", DEFAULT_PASSWORD, true );
 
     public AbstractAccountFixture( TestDirectoryFixture testDirectoryFixture, MongoFixture mongoFixture ) {
         super( testDirectoryFixture, urlOrThrow( AbstractAccountFixture.class, "/application-account.fixture.conf" ) );
@@ -82,8 +83,6 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
         addDependency( "mongo", mongoFixture );
 
         define( "SESSION_MANAGER_EXPIRATION_TIME", "24h" );
-
-        withMigration( "oap.ws.account.testing.migration" );
     }
 
     @SuppressWarnings( "unchecked" )
@@ -186,6 +185,10 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
         return ( Self ) this;
     }
 
+    public void logout() {
+        SecureWSHelper.logout( defaultHttpPort() );
+    }
+
     @SuppressWarnings( "unchecked" )
     public Self assertLogout() {
         SecureWSHelper.assertLogout( defaultHttpPort() );
@@ -248,11 +251,11 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles ) {
-        return userStorage().createUser( new User( mail, mail, mail, pass, true ), roles, Storage.MODIFIED_BY_SYSTEM ).object.user;
+        return userStorage().createUser( new User( null, mail, mail, mail, pass, true ), roles, Storage.MODIFIED_BY_SYSTEM ).object.user;
     }
 
     public User addUser( String mail, String pass, Map<String, String> roles, boolean tfaEnabled ) {
-        User user = new User( mail, mail, mail, pass, true, tfaEnabled );
+        User user = new User( null, mail, mail, mail, pass, true, tfaEnabled );
         if( tfaEnabled ) {
             user.secretKey = UserProvider.toAccessKey( mail );
         }
@@ -275,5 +278,20 @@ public abstract class AbstractAccountFixture<Self extends AbstractAccountFixture
 
     public TransportMock getTransportMock() {
         return service( "oap-account-test", TransportMock.class );
+    }
+
+    public void removeAllUsersExceptAdmins() {
+        UserStorage userStorage = userStorage();
+        for( UserData userData : userStorage ) {
+            String id = userData.getId();
+            String email = userData.getEmail();
+            if( DefaultOrgAdminUnit.SYSTEMADMIN_EMAIL.equalsIgnoreCase( email )
+                || DefaultOrgAdminUnit.ORGADMIN_EMAIL.equalsIgnoreCase( email )
+                || userStorage.defaultSystemAdminEmail.equalsIgnoreCase( email ) ) {
+                continue;
+            }
+
+            userStorage.delete( id );
+        }
     }
 }

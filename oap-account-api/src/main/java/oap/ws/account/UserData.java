@@ -68,6 +68,12 @@ public class UserData implements oap.ws.sso.User, Serializable {
         return user.email;
     }
 
+    @JsonIgnore
+    @Override
+    public String getId() {
+        return user.id;
+    }
+
     @Override
     public Optional<String> getRole( String realm ) {
         return Optional.ofNullable( roles.get( SYSTEM ) ).or( () -> Optional.ofNullable( roles.get( realm ) ) );

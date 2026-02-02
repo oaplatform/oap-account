@@ -89,6 +89,10 @@ public class SecureWSHelper {
             .hasReason( "TFA code is incorrect" );
     }
 
+    public static void logout( int port ) {
+        assertGet( httpUrl( port, "/auth/logout" ) );
+    }
+
     public static void assertLogout( int port ) {
         assertGet( httpUrl( port, "/auth/logout" ) )
             .hasCode( Http.StatusCode.NO_CONTENT )
