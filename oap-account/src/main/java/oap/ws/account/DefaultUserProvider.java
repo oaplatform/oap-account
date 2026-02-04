@@ -85,8 +85,9 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
 
                     if( refreshTokenStatus == JWTExtractor.TokenStatus.VALID ) {
                         JwtToken jwtRefreshToken = jwtExtractor.decodeJWT( rt );
-                        Metadata<UserData> currentUserMetadata = userStorage.getMetadata( jwtRefreshToken.getUserEmail() ).orElse( null );
-                        UserData currentUser = currentUserMetadata.object;
+                        String userId = jwtRefreshToken.getUserId();
+                        Metadata<UserData> currentUserMetadata = userId != null ? userStorage.getMetadata( userId ).orElse( null ) : null;
+                        UserData currentUser = currentUserMetadata != null ? currentUserMetadata.object : null;
 
                         if( currentUser == null || currentUser.getCounter() != jwtRefreshToken.getCounter() ) {
                             return Result.failure( "an outdated version of the refresh token" );
