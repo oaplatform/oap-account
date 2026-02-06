@@ -63,7 +63,7 @@ public class JwtUserAuthenticator implements Authenticator {
 
     @Override
     public Result<Authentication, AuthenticationFailure> authenticate( String idOrEmail, Optional<String> tfaCode ) {
-        var authResult = userProvider.getAuthenticated( idOrEmail, tfaCode );
+        Result<? extends User, AuthenticationFailure> authResult = userProvider.getAuthenticated( idOrEmail, tfaCode );
         return getAuthenticationTokens( authResult );
     }
 
@@ -118,7 +118,7 @@ public class JwtUserAuthenticator implements Authenticator {
 
         Authentication.Token accessToken = jwtTokenGenerator.generateAccessToken( user );
         Authentication.Token refreshToken = jwtTokenGenerator.generateRefreshToken( user );
-        log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
+        log.trace( "generating authentication for user {} / {} -> {} / {}", user.getId(), user.getEmail(), accessToken, refreshToken );
         return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getId() ).get() ) );
     }
 
@@ -131,7 +131,7 @@ public class JwtUserAuthenticator implements Authenticator {
 
         Authentication.Token accessToken = jwtTokenGenerator.generateAccessTokenWithActiveOrgId( user, activeOrgId );
         Authentication.Token refreshToken = jwtTokenGenerator.generateRefreshToken( user );
-        log.trace( "generating authentication for user {} -> {} / {}", user.getEmail(), accessToken, refreshToken );
+        log.trace( "generating authentication for user {} / {} -> {} / {}", user.getId(), user.getEmail(), accessToken, refreshToken );
         return new Authentication( accessToken, refreshToken, Users.userMetadataToView( userStorage.getMetadata( user.getId() ).get() ) );
     }
 

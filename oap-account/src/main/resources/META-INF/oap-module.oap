@@ -175,6 +175,7 @@ services {
     parameters {
       userStorage = <modules.this.user-storage>
       organizationStorage = <modules.this.organization-storage>
+      jwtExtractor = <modules.this.oap-ws-sso-token-extractor>
     }
     ws-service {
       path = admin

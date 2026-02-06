@@ -186,9 +186,9 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
 
     @Override
     public Result<? extends User, AuthenticationFailure>
-    getAuthenticated( String email, Optional<String> tfaCode ) {
-        Optional<UserData> authenticated = userStorage.get( email );
-        return getAuthenticationResult( email, tfaCode, authenticated );
+    getAuthenticated( String idOrEmail, Optional<String> tfaCode ) {
+        Optional<UserData> authenticated = userStorage.get( idOrEmail );
+        return getAuthenticationResult( idOrEmail, tfaCode, authenticated );
     }
 
     private Result<? extends User, AuthenticationFailure> getAuthenticationResult( String idOrEmail, Optional<String> tfaCode, Optional<UserData> authenticated ) {

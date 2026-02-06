@@ -28,20 +28,27 @@ import lombok.extern.slf4j.Slf4j;
 import oap.storage.Storage;
 import oap.ws.WsMethod;
 import oap.ws.WsParam;
+import oap.ws.sso.JWTExtractor;
+import oap.ws.sso.JwtToken;
 
+import java.net.URLEncoder;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static oap.http.server.nio.HttpServerExchange.HttpMethod.DELETE;
+import static oap.http.server.nio.HttpServerExchange.HttpMethod.GET;
 import static oap.ws.WsParam.From.PATH;
 
 @Slf4j
 public class AdminWS {
     private final OrganizationStorage organizationStorage;
     private final UserStorage userStorage;
+    private final JWTExtractor jwtExtractor;
 
-    public AdminWS( OrganizationStorage organizationStorage, UserStorage userStorage ) {
+    public AdminWS( OrganizationStorage organizationStorage, UserStorage userStorage, JWTExtractor jwtExtractor ) {
         this.organizationStorage = organizationStorage;
         this.userStorage = userStorage;
+        this.jwtExtractor = jwtExtractor;
     }
 
     @SuppressWarnings( "checkstyle:UnnecessaryParentheses" )
@@ -96,5 +103,10 @@ public class AdminWS {
         log.debug( "permanentlyDeleteUser {}", email );
 
         userStorage.delete( email );
+    }
+
+    @WsMethod( method = GET, path = "/jwt/{jwt}" )
+    public JwtToken decodeJwt( @WsParam( from = PATH ) String jwt ) {
+        return jwtExtractor.decodeJWT( URLEncoder.encode( jwt, UTF_8 ) );
     }
 }
