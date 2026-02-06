@@ -70,7 +70,11 @@ public class JwtUserAuthenticator implements Authenticator {
     public Result<Authentication, AuthenticationFailure> authenticateWithActiveOrgId( String jwtToken, String orgId ) {
         if( jwtExtractor.verifyToken( jwtToken ) == JWTExtractor.TokenStatus.VALID ) {
             log.trace( "generating new authentication token with active organization {} ", orgId );
-            Optional<? extends User> user = userProvider.getUser( jwtExtractor.decodeJWT( jwtToken ).getUserId() );
+            String userId = jwtExtractor.decodeJWT( jwtToken ).getUserId();
+            if( userId == null ) {
+                return Result.failure( AuthenticationFailure.UNAUTHENTICATED );
+            }
+            Optional<? extends User> user = userProvider.getUser( userId );
             if( user.isEmpty() ) {
                 return Result.failure( AuthenticationFailure.UNAUTHENTICATED );
             }
@@ -140,6 +144,9 @@ public class JwtUserAuthenticator implements Authenticator {
 
     private Result<Authentication, AuthenticationFailure> generateAuthentication( String refreshToken, Optional<String> orgId ) {
         String userId = jwtExtractor.decodeJWT( refreshToken ).getUserId();
+        if( userId == null ) {
+            return Result.failure( AuthenticationFailure.UNAUTHENTICATED );
+        }
         Optional<? extends User> user = userProvider.getUser( userId );
 
         if( user.isEmpty() ) {
