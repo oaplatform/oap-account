@@ -33,9 +33,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import oap.http.Client;
 import oap.http.Http;
+import oap.http.client.OapHttpClient;
+import oap.json.Binder;
+import oap.reflect.TypeRef;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.client.ContentResponse;
+import org.eclipse.jetty.http.HttpMethod;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -73,11 +77,15 @@ public class GoogleProvider implements OauthProviderService {
             }
         } else {
             try {
-                Client.Response response = Client.DEFAULT.get( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
-                Preconditions.checkArgument( response.code == Http.StatusCode.OK );
-                Optional<TokenInfoResponse> info = response.unmarshal( TokenInfoResponse.class );
+                ContentResponse response = OapHttpClient.DEFAULT_HTTP_CLIENT
+                    .newRequest( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken )
+                    .method( HttpMethod.GET )
+                    .send();
 
-                return info.map( i -> new TokenInfo( i.email, i.given_name, i.family_name ) );
+                Preconditions.checkArgument( response.getStatus() == Http.StatusCode.OK );
+                TokenInfoResponse info = Binder.json.unmarshal( new TypeRef<>() {}, response.getContent() );
+
+                return Optional.of( new TokenInfo( info.email, info.given_name, info.family_name ) );
             } catch( Exception e ) {
                 log.error( "Failed to extract user from google token", e );
                 throw Throwables.propagate( e );

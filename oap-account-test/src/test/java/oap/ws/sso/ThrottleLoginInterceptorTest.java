@@ -35,7 +35,6 @@ import java.util.Map;
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.test.HttpAsserts.assertPost;
-import static oap.http.test.HttpAsserts.reset;
 
 public class ThrottleLoginInterceptorTest extends IntegratedTest {
     @Test
@@ -43,7 +42,7 @@ public class ThrottleLoginInterceptorTest extends IntegratedTest {
         accountFixture.service( "oap-ws-sso-api", ThrottleLoginInterceptor.class ).delay = Dates.s( 5 );
 
         Dates.setTimeFixed( DateTimeUtils.currentTimeMillis() );
-        reset();
+//        reset();
         accountFixture.addUser( "test1@user.com", "pass1", Map.of( "realm", "ADMIN" ) );
 
         login( "test1@user.com", "pass" ).hasCode( UNAUTHORIZED );
