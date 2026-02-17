@@ -25,13 +25,13 @@
 package oap.ws.sso;
 
 
-import oap.http.Client;
 import oap.http.Http;
-import oap.http.test.HttpAsserts;
+import oap.http.client.OapHttpClient;
 import oap.json.Binder;
 import oap.ws.account.testing.SecureWSHelper;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.sso.interceptor.ThrottleLoginInterceptor;
+import org.eclipse.jetty.client.HttpClient;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -179,25 +179,19 @@ public class AuthWSTest extends IntegratedTest {
     }
 
     @Test
-    public void testInvalidateTokens() {
+    public void testInvalidateTokens() throws Exception {
         addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
 
-        try( Client client1 = Client.custom().build();
-             Client client2 = Client.custom().build() ) {
+        try( HttpClient client1 = OapHttpClient.customHttpClient().build();
+             HttpClient client2 = OapHttpClient.customHttpClient().build() ) {
 
-            Client.Response response = client1.post( accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON );
-            assertThat( response.code ).isEqualTo( OK );
+            assertPost( client1, accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON, Map.of() ).isOk();
+            assertGet( client1, accountFixture.httpUrl( "/auth/whoami" ), Map.of(), Map.of() ).isOk();
 
-            response = client1.get( accountFixture.httpUrl( "/auth/whoami" ) );
-            assertThat( response.code ).isEqualTo( OK );
+            assertPost( client2, accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON, Map.of() ).isOk();
 
-            response = client2.post( accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON );
-            assertThat( response.code ).isEqualTo( OK );
-
-            response = client1.get( accountFixture.httpUrl( "/auth/whoami" ) );
-            assertThat( response.code ).isEqualTo( UNAUTHORIZED );
-            response = client2.get( accountFixture.httpUrl( "/auth/whoami" ) );
-            assertThat( response.code ).isEqualTo( OK );
+            assertGet( client1, accountFixture.httpUrl( "/auth/whoami" ), Map.of(), Map.of() ).hasCode( UNAUTHORIZED );
+            assertGet( client2, accountFixture.httpUrl( "/auth/whoami" ), Map.of(), Map.of() ).isOk();
         }
     }
 
@@ -205,7 +199,7 @@ public class AuthWSTest extends IntegratedTest {
     public void testRefreshToken() {
         addUser( "admin@admin.com", "pass", Map.of( "r1", "ADMIN" ) );
 
-        HttpAsserts.reset();
+//        HttpAsserts.reset();
 
         assertPost( accountFixture.httpUrl( "/auth/login" ), "{  \"email\": \"admin@admin.com\",  \"password\": \"pass\"}", Http.ContentType.APPLICATION_JSON )
             .isOk()

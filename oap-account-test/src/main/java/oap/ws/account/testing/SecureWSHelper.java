@@ -26,7 +26,6 @@ package oap.ws.account.testing;
 
 import oap.http.Http;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 
 import static oap.http.test.HttpAsserts.CookieHttpAssertion.assertCookie;
 import static oap.http.test.HttpAsserts.assertGet;
@@ -36,7 +35,6 @@ import static oap.io.content.ContentReader.ofString;
 import static oap.testng.Asserts.contentOfTestResource;
 import static oap.ws.sso.SSO.AUTHENTICATION_KEY;
 import static oap.ws.sso.SSO.REFRESH_TOKEN_KEY;
-import static org.joda.time.DateTimeZone.UTC;
 
 /**
  * Created by igor.petrenko on 2021-02-24.
@@ -96,9 +94,7 @@ public class SecureWSHelper {
     public static void assertLogout( int port ) {
         assertGet( httpUrl( port, "/auth/logout" ) )
             .hasCode( Http.StatusCode.NO_CONTENT )
-            .containsCookie( AUTHENTICATION_KEY, cookie -> assertCookie( cookie )
-                .hasValue( "<logged out>" )
-                .expiresAt( new DateTime( 1970, 1, 1, 1, 1, UTC ) ) );
+            .doesNotContainHeader( AUTHENTICATION_KEY );
     }
 
     public static void assertLoginWithFBToken( int port ) {
