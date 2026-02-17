@@ -6,7 +6,7 @@
     <parent>
         <groupId>oap</groupId>
         <artifactId>oap.maven</artifactId>
-        <version>25.0.2</version>
+        <version>25.0.3</version>
     </parent>
 
     <packaging>pom</packaging>
@@ -20,7 +20,7 @@
             <dependency>
                 <groupId>oap</groupId>
                 <artifactId>oap-dependencies</artifactId>
-                <version>25.0.2</version>
+                <version>25.0.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -58,7 +58,7 @@
     <properties>
         <oap.project.version>25.2.0</oap.project.version>
 
-        <oap.deps.oap.version>25.4.0</oap.deps.oap.version>
+        <oap.deps.oap.version>25.4.1</oap.deps.oap.version>
 
         <oap.deps.com.restfb>2024.12.0</oap.deps.com.restfb>
         <oap.deps.google.api-client>2.7.0</oap.deps.google.api-client>
