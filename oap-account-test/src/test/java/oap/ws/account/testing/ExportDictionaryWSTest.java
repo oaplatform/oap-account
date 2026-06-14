@@ -33,7 +33,7 @@ public class ExportDictionaryWSTest extends Fixtures {
             .isOk()
             .satisfies( resp -> {
                 try {
-                    RowBinaryInputStream rowBinaryInputStream = new RowBinaryInputStream( new ByteArrayInputStream( resp.content() ), true );
+                    RowBinaryInputStream rowBinaryInputStream = new RowBinaryInputStream( new ByteArrayInputStream( resp.content() ) );
                     assertThat( rowBinaryInputStream.headers ).isEqualTo( new String[] { "id", "name" } );
                     assertThat( rowBinaryInputStream.readString() ).isEqualTo( "DFLT" );
                     assertThat( rowBinaryInputStream.readString() ).isEqualTo( "Default" );

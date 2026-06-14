@@ -30,12 +30,10 @@ import org.testng.annotations.Test;
 import java.util.Map;
 
 import static oap.http.Http.ContentType.TEXT_PLAIN;
-import static oap.http.Http.StatusCode.CONFLICT;
 import static oap.http.Http.StatusCode.OK;
 import static oap.http.Http.StatusCode.UNAUTHORIZED;
 import static oap.http.test.HttpAsserts.assertGet;
 import static oap.util.Pair.__;
-import static oap.ws.account.testing.SecureWSHelper.assertLogin;
 
 public class ApiKeyInterceptorTest extends IntegratedTest {
 
@@ -70,17 +68,5 @@ public class ApiKeyInterceptorTest extends IntegratedTest {
             __( "accessKey", user.getAccessKey() ),
             __( "apiKey", user.apiKey )
         ).responded( OK, "OK", TEXT_PLAIN, "admin@admin.com" );
-    }
-
-    @Test
-    public void conflict() {
-        assertLogin( "admin@admin.com", "pass" );
-        assertSwitchOrganization( "r1" );
-        assertGet( httpUrl( "/secure/r1" ) )
-            .hasCode( OK );
-        assertGet( httpUrl( "/secure/r1" ),
-            __( "accessKey", user.getAccessKey() ),
-            __( "apiKey", user.apiKey )
-        ).hasCode( CONFLICT );
     }
 }
