@@ -2,6 +2,7 @@ package oap.ws.account;
 
 import oap.http.Http.StatusCode;
 import oap.logstream.formats.rowbinary.RowBinaryOutputStream;
+import oap.template.Types;
 import oap.util.Throwables;
 import oap.ws.Response;
 import oap.ws.WsMethod;
@@ -25,7 +26,7 @@ public class ExportDictionaryWS {
             case "organizations" -> {
                 try {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    RowBinaryOutputStream rowBinaryOutputStream = new RowBinaryOutputStream( baos, List.of( "id", "name" ) );
+                    RowBinaryOutputStream rowBinaryOutputStream = new RowBinaryOutputStream( baos, List.of( "id", "name" ), new byte[][] { new byte[] { Types.STRING.id }, new byte[] { Types.STRING.id } } );
                     organizationStorage
                         .select()
                         .sorted( Comparator.comparing( o -> o.organization.name ) )
