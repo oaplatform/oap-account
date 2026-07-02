@@ -19,15 +19,23 @@ It provides APIs and implementations for handling user accounts, social login in
 ### Prerequisites
 
 - Java 22+
-- Maven 3.8+
+- Gradle 9.6+ (wrapper included, use `./gradlew`)
 
 ### Installation
 
-To include in your Maven project:
+To include in your Gradle project:
 
-```xml
-<dependency>
-  <groupId>oap</groupId>
-  <artifactId>oap-account</artifactId>
-  <version>${oap.project.version}</version>
-</dependency>
+```kotlin
+dependencies {
+    implementation(platform("oap:oap-dependencies:<version>"))
+    implementation("oap:oap-account")
+}
+```
+
+## Build
+
+```bash
+./gradlew build           # full build
+./gradlew build -x test   # skip tests
+./gradlew publish         # publish to repository
+```
