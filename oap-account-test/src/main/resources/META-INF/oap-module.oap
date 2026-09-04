@@ -1,22 +1,18 @@
-name = oap-account-test
-dependsOn = [
-  oap-ws-sso-api
-  oap-account
-  oap-remote
-]
-services {
-  oap-mail-transport-mock {
-    implementation = oap.mail.TransportMock
-  }
-  secure-ws {
-    implementation = oap.ws.account.testing.SecureWS
-    ws-service {
-      path = secure
-      sessionAware = true
-      interceptors = [
-        <modules.oap-ws-sso-api.oap-ws-sso-api-key-interceptor>
-        <modules.oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor>
-      ]
-    }
-  }
-}
+name: oap-account-test
+dependsOn:
+  - oap-ws-sso-api
+  - oap-account
+  - oap-remote
+
+services:
+  oap-mail-transport-mock:
+    implementation: oap.mail.TransportMock
+
+  secure-ws:
+    implementation: oap.ws.account.testing.SecureWS
+    ws-service:
+      path: secure
+      sessionAware: true
+      interceptors:
+        - <modules.oap-ws-sso-api.oap-ws-sso-api-key-interceptor>
+        - <modules.oap-ws-sso-api.oap-ws-sso-jwt-security-interceptor>

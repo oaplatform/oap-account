@@ -1,21 +1,21 @@
-name = oap-account
-dependsOn = [
-  oap
-  oap-http
-  oap-ws
-  oap-ws-api-ws
-  oap-ws-sso-api
-  oap-ws-admin-ws
-  oap-ws-openapi-ws
-  oap-mail
-  oap-mail-mongo
-  oap-storage-mongo
-  oap-account-social
-  oap-remote
-  oap-http
-  oap-http-prometheus
-]
-services {
+name: oap-account
+dependsOn:
+  - oap
+  - oap-http
+  - oap-ws
+  - oap-ws-api-ws
+  - oap-ws-sso-api
+  - oap-ws-admin-ws
+  - oap-ws-openapi-ws
+  - oap-mail
+  - oap-mail-mongo
+  - oap-storage-mongo
+  - oap-account-social
+  - oap-remote
+  - oap-http
+  - oap-http-prometheus
+
+services:
   organization-storage {
     implementation = oap.ws.account.OrganizationStorage
     parameters {
@@ -201,45 +201,31 @@ services {
     }
   }
 
-  refresh-ws {
-    implementation = oap.ws.account.RefreshWS
-    parameters {
-      authenticator = <modules.this.oap-ws-sso-authenticator>
-      sessionManager = <modules.oap-ws.session-manager>
-    }
-    ws-service {
-      path = refresh
-      sessionAware = true
-      interceptors = [
-        <modules.oap-ws-sso-api.oap-ws-sso-throttle-login-interceptor>
-      ]
-    }
-  }
+  refresh-ws:
+    implementation: oap.ws.account.RefreshWS
+    parameters:
+      authenticator: <modules.this.oap-ws-sso-authenticator>
+      sessionManager: <modules.oap-ws.session-manager>
+    ws-service:
+      path: refresh
+      sessionAware: true
+      interceptors:
+        - <modules.oap-ws-sso-api.oap-ws-sso-throttle-login-interceptor>
 
-  xenoss-account-user-storage-metrics {
-    implementation = oap.storage.StorageMetrics
-    parameters {
-      storage = <modules.this.user-storage>
-      name = "xenoss-account.users"
-    }
-  }
+  xenoss-account-user-storage-metrics:
+    implementation: oap.storage.StorageMetrics
+    parameters:
+      storage: <modules.this.user-storage>
+      name: xenoss-account.users
 
-  xenoss-account-org-storage-metrics {
-    implementation = oap.storage.StorageMetrics
-    parameters {
-      storage = <modules.this.organization-storage>
-      name = "xenoss-account.organizations"
-    }
-  }
+  xenoss-account-org-storage-metrics:
+    implementation: oap.storage.StorageMetrics
+    parameters:
+      storage: <modules.this.organization-storage>
+      name: xenoss-account.organizations
 
-}
-
-configurations = [
-  {
-    loader = oap.json.TypeIdFactory
-    config {
-      organization = oap.ws.account.OrganizationData
-      user = oap.ws.account.UserData
-    }
-  }
-]
+configurations:
+  - loader: oap.json.TypeIdFactory
+    config:
+      organization: oap.ws.account.OrganizationData
+      user: oap.ws.account.UserData
