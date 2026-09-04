@@ -19,6 +19,5 @@ hs_err_pid*
 
 .flattened-pom.xml
 .DS_Store
-.idea/runConfigurations.xml
-build
-.gradle
+.idea
+CLAUDE.md
