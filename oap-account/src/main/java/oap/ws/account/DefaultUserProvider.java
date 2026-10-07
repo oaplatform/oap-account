@@ -17,7 +17,6 @@ import oap.ws.sso.WsSecurity;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
-import java.util.List;
 import java.util.Optional;
 
 import static oap.ws.account.utils.TfaUtils.getTOTPCode;
@@ -90,7 +89,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
                         UserData currentUser = currentUserMetadata != null ? currentUserMetadata.object : null;
 
                         if( currentUser == null || currentUser.getCounter() != jwtRefreshToken.getCounter() ) {
-                            return Result.failure( "an outdated version of the refresh token" );
+                            return Result.failure( AccountValidationMessage.OUTDATED_REFRESH_TOKEN.message() );
                         }
 
                         Authentication.Token responseAccessToken = jwtTokenGenerator.generateAccessToken( currentUser );
@@ -105,7 +104,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
                 }
             }
             if( tokenStatus != JWTExtractor.TokenStatus.VALID ) {
-                return Result.failure( "Invalid token: " + token + ", reason: " + tokenStatus );
+                return Result.failure( AccountValidationMessage.INVALID_TOKEN.message() );
             }
             jwtToken = jwtExtractor.decodeJWT( token );
             idOrEmail = jwtToken.getUserId();
@@ -115,7 +114,7 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
         }
 
         if( hasRealmMismatchError( organization, useOrganizationLogin, realm ) ) {
-            return Result.failure( "realm is different from organization logged in" );
+            return Result.failure( AccountValidationMessage.REALM_MISMATCH.message() );
         }
 
         if( sessionUserIdOrEmail.isPresent() && idOrEmail == null ) {
@@ -123,32 +122,32 @@ public class DefaultUserProvider implements oap.ws.sso.UserProvider {
         }
 
         if( idOrEmail == null ) {
-            return Result.failure( "JWT token is empty" );
+            return Result.failure( AccountValidationMessage.JWT_TOKEN_EMPTY.message() );
         }
 
         UserData userData = userStorage.get( idOrEmail ).orElse( null );
 
         if( userData == null ) {
-            return Result.failure( "User not found with id: " + idOrEmail );
+            return Result.failure( AccountValidationMessage.LOGIN_USER_NOT_FOUND.message() );
         } else if( userData.banned ) {
-            return Result.failure( "User with email " + userData.getEmail() + " is banned" );
+            return Result.failure( AccountValidationMessage.USER_BANNED.message() );
         } else if( !userData.user.isConfirmed() ) {
-            return Result.failure( "User with email " + userData.getEmail() + " is not confirmed" );
+            return Result.failure( AccountValidationMessage.USER_NOT_CONFIRMED.message() );
         }
 
         if( jwtToken != null && userData.getCounter() != jwtToken.getCounter() ) {
-            return Result.failure( "an outdated version of the token" );
+            return Result.failure( AccountValidationMessage.OUTDATED_TOKEN.message() );
         }
 
         if( !WsSecurity.USER.equals( realm ) ) {
             String role = userData.getRole( realm ).orElse( null );
             if( role == null ) {
-                return Result.failure( "user doesn't have access to realm '" + realm + "'" );
+                return Result.failure( AccountValidationMessage.REALM_ACCESS_DENIED.message() );
             }
 
             SecurityRoles allRoles = roles.merge( clientRoles );
             if( !allRoles.granted( role, wssPermissions ) ) {
-                return Result.failure( "user doesn't have required permissions: '" + List.of( wssPermissions ) + "', user permissions: '" + allRoles.permissionsOf( role ) + "'" );
+                return Result.failure( AccountValidationMessage.PERMISSIONS_REQUIRED.message() );
             }
         }
 

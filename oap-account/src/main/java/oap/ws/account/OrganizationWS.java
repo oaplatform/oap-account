@@ -76,7 +76,6 @@ import static oap.ws.account.utils.TfaUtils.getGoogleAuthenticatorCode;
 import static oap.ws.sso.WsSecurity.SYSTEM;
 import static oap.ws.sso.WsSecurity.USER;
 import static oap.ws.validate.ValidationErrors.empty;
-import static oap.ws.validate.ValidationErrors.error;
 
 @Slf4j
 @SuppressWarnings( "unused" )
@@ -331,7 +330,7 @@ public class OrganizationWS extends AbstractWS {
             .build();
 
         UserData userConfirmed = userStorage.confirm( idOrEmail, loggedUser.get().getId() ).orElse( null );
-        return userConfirmed != null ? Response.redirect( redirect ) : Response.notFound();
+        return userConfirmed != null ? Response.redirect( redirect ) : Response.build404().build();
     }
 
 
@@ -348,7 +347,7 @@ public class OrganizationWS extends AbstractWS {
             return Response.ok().withBody( encodedCode );
         }
 
-        return Response.notFound();
+        return Response.build404().build();
     }
 
     @WsMethod( method = GET, path = "/users/tfa/{idOrEmail}/{tfacode}/validate", description = "Validate first tfa code from Google Authenticator" )
@@ -360,9 +359,9 @@ public class OrganizationWS extends AbstractWS {
 
         if( user.isPresent() && ( idOrEmail.equals( loggedUser.map( u -> u.user.email ).orElse( null ) ) || idOrEmail.equals( loggedUser.map( u -> u.user.id ).orElse( null ) ) ) ) {
             final boolean tfaValid = TfaUtils.getTOTPCode( loggedUser.get().user.getSecretKey() ).equals( tfaCode );
-            return tfaValid ? Response.ok() : Response.notFound().withReasonPhrase( "TFA code is incorrect" );
+            return tfaValid ? Response.ok() : Response.build403().message( AccountValidationMessage.TFA_CODE_INCORRECT ).build();
         }
-        return Response.notFound();
+        return Response.build404().build();
     }
 
     @WsMethod( method = GET, path = "/users/{idOrEmail}/default-org/{organizationId}", description = "Set default organization to user" )
@@ -471,7 +470,7 @@ public class OrganizationWS extends AbstractWS {
             || isSystem( loggedUser )
             || isOrganizationAdmin( loggedUser, organizationId )
             ? empty()
-            : error( UNAUTHORIZED, "cannot manage " + passwd.email );
+            : empty().statusCode( UNAUTHORIZED ).error( AccountValidationMessage.CANNOT_MANAGE_USER, Map.of( "email", passwd.email ) ).endCode();
     }
 
     protected ValidationErrors validateUsersOrganization( String organizationId, UserData loggedUser ) {
@@ -490,29 +489,33 @@ public class OrganizationWS extends AbstractWS {
             || isSystemAdmin( loggedUser ) ) {
             return empty();
         }
-        return error( FORBIDDEN, "User " + loggedUser.user.email + " is not allowed to change apikey of another user " + idOrEmail );
+        return empty().statusCode( FORBIDDEN )
+            .error( AccountValidationMessage.APIKEY_CHANGE_FORBIDDEN, Map.of( "loggedEmail", loggedUser.user.email, "idOrEmail", idOrEmail ) )
+            .endCode();
     }
 
     private ValidationErrors validateEmailOrganizationAccess( String organizationId, String email ) {
         return userStorage.get( email )
             .filter( u -> !u.canAccessOrganization( organizationId ) && u.getRole( SYSTEM ).isEmpty() )
-            .map( u -> error( FORBIDDEN, "User " + email + " does not belong to organization " + organizationId ) )
+            .map( u -> empty().statusCode( FORBIDDEN )
+                .error( AccountValidationMessage.USER_NOT_IN_ORGANIZATION, Map.of( "email", email, "organizationId", organizationId ) )
+                .endCode() )
             .orElse( empty() );
     }
 
     protected ValidationErrors validateUserRegistered( @Nonnull User user ) {
-        if( !selfRegistrationEnabled ) return error( Http.StatusCode.NOT_FOUND, "not available" );
+        if( !selfRegistrationEnabled ) return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.REGISTRATION_NOT_AVAILABLE ).endCode();
         var existing = userStorage.get( user.email );
         if( existing.isPresent() && user.create )
-            return error( Http.StatusCode.CONFLICT, "user with email " + user.email + " already exists" );
+            return empty().statusCode( Http.StatusCode.CONFLICT ).error( AccountValidationMessage.USER_ALREADY_EXISTS, Map.of( "email", user.email ) ).endCode();
         else if( existing.isEmpty() && !user.create )
-            return error( Http.StatusCode.NOT_FOUND, "user " + user.email + " does not exists" );
+            return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.USER_DOES_NOT_EXIST, Map.of( "email", user.email ) ).endCode();
         else return empty();
     }
 
     protected ValidationErrors validateAdminRole( @Nonnull String organizationId, Optional<String> role, @Nonnull UserData loggedUser ) {
         if( role.isPresent() && ADMIN.equals( role.get() ) && !isSystemAdmin( loggedUser ) ) {
-            return error( FORBIDDEN, "Only ADMIN can create another ADMIN" );
+            return empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.ADMIN_CREATION_DENIED ).endCode();
         } else return empty();
     }
 
@@ -522,7 +525,7 @@ public class OrganizationWS extends AbstractWS {
 
     protected ValidationErrors validateUserRoleNotEmpty( @Nonnull UserData loggedUser ) {
         return loggedUser.roles.isEmpty()
-            ? error( FORBIDDEN, "User role is required" )
+            ? empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.USER_ROLE_REQUIRED ).endCode()
             : empty();
     }
 
@@ -531,7 +534,7 @@ public class OrganizationWS extends AbstractWS {
         if( userData != null && ADMIN.equals( userData.getRole( organizationId ).orElse( null ) )
             && !ADMIN.equals( loggedUser.getRole( organizationId ).orElse( null ) )
             && !isSystemAdmin( loggedUser ) ) {
-            return error( "ADMIN can be banned only by other ADMIN" );
+            return empty().statusCode( BAD_REQUEST ).error( AccountValidationMessage.ADMIN_BAN_DENIED ).endCode();
         } else {
             return empty();
         }
@@ -540,10 +543,12 @@ public class OrganizationWS extends AbstractWS {
     protected ValidationErrors validateAdminOrganizationAccess( String idOrEmail, UserData loggedUser, String userOrganizationId ) {
         final String loggedUserRoleInNewOrganization = loggedUser.roles.getOrDefault( userOrganizationId, "" );
         if( loggedUserRoleInNewOrganization.isEmpty() && !isSystemAdmin( loggedUser ) ) {
-            return error( FORBIDDEN, "User is not allowed to add users to organization (%s)", userOrganizationId );
+            return empty().statusCode( FORBIDDEN )
+                .error( AccountValidationMessage.ORGANIZATION_ADD_USER_NOT_ALLOWED, Map.of( "organizationId", userOrganizationId ) )
+                .endCode();
         }
         if( !loggedUserRoleInNewOrganization.equals( ADMIN ) && !isSystemAdmin( loggedUser ) ) {
-            return error( FORBIDDEN, "Only ADMIN can add user to organization" );
+            return empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.ONLY_ADMIN_ADD_USER ).endCode();
         }
         if( userStorage.get( idOrEmail ).isPresent() && isSystemAdmin( loggedUser ) ) {
             return empty();
@@ -554,14 +559,14 @@ public class OrganizationWS extends AbstractWS {
     protected ValidationErrors validateDefaultOrganization( String idOrEmail, String organizationId ) {
         Optional<UserData> user = userStorage.get( idOrEmail );
         if( user.isEmpty() ) {
-            return error( NOT_FOUND, String.format( "User (%s) doesn't exist", idOrEmail ) );
+            return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.USER_NOT_EXIST, Map.of( "idOrEmail", idOrEmail ) ).endCode();
         }
         final Optional<OrganizationData> organization = organizationStorage.get( organizationId );
         if( organization.isEmpty() ) {
-            return error( NOT_FOUND, String.format( "Organization (%s) does not exist", organizationId ) );
+            return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.ORGANIZATION_NOT_EXIST, Map.of( "organizationId", organizationId ) ).endCode();
         }
         if( organizationId.equals( user.get().user.defaultOrganization ) ) {
-            return error( BAD_REQUEST, String.format( "Organization (%s) is already marked as default", organizationId ) );
+            return empty().statusCode( BAD_REQUEST ).error( AccountValidationMessage.ORGANIZATION_ALREADY_DEFAULT, Map.of( "organizationId", organizationId ) ).endCode();
         }
         return empty();
     }
@@ -569,17 +574,21 @@ public class OrganizationWS extends AbstractWS {
     protected ValidationErrors validateDefaultAccount( String idOrEmail, String organizationId, String accountId ) {
         Optional<UserData> user = userStorage.get( idOrEmail );
         if( user.isEmpty() ) {
-            return error( NOT_FOUND, String.format( "User (%s) doesn't exist", idOrEmail ) );
+            return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.USER_NOT_EXIST, Map.of( "idOrEmail", idOrEmail ) ).endCode();
         }
         final Optional<OrganizationData> organization = organizationStorage.get( organizationId );
         if( organization.isEmpty() ) {
-            return error( NOT_FOUND, String.format( "Organization (%s) does not exist", organizationId ) );
+            return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.ORGANIZATION_NOT_EXIST, Map.of( "organizationId", organizationId ) ).endCode();
         }
         if( organization.get().accounts.get( accountId ).isEmpty() ) {
-            return error( NOT_FOUND, String.format( "Account (%s) does not exist in organization (%s)", accountId, organizationId ) );
+            return empty().statusCode( NOT_FOUND )
+                .error( AccountValidationMessage.ACCOUNT_NOT_IN_ORGANIZATION, Map.of( "accountId", accountId, "organizationId", organizationId ) )
+                .endCode();
         }
         if( accountId.equals( user.get().user.defaultAccounts.get( organizationId ) ) ) {
-            return error( BAD_REQUEST, String.format( "Account (%s) is already marked as default in organization (%s)", accountId, organizationId ) );
+            return empty().statusCode( BAD_REQUEST )
+                .error( AccountValidationMessage.ACCOUNT_ALREADY_DEFAULT, Map.of( "accountId", accountId, "organizationId", organizationId ) )
+                .endCode();
         }
         return empty();
     }
@@ -588,7 +597,7 @@ public class OrganizationWS extends AbstractWS {
         if( roles.roles().contains( role ) ) {
             return empty();
         } else {
-            return error( BAD_REQUEST, String.format( "Role (%s) does not exist", role ) );
+            return empty().statusCode( BAD_REQUEST ).error( AccountValidationMessage.ROLE_NOT_EXIST, Map.of( "role", role ) ).endCode();
         }
     }
 

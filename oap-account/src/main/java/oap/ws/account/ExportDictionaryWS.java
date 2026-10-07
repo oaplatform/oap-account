@@ -45,7 +45,7 @@ public class ExportDictionaryWS {
                 }
             }
             default -> {
-                return Response.notFound();
+                return Response.build404().build();
             }
         }
     }

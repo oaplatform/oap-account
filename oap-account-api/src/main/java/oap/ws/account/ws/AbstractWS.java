@@ -6,18 +6,19 @@
 
 package oap.ws.account.ws;
 
-import oap.http.Http;
+import oap.ws.account.AccountValidationMessage;
 import oap.ws.account.UserData;
 import oap.ws.sso.AbstractSecureWS;
 import oap.ws.validate.ValidationErrors;
 
 import javax.annotation.Nonnull;
 
+import java.util.Map;
+
 import static oap.http.Http.StatusCode.FORBIDDEN;
 import static oap.ws.account.Roles.ORGANIZATION_ADMIN;
 import static oap.ws.sso.WsSecurity.SYSTEM;
 import static oap.ws.validate.ValidationErrors.empty;
-import static oap.ws.validate.ValidationErrors.error;
 
 public abstract class AbstractWS extends AbstractSecureWS {
     protected boolean securityDisabled = false;
@@ -25,19 +26,23 @@ public abstract class AbstractWS extends AbstractSecureWS {
     protected ValidationErrors validateOrganizationAccess( UserData loggedUser, String organizationId ) {
         return canAccessOrganization( loggedUser, organizationId )
             ? empty()
-            : error( Http.StatusCode.FORBIDDEN, "%s cannot access organization %s", loggedUser.user.email, organizationId );
+            : empty().statusCode( FORBIDDEN )
+            .error( AccountValidationMessage.ORGANIZATION_ACCESS_DENIED, Map.of( "email", loggedUser.user.email, "organizationId", organizationId ) )
+            .endCode();
     }
 
     protected ValidationErrors validateAccountAccess( UserData loggedUser, String organizationId, String accountId ) {
         return canAccessAccount( loggedUser, organizationId, accountId )
             ? empty()
-            : error( Http.StatusCode.FORBIDDEN, "User (%s) cannot access account %s of organization %s", loggedUser.user.email, accountId, organizationId );
+            : empty().statusCode( FORBIDDEN )
+            .error( AccountValidationMessage.ACCOUNT_ACCESS_DENIED, Map.of( "email", loggedUser.user.email, "accountId", accountId, "organizationId", organizationId ) )
+            .endCode();
     }
 
     protected ValidationErrors validateSecurityDisabled() {
         return securityDisabled
             ? empty()
-            : error( Http.StatusCode.FORBIDDEN, "this method is only allowed with disabled security" );
+            : empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.SECURITY_DISABLED_ONLY ).endCode();
     }
 
     protected boolean canAccessOrganization( UserData loggedUser, String organizationId ) {
@@ -61,7 +66,7 @@ public abstract class AbstractWS extends AbstractSecureWS {
 
     public ValidationErrors validateSystemAdminRole( @Nonnull UserData loggedUser ) {
         if( !isSystem( loggedUser ) ) {
-            return error( FORBIDDEN, "Only System ADMIN can access to this api" );
+            return empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.SYSTEM_ADMIN_REQUIRED ).endCode();
         } else return empty();
     }
 }

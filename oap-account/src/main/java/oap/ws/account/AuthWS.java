@@ -25,7 +25,6 @@
 package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
-import oap.http.Http;
 import oap.util.Result;
 import oap.ws.Response;
 import oap.ws.Session;
@@ -43,6 +42,7 @@ import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static oap.http.Http.StatusCode.BAD_REQUEST;
@@ -62,7 +62,6 @@ import static oap.ws.sso.SSO.authenticatedResponse;
 import static oap.ws.sso.SSO.logoutResponse;
 import static oap.ws.sso.SSO.notAuthenticatedResponse;
 import static oap.ws.validate.ValidationErrors.empty;
-import static oap.ws.validate.ValidationErrors.error;
 
 @Slf4j
 @SuppressWarnings( "unused" )
@@ -104,11 +103,11 @@ public class AuthWS extends AbstractSecureWS {
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( TFA_REQUIRED == result.getFailureValue() )
-            return notAuthenticatedResponse( BAD_REQUEST, "TFA code is required", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_REQUIRED.message(), sessionManager.cookieDomain );
         else if( WRONG_TFA_CODE == result.getFailureValue() ) {
-            return notAuthenticatedResponse( BAD_REQUEST, "TFA code is incorrect", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_INCORRECT.message(), sessionManager.cookieDomain );
         } else
-            return notAuthenticatedResponse( UNAUTHORIZED, "Username or password is invalid", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.USERNAME_OR_PASSWORD_INVALID.message(), sessionManager.cookieDomain );
     }
 
     @WsMethod( method = POST, path = "/oauth/login" )
@@ -122,13 +121,13 @@ public class AuthWS extends AbstractSecureWS {
             if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
                 sessionManager.cookieDomain, sessionManager.cookieSecure );
             else if( TFA_REQUIRED == result.getFailureValue() )
-                return notAuthenticatedResponse( BAD_REQUEST, "TFA code is required", sessionManager.cookieDomain );
+                return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_REQUIRED.message(), sessionManager.cookieDomain );
             else if( WRONG_TFA_CODE == result.getFailureValue() ) {
-                return notAuthenticatedResponse( BAD_REQUEST, "TFA code is incorrect", sessionManager.cookieDomain );
+                return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_INCORRECT.message(), sessionManager.cookieDomain );
             } else
-                return notAuthenticatedResponse( UNAUTHORIZED, "User not found", sessionManager.cookieDomain );
+                return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.LOGIN_USER_NOT_FOUND.message(), sessionManager.cookieDomain );
         }
-        return notAuthenticatedResponse( UNAUTHORIZED, "Token is empty", sessionManager.cookieDomain );
+        return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.TOKEN_EMPTY.message(), sessionManager.cookieDomain );
     }
 
     @SuppressWarnings( "ParameterName" )
@@ -142,11 +141,11 @@ public class AuthWS extends AbstractSecureWS {
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( WRONG_ORGANIZATION == result.getFailureValue() )
-            return notAuthenticatedResponse( FORBIDDEN, "User doesn't belong to organization", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( FORBIDDEN, AccountValidationMessage.ORGANIZATION_MISMATCH.message(), sessionManager.cookieDomain );
         else if( TOKEN_NOT_VALID == result.getFailureValue() ) {
-            return notAuthenticatedResponse( UNAUTHORIZED, "Token is invalid", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.TOKEN_INVALID.message(), sessionManager.cookieDomain );
         } else
-            return notAuthenticatedResponse( UNAUTHORIZED, "User not found", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.LOGIN_USER_NOT_FOUND.message(), sessionManager.cookieDomain );
     }
 
     @WsMethod( method = GET, path = "/logout" )
@@ -164,7 +163,7 @@ public class AuthWS extends AbstractSecureWS {
     protected ValidationErrors validateUserAccess( Optional<String> email, oap.ws.sso.User loggedUser ) {
         return email
             .filter( e -> !loggedUser.getEmail().equalsIgnoreCase( e ) )
-            .map( e -> error( Http.StatusCode.FORBIDDEN, "User [%s] doesn't have enough permissions", loggedUser.getEmail() ) )
+            .map( e -> empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.USER_ACCESS_DENIED, Map.of( "email", loggedUser.getEmail() ) ).endCode() )
             .orElse( empty() );
     }
 

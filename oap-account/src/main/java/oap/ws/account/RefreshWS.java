@@ -62,6 +62,6 @@ public class RefreshWS {
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else
-            return notAuthenticatedResponse( UNAUTHORIZED, "Token is invalid", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.TOKEN_INVALID.message(), sessionManager.cookieDomain );
     }
 }

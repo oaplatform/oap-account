@@ -14,9 +14,10 @@ import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
 
-import java.net.HttpURLConnection;
+import java.util.Map;
 import java.util.Optional;
 
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static oap.http.server.nio.HttpServerExchange.HttpMethod.GET;
 import static oap.ws.WsParam.From.PATH;
 import static oap.ws.WsParam.From.SESSION;
@@ -52,7 +53,9 @@ public class UserWS extends AbstractWS {
         return userStorage.getMetadata( idOrEmail )
             .filter( user -> user.object.canAccessOrganization( organizationId ) )
             .map( user -> ValidationErrors.empty() )
-            .orElseGet( () -> ValidationErrors.error( HttpURLConnection.HTTP_NOT_FOUND, "not found " + idOrEmail ) );
+            .orElseGet( () -> ValidationErrors.empty().statusCode( HTTP_NOT_FOUND )
+                .error( AccountValidationMessage.USER_NOT_FOUND, Map.of( "idOrEmail", idOrEmail ) )
+                .endCode() );
     }
 
     @WsMethod( method = GET, path = "/current", description = "Returns a current logged user" )
