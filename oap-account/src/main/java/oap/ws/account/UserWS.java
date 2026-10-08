@@ -54,7 +54,7 @@ public class UserWS extends AbstractWS {
             .filter( user -> user.object.canAccessOrganization( organizationId ) )
             .map( user -> ValidationErrors.empty() )
             .orElseGet( () -> ValidationErrors.empty().statusCode( HTTP_NOT_FOUND )
-                .error( AccountValidationMessage.USER_NOT_FOUND, Map.of( "idOrEmail", idOrEmail ) )
+                .error( AccountValidationMessage.USER_NOT_FOUND, Map.of( "idOrEmail", idOrEmail ), null )
                 .endCode() );
     }
 

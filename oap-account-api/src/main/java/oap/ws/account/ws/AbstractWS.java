@@ -27,7 +27,7 @@ public abstract class AbstractWS extends AbstractSecureWS {
         return canAccessOrganization( loggedUser, organizationId )
             ? empty()
             : empty().statusCode( FORBIDDEN )
-            .error( AccountValidationMessage.ORGANIZATION_ACCESS_DENIED, Map.of( "email", loggedUser.user.email, "organizationId", organizationId ) )
+            .error( AccountValidationMessage.ORGANIZATION_ACCESS_DENIED, Map.of( "email", loggedUser.user.email, "organizationId", organizationId ), null )
             .endCode();
     }
 
@@ -35,14 +35,14 @@ public abstract class AbstractWS extends AbstractSecureWS {
         return canAccessAccount( loggedUser, organizationId, accountId )
             ? empty()
             : empty().statusCode( FORBIDDEN )
-            .error( AccountValidationMessage.ACCOUNT_ACCESS_DENIED, Map.of( "email", loggedUser.user.email, "accountId", accountId, "organizationId", organizationId ) )
+            .error( AccountValidationMessage.ACCOUNT_ACCESS_DENIED, Map.of( "email", loggedUser.user.email, "accountId", accountId, "organizationId", organizationId ), null )
             .endCode();
     }
 
     protected ValidationErrors validateSecurityDisabled() {
         return securityDisabled
             ? empty()
-            : empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.SECURITY_DISABLED_ONLY ).endCode();
+            : empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.SECURITY_DISABLED_ONLY, null ).endCode();
     }
 
     protected boolean canAccessOrganization( UserData loggedUser, String organizationId ) {
@@ -66,7 +66,7 @@ public abstract class AbstractWS extends AbstractSecureWS {
 
     public ValidationErrors validateSystemAdminRole( @Nonnull UserData loggedUser ) {
         if( !isSystem( loggedUser ) ) {
-            return empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.SYSTEM_ADMIN_REQUIRED ).endCode();
+            return empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.SYSTEM_ADMIN_REQUIRED, null ).endCode();
         } else return empty();
     }
 }

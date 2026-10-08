@@ -498,8 +498,8 @@ public class OrganizationWSTest extends Fixtures {
             .hasCode( Http.StatusCode.BAD_REQUEST )
             .satisfies( response -> assertValidation( response )
                 .hasErrors(
-                    "/password: required property is missing",
-                    "/email: required property is missing"
+                    "required property is missing",
+                    "required property is missing"
                 ) );
         assertPost( accountFixture.httpUrl( "/organizations/" + DEFAULT_ORGANIZATION_ID + "/users/passwd" ), "{\"email\": \"" + email + "\", \"password\": \"newpass\"}" )
             .hasCode( OK );

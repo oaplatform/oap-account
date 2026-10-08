@@ -163,7 +163,7 @@ public class AuthWS extends AbstractSecureWS {
     protected ValidationErrors validateUserAccess( Optional<String> email, oap.ws.sso.User loggedUser ) {
         return email
             .filter( e -> !loggedUser.getEmail().equalsIgnoreCase( e ) )
-            .map( e -> empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.USER_ACCESS_DENIED, Map.of( "email", loggedUser.getEmail() ) ).endCode() )
+            .map( e -> empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.USER_ACCESS_DENIED, Map.of( "email", loggedUser.getEmail() ), null ).endCode() )
             .orElse( empty() );
     }
 
