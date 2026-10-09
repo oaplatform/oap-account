@@ -118,111 +118,146 @@ public class OrganizationWS extends AbstractWS {
             new DateTime( metadata.modified, DateTimeZone.UTC ) );
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}" )
+    @WsMethod( method = POST, path = "/{organizationId}", description = "Updates an existing organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_UPDATE } )
     @WsValidate( "validateOrganizationAccess" )
-    public Organization store( @WsParam( from = PATH ) String organizationId,
-                               @WsValidateJson( schema = Organization.SCHEMA ) @WsParam( from = BODY ) Organization organization,
-                               @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Organization store( @WsParam( from = PATH, description = "Id of the organization to update" )
+                               String organizationId,
+                               @WsValidateJson( schema = Organization.SCHEMA )
+                               @WsParam( from = BODY, description = "Organization data to store" )
+                               Organization organization,
+                               @WsParam( from = SESSION, description = "Currently authenticated user" )
+                               UserData loggedUser ) {
 
         log.debug( "store id {} organization {}", organizationId, organization );
         return organizationStorage.storeOrganization( organization, loggedUser.getId() ).organization;
     }
 
-    @WsMethod( method = POST, path = "/" )
+    @WsMethod( method = POST, path = "/", description = "Creates a new organization" )
     @WsSecurity( permissions = { ORGANIZATION_STORE } )
-    public Organization store( @WsValidateJson( schema = Organization.SCHEMA ) @WsParam( from = BODY ) Organization organization,
-                               @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Organization store( @WsValidateJson( schema = Organization.SCHEMA )
+                               @WsParam( from = BODY, description = "Organization data to store" )
+                               Organization organization,
+                               @WsParam( from = SESSION, description = "Currently authenticated user" )
+                               UserData loggedUser ) {
         log.debug( "store organization {}", organization );
 
         return organizationStorage.storeOrganization( organization, loggedUser.getId() ).organization;
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}" )
+    @WsMethod( method = GET, path = "/{organizationId}", description = "Returns an organization by id" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_READ } )
     @WsValidate( "validateOrganizationAccess" )
-    public Optional<OrganizationView> get( @WsParam( from = PATH ) String organizationId, @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<OrganizationView> get( @WsParam( from = PATH, description = "Id of the organization to return" )
+                                           String organizationId,
+                                           @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                           UserData loggedUser ) {
         return organizationStorage
             .getMetadata( organizationId )
             .map( OrganizationWS::organizationMetadataToView );
     }
 
-    @WsMethod( method = GET, path = "/" )
+    @WsMethod( method = GET, path = "/", description = "Lists organizations the current user can access" )
     @WsValidate( { "validateUserLoggedIn" } )
     @WsSecurity( realm = USER, permissions = {} )
-    public List<OrganizationView> list( @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+    public List<OrganizationView> list( @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                        Optional<UserData> loggedUser ) {
         return organizationStorage.selectMetadata()
             .filter( o -> canAccessOrganization( loggedUser.get(), o.object.organization.id ) )
             .map( OrganizationWS::organizationMetadataToView )
             .toList();
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}/accounts" )
+    @WsMethod( method = POST, path = "/{organizationId}/accounts", description = "Creates a new account in an organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_STORE } )
     @WsValidate( { "validateOrganizationAccess" } )
-    public Optional<OrganizationView> storeAccount( @WsParam( from = PATH ) String organizationId,
-                                                    @WsParam( from = BODY ) @WsValidateJson( schema = Account.SCHEMA ) Account account,
-                                                    @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<OrganizationView> storeAccount( @WsParam( from = PATH, description = "Id of the organization to add the account to" )
+                                                    String organizationId,
+                                                    @WsParam( from = BODY, description = "Account data to store" )
+                                                    @WsValidateJson( schema = Account.SCHEMA )
+                                                    Account account,
+                                                    @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                    UserData loggedUser ) {
         return organizationStorage
             .storeAccount( organizationId, account, loggedUser.getId() )
             .map( OrganizationWS::organizationMetadataToView );
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/accounts" )
+    @WsMethod( method = GET, path = "/{organizationId}/accounts", description = "Lists the accounts of an organization accessible to the current user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_LIST } )
-    public Optional<List<Account>> accounts( @WsParam( from = PATH ) String organizationId,
-                                             @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<List<Account>> accounts( @WsParam( from = PATH, description = "Id of the organization" )
+                                             String organizationId,
+                                             @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                             UserData loggedUser ) {
         return organizationStorage.get( organizationId )
             .map( o -> Stream.of( o.accounts )
                 .filter( a -> canAccessAccount( loggedUser, organizationId, a.id ) )
                 .toList() );
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/accounts/{accountId}" )
+    @WsMethod( method = GET, path = "/{organizationId}/accounts/{accountId}", description = "Returns an account of an organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_READ } )
     @WsValidate( { "validateOrganizationAccess", "validateAccountAccess" } )
-    public Optional<Account> account( @WsParam( from = PATH ) String organizationId,
-                                      @WsParam( from = PATH ) String accountId,
-                                      @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<Account> account( @WsParam( from = PATH, description = "Id of the organization" )
+                                      String organizationId,
+                                      @WsParam( from = PATH, description = "Id of the account to return" )
+                                      String accountId,
+                                      @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                      UserData loggedUser ) {
         return organizationStorage.get( organizationId ).flatMap( o -> o.accounts.get( accountId ) );
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}/users/{idOrEmail}/accounts/add" )
+    @WsMethod( method = POST, path = "/{organizationId}/users/{idOrEmail}/accounts/add", description = "Grants a user access to an account" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_ADD } )
-    public Optional<UserView> addAccountToUser( @WsParam( from = PATH ) String organizationId,
-                                                @WsParam( from = PATH ) String idOrEmail,
-                                                @WsParam( from = QUERY ) String accountId,
-                                                @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> addAccountToUser( @WsParam( from = PATH, description = "Id of the organization" )
+                                                String organizationId,
+                                                @WsParam( from = PATH, description = "Id or email of the user" )
+                                                String idOrEmail,
+                                                @WsParam( from = QUERY, description = "Id of the account to grant access to" )
+                                                String accountId,
+                                                @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                UserData loggedUser ) {
         return userStorage.addAccountToUser( idOrEmail, organizationId, accountId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}/users/{idOrEmail}/accounts/remove" )
+    @WsMethod( method = POST, path = "/{organizationId}/users/{idOrEmail}/accounts/remove", description = "Revokes a user's access to an account" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_ADD } )
-    public Optional<UserView> removeAccountFromUser( @WsParam( from = PATH ) String organizationId,
-                                                     @WsParam( from = PATH ) String idOrEmail,
-                                                     @WsParam( from = QUERY ) String accountId,
-                                                     @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> removeAccountFromUser( @WsParam( from = PATH, description = "Id of the organization" )
+                                                     String organizationId,
+                                                     @WsParam( from = PATH, description = "Id or email of the user" )
+                                                     String idOrEmail,
+                                                     @WsParam( from = QUERY, description = "Id of the account to revoke access to" )
+                                                     String accountId,
+                                                     @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                     UserData loggedUser ) {
         return userStorage.removeAccountFromUser( idOrEmail, organizationId, accountId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/users" )
+    @WsMethod( method = GET, path = "/{organizationId}/users", description = "Lists the users of an organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_LIST_USERS } )
     @WsValidate( { "validateOrganizationAccess" } )
-    public List<UserView> users( @WsParam( from = PATH ) String organizationId,
-                                 @WsParam( from = SESSION ) UserData loggedUser ) {
+    public List<UserView> users( @WsParam( from = PATH, description = "Id of the organization" )
+                                 String organizationId,
+                                 @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                 UserData loggedUser ) {
         return Stream.of( userStorage.getUsers( organizationId ) )
             .map( Users::userMetadataToView )
             .sorted( Comparator.comparing( UserView::getEmail ) )
             .toList();
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}/users" )
+    @WsMethod( method = POST, path = "/{organizationId}/users", description = "Creates or updates a user in an organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_STORE_USER } )
     @WsValidate( { "validateOrganizationAccess", "validateUsersOrganization", "validateAdminRole", "validateUserRoleNotEmpty", "validateUserRegistered" } )
-    public UserView storeUser( @WsParam( from = PATH ) String organizationId,
-                               @WsValidateJson( schema = User.SCHEMA ) @WsParam( from = BODY ) User user,
-                               @WsParam( from = QUERY ) Optional<String> role,
-                               @WsParam( from = SESSION ) UserData loggedUser ) {
+    public UserView storeUser( @WsParam( from = PATH, description = "Id of the organization" )
+                               String organizationId,
+                               @WsValidateJson( schema = User.SCHEMA )
+                               @WsParam( from = BODY, description = "User data to store" )
+                               User user,
+                               @WsParam( from = QUERY, description = "Role to assign to a newly created user" )
+                               Optional<String> role,
+                               @WsParam( from = SESSION, description = "Currently authenticated user" )
+                               UserData loggedUser ) {
         user.defaultOrganization = organizationId;
         if( user.create ) {
             Metadata<UserData> userCreated = userStorage.createUser( user, role.map( r -> new HashMap<>( Map.of( organizationId, r ) ) ).orElse( null ), loggedUser.getId() );
@@ -233,10 +268,13 @@ public class OrganizationWS extends AbstractWS {
             .orElseThrow() );
     }
 
-    @WsMethod( method = POST, path = "/register" )
+    @WsMethod( method = POST, path = "/register", description = "Registers a new user and a new organization for them" )
     @WsValidate( "validateUserRegistered" )
-    public UserView register( @WsValidateJson( schema = User.SCHEMA_REGISTRATION ) @WsParam( from = BODY ) User user,
-                              @WsParam( from = QUERY ) String organizationName ) {
+    public UserView register( @WsValidateJson( schema = User.SCHEMA_REGISTRATION )
+                              @WsParam( from = BODY, description = "User data to register" )
+                              User user,
+                              @WsParam( from = QUERY, description = "Name of the new organization to create for the user" )
+                              String organizationName ) {
         OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), user.email );
         final String orgId = organizationData.organization.id;
         user.defaultOrganization = orgId;
@@ -246,12 +284,19 @@ public class OrganizationWS extends AbstractWS {
     }
 
 
-    @WsMethod( method = POST, path = "/register/oauth" )
+    @WsMethod( method = POST, path = "/register/oauth", description = "Registers a new user and organization using a social/OAuth provider token" )
     @WsValidate( "validateUserRegistered" )
     public Optional<UserView> register(
-        @WsParam( from = QUERY ) String organizationName,
-        @WsParam( from = SESSION ) UserData loggedUser,
-        String externalOauthToken, OauthProvider source, Ext ext ) {
+        @WsParam( from = QUERY, description = "Name of the new organization to create for the user" )
+        String organizationName,
+        @WsParam( from = SESSION, description = "Currently authenticated user" )
+        UserData loggedUser,
+        @WsParam( description = "Access token issued by the OAuth provider" )
+        String externalOauthToken,
+        @WsParam( description = "OAuth provider to resolve the token against" )
+        OauthProvider source,
+        @WsParam( description = "Additional user extension data" )
+        Ext ext ) {
         OrganizationData organizationData = organizationStorage.storeOrganization( new Organization( organizationName ), loggedUser.getId() );
         final String orgId = organizationData.organization.id;
         TokenInfo tokenInfo = oauthService.getOauthProvider( source ).getTokenInfo( externalOauthToken ).orElse( null );
@@ -266,12 +311,16 @@ public class OrganizationWS extends AbstractWS {
         return Optional.empty();
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}/users/passwd" )
+    @WsMethod( method = POST, path = "/{organizationId}/users/passwd", description = "Changes a user's password" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_USER_PASSWD, USER_PASSWD } )
     @WsValidate( { "validateOrganizationAccess", "validatePasswdOrganization", "validateUserAccess" } )
-    public Optional<UserView> passwd( @WsParam( from = PATH ) String organizationId,
-                                      @WsParam( from = BODY ) @WsValidateJson( schema = Passwd.SCHEMA ) Passwd passwd,
-                                      @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> passwd( @WsParam( from = PATH, description = "Id of the organization" )
+                                      String organizationId,
+                                      @WsParam( from = BODY, description = "Email of the user and the new password" )
+                                      @WsValidateJson( schema = Passwd.SCHEMA )
+                                      Passwd passwd,
+                                      @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                      UserData loggedUser ) {
         return userStorage.passwd( passwd.email, passwd.password, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
@@ -279,46 +328,60 @@ public class OrganizationWS extends AbstractWS {
         description = "Generate new apikey for user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_APIKEY, USER_APIKEY } )
     @WsValidate( { "validateOrganizationAccess", "validateCreateApikey" } )
-    public Optional<String> refreshApikey( @WsParam( from = PATH ) String organizationId,
-                                           @WsParam( from = PATH ) String idOrEmail,
-                                           @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+    public Optional<String> refreshApikey( @WsParam( from = PATH, description = "Id of the organization" )
+                                           String organizationId,
+                                           @WsParam( from = PATH, description = "Id or email of the user" )
+                                           String idOrEmail,
+                                           @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                           oap.ws.sso.User loggedUser ) {
 
         return userStorage.refreshApikey( idOrEmail, loggedUser.getId() ).map( u -> u.user.apiKey );
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/users/ban/{idOrEmail}" )
+    @WsMethod( method = GET, path = "/{organizationId}/users/ban/{idOrEmail}", description = "Bans a user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { BAN_USER } )
     @WsValidate( { "validateAdminBanAccess" } )
-    public Optional<UserView> ban( @WsParam( from = PATH ) String organizationId,
-                                   @WsParam( from = PATH ) String idOrEmail,
-                                   @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> ban( @WsParam( from = PATH, description = "Id of the organization" )
+                                   String organizationId,
+                                   @WsParam( from = PATH, description = "Id or email of the user to ban" )
+                                   String idOrEmail,
+                                   @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                   UserData loggedUser ) {
 
 
         return userStorage.ban( idOrEmail, true, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/users/delete/{idOrEmail}" )
+    @WsMethod( method = GET, path = "/{organizationId}/users/delete/{idOrEmail}", description = "Permanently deletes a user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ACCOUNT_DELETE } )
-    public Optional<UserView> delete( @WsParam( from = PATH ) String organizationId,
-                                      @WsParam( from = PATH ) String idOrEmail,
-                                      @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> delete( @WsParam( from = PATH, description = "Id of the organization" )
+                                      String organizationId,
+                                      @WsParam( from = PATH, description = "Id or email of the user to delete" )
+                                      String idOrEmail,
+                                      @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                      UserData loggedUser ) {
         return userStorage.deleteMetadata( idOrEmail ).map( Users::userMetadataToView );
     }
 
-    @WsMethod( method = GET, path = "/{organizationId}/users/unban/{idOrEmail}" )
+    @WsMethod( method = GET, path = "/{organizationId}/users/unban/{idOrEmail}", description = "Unbans a user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { UNBAN_USER } )
-    public Optional<UserView> unban( @WsParam( from = PATH ) String organizationId,
-                                     @WsParam( from = PATH ) String idOrEmail,
-                                     @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> unban( @WsParam( from = PATH, description = "Id of the organization" )
+                                     String organizationId,
+                                     @WsParam( from = PATH, description = "Id or email of the user to unban" )
+                                     String idOrEmail,
+                                     @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                     UserData loggedUser ) {
         return userStorage.ban( idOrEmail, false, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
-    @WsMethod( method = GET, path = "/users/confirm/{idOrEmail}" )
+    @WsMethod( method = GET, path = "/users/confirm/{idOrEmail}", description = "Confirms a user's registration and redirects to the confirmation page" )
     @WsValidate( { "validateUserLoggedIn" } )
     @SneakyThrows
-    public Response confirm( @WsParam( from = PATH ) String idOrEmail,
+    public Response confirm( @WsParam( from = PATH, description = "Id or email of the user to confirm" )
+                             String idOrEmail,
                              // validateUserLoggedIn( Optinal )
-                             @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+                             @WsParam( from = SESSION, description = "Currently authenticated user" )
+                             Optional<UserData> loggedUser ) {
         log.debug( "confirm idOrEmail {} loggedUser {} hasPassword {}", idOrEmail, loggedUser, loggedUser.get().user.hasPassword() );
 
         User user = loggedUser.get().user;
@@ -337,8 +400,10 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = GET, path = "/users/tfa/{idOrEmail}", description = "Generate authorization link for Google Authenticator" )
     @WsValidate( { "validateUserLoggedIn" } )
     @WsSecurity( realm = USER, permissions = {} )
-    public Response generateTfaCode( @WsParam( from = PATH ) String idOrEmail,
-                                     @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+    public Response generateTfaCode( @WsParam( from = PATH, description = "Id or email of the user" )
+                                     String idOrEmail,
+                                     @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                     Optional<UserData> loggedUser ) {
         Optional<UserData> user = userStorage.get( idOrEmail );
 
         if( user.isPresent() && ( idOrEmail.equals( loggedUser.map( u -> u.user.email ).orElse( null ) ) || idOrEmail.equals( loggedUser.map( u -> u.user.id ).orElse( null ) ) ) ) {
@@ -352,14 +417,18 @@ public class OrganizationWS extends AbstractWS {
 
     @WsMethod( method = GET, path = "/users/tfa/{idOrEmail}/{tfacode}/validate", description = "Validate first tfa code from Google Authenticator" )
     @WsValidate( { "validateUserLoggedIn" } )
-    public Response validateTfaCode( @WsParam( from = PATH ) String idOrEmail,
-                                     @WsParam( from = PATH ) String tfaCode,
-                                     @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+    public Response validateTfaCode( @WsParam( from = PATH, description = "Id or email of the user" )
+                                     String idOrEmail,
+                                     @WsParam( from = PATH, description = "TFA code to validate" )
+                                     String tfaCode,
+                                     @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                     Optional<UserData> loggedUser ) {
         Optional<UserData> user = userStorage.get( idOrEmail );
 
         if( user.isPresent() && ( idOrEmail.equals( loggedUser.map( u -> u.user.email ).orElse( null ) ) || idOrEmail.equals( loggedUser.map( u -> u.user.id ).orElse( null ) ) ) ) {
             final boolean tfaValid = TfaUtils.getTOTPCode( loggedUser.get().user.getSecretKey() ).equals( tfaCode );
-            return tfaValid ? Response.ok() : Response.build403().message( AccountValidationMessage.TFA_CODE_INCORRECT ).build();
+            return tfaValid ? Response.ok()
+                : Response.build403().message( AccountValidationMessage.TFA_CODE_INCORRECT ).build();
         }
         return Response.build404().build();
     }
@@ -367,19 +436,26 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = GET, path = "/users/{idOrEmail}/default-org/{organizationId}", description = "Set default organization to user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { MANAGE_SELF } )
     @WsValidate( { "validateUsersOrganization", "validateDefaultOrganization" } )
-    public Optional<UserView> changeDefaultOrganization( @WsParam( from = PATH ) String idOrEmail,
-                                                         @WsParam( from = PATH ) String organizationId,
-                                                         @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> changeDefaultOrganization( @WsParam( from = PATH, description = "Id or email of the user" )
+                                                         String idOrEmail,
+                                                         @WsParam( from = PATH, description = "Id of the organization to mark as default" )
+                                                         String organizationId,
+                                                         @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                         UserData loggedUser ) {
         return userStorage.updateUser( idOrEmail, u -> u.defaultOrganization = organizationId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/users/{idOrEmail}/default-account/{accountId}", description = "Set default account in organization to user" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { MANAGE_SELF } )
     @WsValidate( { "validateUsersOrganization", "validateAccountAccess", "validateDefaultAccount" } )
-    public Optional<UserView> changeDefaultAccount( @WsParam( from = PATH ) String organizationId,
-                                                    @WsParam( from = PATH ) String idOrEmail,
-                                                    @WsParam( from = PATH ) String accountId,
-                                                    @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> changeDefaultAccount( @WsParam( from = PATH, description = "Id of the organization" )
+                                                    String organizationId,
+                                                    @WsParam( from = PATH, description = "Id or email of the user" )
+                                                    String idOrEmail,
+                                                    @WsParam( from = PATH, description = "Id of the account to mark as default" )
+                                                    String accountId,
+                                                    @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                    UserData loggedUser ) {
         return userStorage.updateUser( idOrEmail, u -> u.defaultAccounts.put( organizationId, accountId ), loggedUser.getId() )
             .map( Users::userMetadataToView );
     }
@@ -387,45 +463,62 @@ public class OrganizationWS extends AbstractWS {
     @WsMethod( method = GET, path = "/{organizationId}/add", description = "Add user to existing organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_STORE_USER } )
     @WsValidate( "validateAdminOrganizationAccess" )
-    public Optional<UserView> addUserToOrganization( @WsParam( from = PATH ) String organizationId,
-                                                     @WsParam( from = QUERY ) String userOrganizationId,
-                                                     @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
-                                                     @WsParam( from = QUERY ) String role,
-                                                     @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> addUserToOrganization( @WsParam( from = PATH, description = "Id of the organization granting access" )
+                                                     String organizationId,
+                                                     @WsParam( from = QUERY, description = "Id of the organization to add the user to" )
+                                                     String userOrganizationId,
+                                                     @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" }, description = "Id or email of the user to add" )
+                                                     String idOrEmail,
+                                                     @WsParam( from = QUERY, description = "Role to assign to the user in the new organization" )
+                                                     String role,
+                                                     @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                     UserData loggedUser ) {
         return userStorage.addOrganizationToUser( idOrEmail, userOrganizationId, role, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/remove", description = "Remove user from existing organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ORGANIZATION_STORE_USER } )
     @WsValidate( "validateAdminOrganizationAccess" )
-    public Optional<UserView> removeUserFromOrganization( @WsParam( from = PATH ) String organizationId,
-                                                          @WsParam( from = QUERY ) String userOrganizationId,
-                                                          @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
-                                                          @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> removeUserFromOrganization( @WsParam( from = PATH, description = "Id of the organization granting access" )
+                                                          String organizationId,
+                                                          @WsParam( from = QUERY, description = "Id of the organization to remove the user from" )
+                                                          String userOrganizationId,
+                                                          @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" }, description = "Id or email of the user to remove" )
+                                                          String idOrEmail,
+                                                          @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                          UserData loggedUser ) {
         return userStorage.removeUserFromOrganization( idOrEmail, userOrganizationId, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
-    @WsMethod( method = POST, path = "/{organizationId}/assign" )
+    @WsMethod( method = POST, path = "/{organizationId}/assign", description = "Assigns a role to a user in an organization" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
     @WsValidate( "validateRole" )
-    public Optional<UserView> assignRole( @WsParam( from = PATH ) String organizationId,
-                                          @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
-                                          @WsParam( from = QUERY ) String role,
-                                          @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> assignRole( @WsParam( from = PATH, description = "Id of the organization" )
+                                          String organizationId,
+                                          @WsParam( from = QUERY, name = { "id", "email", "idOrEmail" }, description = "Id or email of the user" )
+                                          String idOrEmail,
+                                          @WsParam( from = QUERY, description = "Role to assign" )
+                                          String role,
+                                          @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                          UserData loggedUser ) {
         return userStorage.assignRole( idOrEmail, organizationId, role, loggedUser.getId() ).map( Users::userMetadataToView );
     }
 
     @WsMethod( method = GET, path = "/{organizationId}/roles", description = "List all available roles with permissions" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE } )
-    public Map<String, Set<String>> listAllRolesWithPermissions( @WsParam( from = PATH ) String organizationId,
-                                                                 @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+    public Map<String, Set<String>> listAllRolesWithPermissions( @WsParam( from = PATH, description = "Id of the organization" )
+                                                                 String organizationId,
+                                                                 @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                                 oap.ws.sso.User loggedUser ) {
         return roles.roles().stream().collect( Collectors.toMap( Function.identity(), roles::permissionsOf ) );
     }
 
     @WsMethod( path = "/{organizationId}/user/roles", method = GET, description = "List user roles with permissions" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { ASSIGN_ROLE, MANAGE_SELF } )
-    public Map<String, Set<String>> listUserRolesWithPermissions( @WsParam( from = PATH ) String organizationId,
-                                                                  @WsParam( from = SESSION ) oap.ws.sso.User loggedUser ) {
+    public Map<String, Set<String>> listUserRolesWithPermissions( @WsParam( from = PATH, description = "Id of the organization" )
+                                                                  String organizationId,
+                                                                  @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                                                  oap.ws.sso.User loggedUser ) {
         final Collection<String> userRoles = loggedUser.getRoles().values();
         return userRoles.stream()
             .collect( Collectors.toMap(
@@ -436,7 +529,8 @@ public class OrganizationWS extends AbstractWS {
     }
 
     @WsMethod( method = POST, path = "/users/recover-password", description = "Recovery password endpoint" )
-    public Response recoverPassword( @WsParam( from = BODY ) RecoverPasswordRequest recoverPasswordRequest ) {
+    public Response recoverPassword( @WsParam( from = BODY, description = "Email of the user requesting a password recovery" )
+                                     RecoverPasswordRequest recoverPasswordRequest ) {
         Optional<UserData> userData = userStorage.get( recoverPasswordRequest.email );
 
         if( userData.isPresent() ) {
@@ -452,7 +546,8 @@ public class OrganizationWS extends AbstractWS {
     }
 
     @WsMethod( method = POST, path = "/users/reset-password", description = "Reset password endpoint" )
-    public Response resetPassword( @WsParam( from = BODY ) ResetPasswordRequest request ) {
+    public Response resetPassword( @WsParam( from = BODY, description = "Recovery token and the new password" )
+                                   ResetPasswordRequest request ) {
         String email = recoveryTokenService.getEmailByToken( request.token ).orElse( null );
         if( email != null ) {
             Optional<UserView> userView = userStorage.passwd( email, request.newPassword, email ).map( Users::userMetadataToView );
@@ -504,7 +599,8 @@ public class OrganizationWS extends AbstractWS {
     }
 
     protected ValidationErrors validateUserRegistered( @Nonnull User user ) {
-        if( !selfRegistrationEnabled ) return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.REGISTRATION_NOT_AVAILABLE, null ).endCode();
+        if( !selfRegistrationEnabled )
+            return empty().statusCode( NOT_FOUND ).error( AccountValidationMessage.REGISTRATION_NOT_AVAILABLE, null ).endCode();
         var existing = userStorage.get( user.email );
         if( existing.isPresent() && user.create )
             return empty().statusCode( Http.StatusCode.CONFLICT ).error( AccountValidationMessage.USER_ALREADY_EXISTS, Map.of( "email", user.email ), null ).endCode();

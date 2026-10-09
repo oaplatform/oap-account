@@ -39,9 +39,12 @@ public class UserWS extends AbstractWS {
     @WsMethod( method = GET, path = "/{organizationId}/{idOrEmail}", description = "Returns user with given email" )
     @WsSecurity( realm = ORGANIZATION_ID, permissions = { USER_READ, MANAGE_SELF } )
     @WsValidate( { "validateOrganizationAccess", "validateSameOrganization" } )
-    public Optional<UserView> get( @WsParam( from = PATH ) String organizationId,
-                                   @WsParam( from = PATH, name = { "id", "email", "idOrEmail" } ) String idOrEmail,
-                                   @WsParam( from = SESSION ) UserData loggedUser ) {
+    public Optional<UserView> get( @WsParam( from = PATH, description = "Id of the organization the user belongs to" )
+                                   String organizationId,
+                                   @WsParam( from = PATH, name = { "id", "email", "idOrEmail" }, description = "Id or email of the user to return" )
+                                   String idOrEmail,
+                                   @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                   UserData loggedUser ) {
         return userStorage.getMetadata( idOrEmail )
             .map( u ->
                 ( idOrEmail.equalsIgnoreCase( loggedUser.user.id ) || idOrEmail.equalsIgnoreCase( loggedUser.user.email ) ) || isSystem( loggedUser )
@@ -61,7 +64,8 @@ public class UserWS extends AbstractWS {
     @WsMethod( method = GET, path = "/current", description = "Returns a current logged user" )
     @WsValidate( { "validateUserLoggedIn" } )
     @WsSecurity( realm = USER, permissions = {} )
-    public Optional<UserSecureView> current( @WsParam( from = SESSION ) Optional<UserData> loggedUser ) {
+    public Optional<UserSecureView> current( @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                             Optional<UserData> loggedUser ) {
         return loggedUser
             .flatMap( u -> userStorage.getMetadata( u.user.id ) )
             .map( Users::userMetadataToSecureView );

@@ -20,8 +20,9 @@ public class ExportDictionaryWS {
         this.organizationStorage = organizationStorage;
     }
 
-    @WsMethod( path = "/{dictionaryName}" )
-    public Response getDictionary( @WsParam( from = WsParam.From.PATH ) String dictionaryName ) {
+    @WsMethod( path = "/{dictionaryName}", description = "Exports a dictionary (currently only \"organizations\") as a row-binary stream" )
+    public Response getDictionary( @WsParam( from = WsParam.From.PATH, description = "Name of the dictionary to export" )
+                                   String dictionaryName ) {
         switch( dictionaryName ) {
             case "organizations" -> {
                 try {

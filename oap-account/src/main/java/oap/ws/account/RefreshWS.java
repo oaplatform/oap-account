@@ -55,9 +55,11 @@ public class RefreshWS {
         this.sessionManager = sessionManager;
     }
 
-    @WsMethod( method = GET, path = "/" )
-    public Response refreshToken( @WsParam( from = COOKIE ) String refreshToken,
-                                  @WsParam( from = QUERY ) Optional<String> organizationId ) {
+    @WsMethod( method = GET, path = "/", description = "Exchanges a refresh token for a new access token, optionally switching the active organization" )
+    public Response refreshToken( @WsParam( from = COOKIE, description = "Refresh token cookie" )
+                                  String refreshToken,
+                                  @WsParam( from = QUERY, description = "Organization id to switch the active organization to" )
+                                  Optional<String> organizationId ) {
         Result<Authentication, AuthenticationFailure> result = authenticator.refreshToken( refreshToken, organizationId );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
