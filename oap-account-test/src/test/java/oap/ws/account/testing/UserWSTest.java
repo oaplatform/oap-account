@@ -192,7 +192,7 @@ public class UserWSTest extends Fixtures {
 
         accountFixture.assertOrgAdminLogin();
         assertGet( accountFixture.httpUrl( s( "/user/${DEFAULT_ORGANIZATION_ID}/${user.user.email}" ) ) )
-            .respondedJson( HTTP_NOT_FOUND, "validation failed", "{\"errors\":[\"not found other@other.com\"]}" );
+            .respondedJson( HTTP_NOT_FOUND, "validation failed", "{\"messages\":[{\"code\":\"OAP-ACCOUNT-112\",\"message\":\"not found other@other.com\"}]}" );
         accountFixture.assertLogout();
     }
 

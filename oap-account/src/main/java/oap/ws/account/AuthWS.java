@@ -25,7 +25,6 @@
 package oap.ws.account;
 
 import lombok.extern.slf4j.Slf4j;
-import oap.http.Http;
 import oap.util.Result;
 import oap.ws.Response;
 import oap.ws.Session;
@@ -43,6 +42,7 @@ import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
 import oap.ws.validate.WsValidate;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static oap.http.Http.StatusCode.BAD_REQUEST;
@@ -62,7 +62,6 @@ import static oap.ws.sso.SSO.authenticatedResponse;
 import static oap.ws.sso.SSO.logoutResponse;
 import static oap.ws.sso.SSO.notAuthenticatedResponse;
 import static oap.ws.validate.ValidationErrors.empty;
-import static oap.ws.validate.ValidationErrors.error;
 
 @Slf4j
 @SuppressWarnings( "unused" )
@@ -86,34 +85,42 @@ public class AuthWS extends AbstractSecureWS {
         this( authenticator, userStorage, sessionManager, null );
     }
 
-    @WsMethod( method = POST, path = "/login" )
-    public Response login( @WsParam( from = BODY ) Credentials credentials,
-                           @WsParam( from = SESSION ) Optional<User> loggedUser,
+    @WsMethod( method = POST, path = "/login", description = "Logs in with email/password credentials from the request body" )
+    public Response login( @WsParam( from = BODY, description = "Login credentials: email, password and an optional TFA code" )
+                           Credentials credentials,
+                           @WsParam( from = SESSION, description = "Currently authenticated user, if any" )
+                           Optional<User> loggedUser,
                            Session session ) {
         return login( credentials.email, credentials.password, Optional.ofNullable( credentials.tfaCode ), loggedUser, session );
     }
 
-    @WsMethod( method = GET, path = "/login" )
-    public Response login( String email,
+    @WsMethod( method = GET, path = "/login", description = "Logs in with email/password query parameters" )
+    public Response login( @WsParam( description = "User email" )
+                           String email,
+                           @WsParam( description = "User password" )
                            String password,
-                           @WsParam( from = BODY ) Optional<String> tfaCode,
-                           @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
+                           @WsParam( from = BODY, description = "TFA code, required when the user has TFA enabled" )
+                           Optional<String> tfaCode,
+                           @WsParam( from = SESSION, description = "Currently authenticated user, if any" )
+                           Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         Result<Authentication, AuthenticationFailure> result = authenticator.authenticate( email, password, tfaCode );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( TFA_REQUIRED == result.getFailureValue() )
-            return notAuthenticatedResponse( BAD_REQUEST, "TFA code is required", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_REQUIRED.message(), sessionManager.cookieDomain );
         else if( WRONG_TFA_CODE == result.getFailureValue() ) {
-            return notAuthenticatedResponse( BAD_REQUEST, "TFA code is incorrect", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_INCORRECT.message(), sessionManager.cookieDomain );
         } else
-            return notAuthenticatedResponse( UNAUTHORIZED, "Username or password is invalid", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.USERNAME_OR_PASSWORD_INVALID.message(), sessionManager.cookieDomain );
     }
 
-    @WsMethod( method = POST, path = "/oauth/login" )
-    public Response login( @WsParam( from = BODY ) TokenCredentials credentials,
-                           @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
+    @WsMethod( method = POST, path = "/oauth/login", description = "Logs in using a social/OAuth provider access token" )
+    public Response login( @WsParam( from = BODY, description = "OAuth provider source and access token, with an optional TFA code" )
+                           TokenCredentials credentials,
+                           @WsParam( from = SESSION, description = "Currently authenticated user, if any" )
+                           Optional<oap.ws.sso.User> loggedUser,
                            Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         TokenInfo tokenInfo = oauthService.getOauthProvider( credentials.source ).getTokenInfo( credentials.accessToken ).orElse( null );
@@ -122,36 +129,40 @@ public class AuthWS extends AbstractSecureWS {
             if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
                 sessionManager.cookieDomain, sessionManager.cookieSecure );
             else if( TFA_REQUIRED == result.getFailureValue() )
-                return notAuthenticatedResponse( BAD_REQUEST, "TFA code is required", sessionManager.cookieDomain );
+                return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_REQUIRED.message(), sessionManager.cookieDomain );
             else if( WRONG_TFA_CODE == result.getFailureValue() ) {
-                return notAuthenticatedResponse( BAD_REQUEST, "TFA code is incorrect", sessionManager.cookieDomain );
+                return notAuthenticatedResponse( BAD_REQUEST, AccountValidationMessage.TFA_CODE_INCORRECT.message(), sessionManager.cookieDomain );
             } else
-                return notAuthenticatedResponse( UNAUTHORIZED, "User not found", sessionManager.cookieDomain );
+                return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.LOGIN_USER_NOT_FOUND.message(), sessionManager.cookieDomain );
         }
-        return notAuthenticatedResponse( UNAUTHORIZED, "Token is empty", sessionManager.cookieDomain );
+        return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.TOKEN_EMPTY.message(), sessionManager.cookieDomain );
     }
 
     @SuppressWarnings( "ParameterName" )
-    @WsMethod( method = GET, path = "/switch/{organizationId}" )
-    public Response switchOrganization( @WsParam( from = PATH ) String organizationId,
-                                        @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
-                                        @WsParam( from = COOKIE ) String Authorization,
+    @WsMethod( method = GET, path = "/switch/{organizationId}", description = "Switches the active organization for the current session and issues a new token" )
+    public Response switchOrganization( @WsParam( from = PATH, description = "Id of the organization to switch to" )
+                                        String organizationId,
+                                        @WsParam( from = SESSION, description = "Currently authenticated user, if any" )
+                                        Optional<oap.ws.sso.User> loggedUser,
+                                        @WsParam( from = COOKIE, description = "Current access token" )
+                                        String Authorization,
                                         Session session ) {
         loggedUser.ifPresent( user -> logout( loggedUser, session ) );
         Result<Authentication, AuthenticationFailure> result = authenticator.authenticateWithActiveOrgId( Authorization, organizationId );
         if( result.isSuccess() ) return authenticatedResponse( result.getSuccessValue(),
             sessionManager.cookieDomain, sessionManager.cookieSecure );
         else if( WRONG_ORGANIZATION == result.getFailureValue() )
-            return notAuthenticatedResponse( FORBIDDEN, "User doesn't belong to organization", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( FORBIDDEN, AccountValidationMessage.ORGANIZATION_MISMATCH.message(), sessionManager.cookieDomain );
         else if( TOKEN_NOT_VALID == result.getFailureValue() ) {
-            return notAuthenticatedResponse( UNAUTHORIZED, "Token is invalid", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.TOKEN_INVALID.message(), sessionManager.cookieDomain );
         } else
-            return notAuthenticatedResponse( UNAUTHORIZED, "User not found", sessionManager.cookieDomain );
+            return notAuthenticatedResponse( UNAUTHORIZED, AccountValidationMessage.LOGIN_USER_NOT_FOUND.message(), sessionManager.cookieDomain );
     }
 
-    @WsMethod( method = GET, path = "/logout" )
+    @WsMethod( method = GET, path = "/logout", description = "Logs out the current user and invalidates the session" )
     @WsSecurity( realm = WsSecurity.USER, permissions = {} )
-    public Response logout( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser,
+    public Response logout( @WsParam( from = SESSION, description = "Currently authenticated user, if any" )
+                            Optional<oap.ws.sso.User> loggedUser,
                             Session session ) {
         loggedUser.ifPresent( user -> {
             log.debug( "Invalidating token for user [{}]", user.getEmail() );
@@ -164,14 +175,15 @@ public class AuthWS extends AbstractSecureWS {
     protected ValidationErrors validateUserAccess( Optional<String> email, oap.ws.sso.User loggedUser ) {
         return email
             .filter( e -> !loggedUser.getEmail().equalsIgnoreCase( e ) )
-            .map( e -> error( Http.StatusCode.FORBIDDEN, "User [%s] doesn't have enough permissions", loggedUser.getEmail() ) )
+            .map( e -> empty().statusCode( FORBIDDEN ).error( AccountValidationMessage.USER_ACCESS_DENIED, Map.of( "email", loggedUser.getEmail() ), null ).endCode() )
             .orElse( empty() );
     }
 
-    @WsMethod( method = GET, path = "/whoami" )
+    @WsMethod( method = GET, path = "/whoami", description = "Returns the currently authenticated user" )
     @WsValidate( "validateUserLoggedIn" )
     @WsSecurity( realm = WsSecurity.USER, permissions = {} )
-    public Optional<UserView> whoami( @WsParam( from = SESSION ) Optional<oap.ws.sso.User> loggedUser ) {
+    public Optional<UserView> whoami( @WsParam( from = SESSION, description = "Currently authenticated user" )
+                                      Optional<oap.ws.sso.User> loggedUser ) {
         return loggedUser
             .flatMap( user -> userStorage.getMetadata( user.getEmail() ) )
             .map( Users::userMetadataToView );

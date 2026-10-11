@@ -35,9 +35,12 @@ import static oap.ws.WsParam.From.PATH;
 import static oap.ws.WsParam.From.SESSION;
 
 public class SecureWS {
-    @WsMethod( path = "/{realm}", produces = "text/plain" )
+    @WsMethod( path = "/{realm}", produces = "text/plain", description = "Test endpoint used to verify realm/permission-based access" )
     @WsSecurity( realm = "realm", permissions = "ALLOWED" )
-    public String secure( @WsParam( from = PATH ) String realm, @WsParam( from = SESSION ) Optional<User> loggedUser ) {
+    public String secure( @WsParam( from = PATH, description = "Realm to secure the endpoint under" )
+                          String realm,
+                          @WsParam( from = SESSION, description = "Currently authenticated user" )
+                          Optional<User> loggedUser ) {
         return loggedUser.get().getEmail();
     }
 }

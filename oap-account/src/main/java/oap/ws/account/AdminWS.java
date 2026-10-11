@@ -52,8 +52,9 @@ public class AdminWS {
     }
 
     @SuppressWarnings( "checkstyle:UnnecessaryParentheses" )
-    @WsMethod( method = DELETE, path = "/organizations/{organizationId}" )
-    public void deleteOrganization( @WsParam( from = PATH ) String organizationId ) {
+    @WsMethod( method = DELETE, path = "/organizations/{organizationId}", description = "Permanently deletes an organization and detaches or deletes the users that belong only to it" )
+    public void deleteOrganization( @WsParam( from = PATH, description = "Id of the organization to delete" )
+                                    String organizationId ) {
         log.debug( "permanentlyDeleteOrganization {}", organizationId );
 
         userStorage
@@ -77,7 +78,7 @@ public class AdminWS {
         organizationStorage.delete( organizationId );
     }
 
-    @WsMethod( method = DELETE, path = "/all" )
+    @WsMethod( method = DELETE, path = "/all", description = "Permanently deletes all organizations and users except the default system admin and default organization" )
     public void deleteAll() {
         List<String> users = userStorage.select()
             .filter( u -> !userStorage.defaultSystemAdminEmail.equals( u.user.email ) )
@@ -98,15 +99,17 @@ public class AdminWS {
         }
     }
 
-    @WsMethod( method = DELETE, path = "/users/{email}" )
-    public void deleteUser( @WsParam( from = PATH ) String email ) {
+    @WsMethod( method = DELETE, path = "/users/{email}", description = "Permanently deletes a user" )
+    public void deleteUser( @WsParam( from = PATH, description = "Email of the user to delete" )
+                            String email ) {
         log.debug( "permanentlyDeleteUser {}", email );
 
         userStorage.delete( email );
     }
 
-    @WsMethod( method = GET, path = "/jwt/{jwt}" )
-    public JwtToken decodeJwt( @WsParam( from = PATH ) String jwt ) {
+    @WsMethod( method = GET, path = "/jwt/{jwt}", description = "Decodes a JWT token and returns its claims" )
+    public JwtToken decodeJwt( @WsParam( from = PATH, description = "JWT token to decode" )
+                               String jwt ) {
         return jwtExtractor.decodeJWT( URLEncoder.encode( jwt, UTF_8 ) );
     }
 }
