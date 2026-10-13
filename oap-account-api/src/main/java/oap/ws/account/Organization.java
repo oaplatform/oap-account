@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import oap.json.ext.Ext;
+import oap.ws.openapi.OpenApiDescription;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -21,13 +22,19 @@ public class Organization implements Serializable {
     @Serial
     private static final long serialVersionUID = 2685007887187110374L;
 
+    @OpenApiDescription( "Id of the organization" )
     public String id;
+    @OpenApiDescription( "Name of the organization" )
     public String name;
+    @OpenApiDescription( "Description of the organization" )
     public String description;
+    @OpenApiDescription( "Contact name for the organization" )
     @JsonInclude( JsonInclude.Include.NON_NULL )
     public String contactName;
+    @OpenApiDescription( "Contact email for the organization" )
     @JsonInclude( JsonInclude.Include.NON_NULL )
     public String contactEmail;
+    @OpenApiDescription( "Additional extension data for the organization" )
     public Ext ext;
 
     public Organization() {

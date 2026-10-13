@@ -27,14 +27,18 @@ package oap.ws.sso;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.EqualsAndHashCode;
 import oap.ws.account.OauthProvider;
+import oap.ws.openapi.OpenApiDescription;
 
 import java.io.Serializable;
 import java.util.Optional;
 
 @EqualsAndHashCode
 public class TokenCredentials implements Serializable {
+    @OpenApiDescription( "Access token issued by the OAuth provider" )
     public final String accessToken;
+    @OpenApiDescription( "OAuth provider to resolve the token against" )
     public final OauthProvider source;
+    @OpenApiDescription( "TFA code, required when the user has TFA enabled" )
     public Optional<String> tfaCode;
 
     @JsonCreator

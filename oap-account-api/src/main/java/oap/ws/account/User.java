@@ -15,6 +15,7 @@ import oap.id.Id;
 import oap.json.ext.Ext;
 import oap.util.Hash;
 import oap.util.Strings;
+import oap.ws.openapi.OpenApiDescription;
 import oap.ws.sso.UserProvider;
 import org.apache.commons.codec.binary.Base32;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,19 +39,32 @@ public class User implements Serializable {
     public static RandomGenerator random = new SecureRandom();
     public long counter = 0;
     @Id
+    @OpenApiDescription( "Id of the user" )
     public String id;
+    @OpenApiDescription( "Email of the user" )
     public String email;
+    @OpenApiDescription( "First name of the user" )
     public String firstName;
+    @OpenApiDescription( "Last name of the user" )
     public String lastName;
+    @OpenApiDescription( "Additional extension data for the user" )
     public Ext ext;
+    @OpenApiDescription( "Password hash of the user" )
     public String password;
+    @OpenApiDescription( "Whether the user has confirmed registration" )
     public boolean confirmed = false;
+    @OpenApiDescription( "API key of the user" )
     public String apiKey = RandomStringUtils.random( 30, true, true );
+    @OpenApiDescription( "Whether to create a new user instead of updating an existing one" )
     @JsonProperty( access = JsonProperty.Access.WRITE_ONLY )
     public boolean create;
+    @OpenApiDescription( "Whether two-factor authentication is enabled for the user" )
     public boolean tfaEnabled;
+    @OpenApiDescription( "Id of the organization selected as default for the user" )
     public String defaultOrganization;
+    @OpenApiDescription( "Map of organization id to the default account id in that organization" )
     public Map<String, String> defaultAccounts = new HashMap<>();
+    @OpenApiDescription( "Secret key used for TFA code generation" )
     public String secretKey = generateSecretKey();
 
     @JsonCreator
