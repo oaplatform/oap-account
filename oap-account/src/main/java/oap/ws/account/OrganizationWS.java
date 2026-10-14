@@ -18,6 +18,7 @@ import oap.ws.WsParam;
 import oap.ws.account.utils.RecoveryTokenService;
 import oap.ws.account.utils.TfaUtils;
 import oap.ws.account.ws.AbstractWS;
+import oap.ws.openapi.OpenApiDescription;
 import oap.ws.sso.SecurityRoles;
 import oap.ws.sso.WsSecurity;
 import oap.ws.validate.ValidationErrors;
@@ -700,7 +701,9 @@ public class OrganizationWS extends AbstractWS {
 
     public static class Passwd {
         public static final String SCHEMA = "/oap/ws/account/passwd.schema.conf";
+        @OpenApiDescription( "Email of the user whose password is being changed" )
         String email;
+        @OpenApiDescription( "New password for the user" )
         String password;
     }
 }

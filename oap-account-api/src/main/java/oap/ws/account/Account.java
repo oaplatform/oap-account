@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import oap.json.ext.Ext;
 import oap.json.properties.PropertiesDeserializer;
+import oap.ws.openapi.OpenApiDescription;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -29,9 +30,13 @@ public class Account implements Serializable {
     private static final long serialVersionUID = -1598345391160039855L;
     @JsonIgnore
     private final LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
+    @OpenApiDescription( "Id of the account" )
     public String id;
+    @OpenApiDescription( "Name of the account" )
     public String name;
+    @OpenApiDescription( "Description of the account" )
     public String description;
+    @OpenApiDescription( "Additional extension data for the account" )
     public Ext ext;
 
     public Account() {
@@ -58,6 +63,7 @@ public class Account implements Serializable {
     }
 
     @JsonAnyGetter
+    @OpenApiDescription( "Additional dynamic properties of the account" )
     public Map<String, Object> getProperties() {
         return properties;
     }

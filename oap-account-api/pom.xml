@@ -29,6 +29,11 @@
             <artifactId>oap-ws-sso-api</artifactId>
             <version>${oap.deps.oap.version}</version>
         </dependency>
+        <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-ws-openapi-annotations</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
 
 <!--        <dependency>-->
 <!--            <groupId>de.taimos</groupId>-->

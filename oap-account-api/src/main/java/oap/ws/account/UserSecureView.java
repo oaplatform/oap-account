@@ -1,6 +1,7 @@
 package oap.ws.account;
 
 import lombok.Getter;
+import oap.ws.openapi.OpenApiDescription;
 import org.joda.time.DateTime;
 
 import java.io.Serial;
@@ -12,8 +13,11 @@ public class UserSecureView extends UserView {
     @Serial
     private static final long serialVersionUID = -6998816008822366323L;
 
+    @OpenApiDescription( "API key of the user" )
     public final String apiKey;
+    @OpenApiDescription( "Access key derived from the user's email" )
     public final String accessKey;
+    @OpenApiDescription( "Secret key used for TFA code generation" )
     public final String secretKey;
 
     public UserSecureView( String id, String email, String firstName, String lastName, Map<String, List<String>> accounts,

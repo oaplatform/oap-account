@@ -23,6 +23,11 @@
             <version>${oap.deps.oap.version}</version>
         </dependency>
         <dependency>
+            <groupId>oap</groupId>
+            <artifactId>oap-ws-openapi-annotations</artifactId>
+            <version>${oap.deps.oap.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.restfb</groupId>
             <artifactId>restfb</artifactId>
             <version>${oap.deps.com.restfb}</version>
